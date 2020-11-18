@@ -1,3 +1,5 @@
+// Copyright (c) 2020 Faiz Surani. All rights reserved.
+
 const NUM_BALLOTS = 2;
 const ROUND_INDEX = 0;
 const JUDGE_NAME_INDEX = 1;
@@ -6,6 +8,9 @@ const OPPONENT_NUMBER_INDEX = 3;
 const SIDE_INDEX = 4;
 const PD_INDEX = 5;
 const WON_INDEX = 6;
+
+const OUTPUT_BALLOTS_WON_INDEX = 1;
+const OUTPUT_PD_INDEX = 2;
 
 const normalizeTotal = (total, factor) => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
@@ -51,12 +56,12 @@ const tabulateRound = (roundResults) => {
 
 compareTeamResults = (first, second) => {
     // First, compare by ballots won
-    if (second[1] - first[1] !== 0) {
-        return second[1] - first[1];
+    if (second[OUTPUT_BALLOTS_WON_INDEX] - first[OUTPUT_BALLOTS_WON_INDEX] !== 0) {
+        return second[OUTPUT_BALLOTS_WON_INDEX] - first[OUTPUT_BALLOTS_WON_INDEX];
     }
     // Then, by PD
-    else if (second[2] - first[2] !== 0) {
-        return second[2] - first[2];
+    else if (second[OUTPUT_PD_INDEX] - first[OUTPUT_PD_INDEX] !== 0) {
+        return second[OUTPUT_PD_INDEX] - first[OUTPUT_PD_INDEX];
     }
     // If both are the same, it's a tie
     return 0;

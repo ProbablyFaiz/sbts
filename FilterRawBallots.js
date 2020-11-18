@@ -1,3 +1,5 @@
+// Copyright (c) 2020 Faiz Surani. All rights reserved.
+
 const TEAM_READY_INDEX = 8;
 const ROWS_PER_TEAM_BALLOT = 2;
 const INDIVIDUAL_READY_INDEX = 8;
