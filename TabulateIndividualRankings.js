@@ -34,34 +34,11 @@ const normalizeValue = (total, factor) => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
 
-compareIndividualResults = (first, second) => {
+const compareIndividualResults = (first, second) => {
     return second[I_OUTPUT_RANK_VALUE_INDEX] - first[I_OUTPUT_RANK_VALUE_INDEX];
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType) {
-    const competitorMap = new TupleMap();
-    ballotsRange.forEach((ballot, index) => {
-        if (index === 0 || ballot[I_TYPE_INDEX] !== rankingType || ballot[I_TEAM_NUMBER_INDEX] === "" || ballot[I_COMPETITOR_NAME_INDEX] === "")
-            return;
-        const competitorKey = {
-            team: ballot[I_TEAM_NUMBER_INDEX],
-            name: ballot[I_COMPETITOR_NAME_INDEX]
-        };
-        let competitorObject;
-        if (competitorMap.has(competitorKey)) {
-            competitorObject = competitorMap.get(competitorKey);
-        } else {
-            competitorObject = {};
-            competitorMap.set(competitorKey, competitorObject);
-        }
-
-        const roundNumber = ballot[I_ROUND_INDEX];
-        if (!(roundNumber in competitorObject)) {
-            competitorObject[roundNumber] = [];
-        }
-        competitorObject[roundNumber].push(ballot[I_RANK_VALUE_INDEX]);
-    });
-
+const createIndividualResultsOutput = (competitorMap) => {
     const resultsArr = [];
     competitorMap.forEach((competitorObject, competitorKey) => {
         const competitorInfo = JSON.parse(competitorKey);
@@ -76,6 +53,41 @@ function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType) {
     });
     resultsArr.sort(compareIndividualResults);
     return resultsArr;
+}
+
+const tabulateIndividualBallot = (ballot, index, rankingType, firstRound, lastRound, competitorMap) => {
+    const roundNumber = ballot[I_ROUND_INDEX];
+    if (index === 0 ||
+        ballot[I_TYPE_INDEX] !== rankingType ||
+        ballot[I_TEAM_NUMBER_INDEX] === "" ||
+        ballot[I_COMPETITOR_NAME_INDEX] === "" ||
+        roundNumber < firstRound ||
+        roundNumber > lastRound
+    )
+        return;
+    const competitorKey = {
+        team: ballot[I_TEAM_NUMBER_INDEX],
+        name: ballot[I_COMPETITOR_NAME_INDEX]
+    };
+    let competitorObject;
+    if (competitorMap.has(competitorKey)) {
+        competitorObject = competitorMap.get(competitorKey);
+    } else {
+        competitorObject = {};
+        competitorMap.set(competitorKey, competitorObject);
+    }
+    if (!(roundNumber in competitorObject)) {
+        competitorObject[roundNumber] = [];
+    }
+    competitorObject[roundNumber].push(ballot[I_RANK_VALUE_INDEX]);
+}
+
+function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound, endRound) {
+    const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
+    const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
+    const competitorMap = new TupleMap();
+    ballotsRange.forEach((ballot, index) => tabulateIndividualBallot(ballot, index, rankingType, firstRound, lastRound, competitorMap));
+    return createIndividualResultsOutput(competitorMap);
 }
 
 const testArr = [

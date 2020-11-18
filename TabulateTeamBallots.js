@@ -54,7 +54,7 @@ const tabulateRound = (roundResults) => {
     };
 }
 
-compareTeamResults = (first, second) => {
+const compareTeamResults = (first, second) => {
     // First, compare by ballots won
     if (second[OUTPUT_BALLOTS_WON_INDEX] - first[OUTPUT_BALLOTS_WON_INDEX] !== 0) {
         return second[OUTPUT_BALLOTS_WON_INDEX] - first[OUTPUT_BALLOTS_WON_INDEX];
@@ -67,12 +67,38 @@ compareTeamResults = (first, second) => {
     return 0;
 }
 
+const createTeamResultsOutput = (teamSummaryResults, fullTeamResults) => {
+    const outputCells = [];
+    Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
+        let combinedStrength = 0;
+        let teamRounds = Object.values(fullTeamResults[teamNumber]);
+        const opponents = teamRounds.map(roundResult => roundResult.opponent);
+        opponents.forEach(oppTeamNumber => combinedStrength += teamSummaryResults[oppTeamNumber].ballotsWon);
+        teamSummary.combinedStrength = combinedStrength;
+
+        // Order is team #, ballots won, PD, CS, times plaintiff, times defense
+        outputCells.push([
+            teamNumber,
+            teamSummary.ballotsWon,
+            teamSummary.pointDifferential,
+            teamSummary.combinedStrength,
+            teamSummary.timesPlaintiff,
+            teamSummary.timesDefense
+        ]);
+    });
+    outputCells.sort(compareTeamResults)
+    return outputCells;
+}
+
 function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
     let fullTeamResults = {};
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
     ballotsRange.forEach((ballot, i) => {
-        if (i === 0 || ballot[ROUND_INDEX] === '' || ballot[ROUND_INDEX] < firstRound || ballot[ROUND_INDEX] > lastRound)  // Skip first row, blank rows, and rounds past limit
+        if (i === 0 ||
+            ballot[ROUND_INDEX] === '' ||
+            ballot[ROUND_INDEX] < firstRound ||
+            ballot[ROUND_INDEX] > lastRound)  // Skip first row, blank rows, and rounds past limit
             return;
         tabulateBallot(ballot, fullTeamResults)
     });
@@ -100,27 +126,7 @@ function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
             timesDefense
         }
     });
-
-    const outputCells = [];
-    Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
-        let combinedStrength = 0;
-        let teamRounds = Object.values(fullTeamResults[teamNumber]);
-        const opponents = teamRounds.map(roundResult => roundResult.opponent);
-        opponents.forEach(oppTeamNumber => combinedStrength += teamSummaryResults[oppTeamNumber].ballotsWon);
-        teamSummary.combinedStrength = combinedStrength;
-
-        // Order is team #, ballots won, PD, CS, times plaintiff, times defense
-        outputCells.push([
-            teamNumber,
-            teamSummary.ballotsWon,
-            teamSummary.pointDifferential,
-            teamSummary.combinedStrength,
-            teamSummary.timesPlaintiff,
-            teamSummary.timesDefense
-        ]);
-    });
-    outputCells.sort(compareTeamResults)
-    return outputCells;
+    return createTeamResultsOutput(teamSummaryResults, fullTeamResults);
 }
 
 let ballots = [
