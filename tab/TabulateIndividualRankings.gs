@@ -82,7 +82,7 @@ const tabulateIndividualBallot = (ballot, index, rankingType, firstRound, lastRo
     competitorObject[roundNumber].push(ballot[I_RANK_VALUE_INDEX]);
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound, endRound) {
+function TabulateIndividualBallots(ballotsRange, rankingType, startRound, endRound) {
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
     const competitorMap = new TupleMap();
@@ -95,4 +95,4 @@ const testArr = [
     [1, 'Faiz', 1234, 'Bob', 'Plaintiff', 'Attorney', 5],
     [1, 'Faiz', 1234, 'Dan', 'Plaintiff', 'Attorney', 4]
 ]
-console.log(TABULATEINDIVIDUALBALLOTS(testArr, 'Attorney'))
+console.log(TabulateIndividualBallots(testArr, 'Attorney'))

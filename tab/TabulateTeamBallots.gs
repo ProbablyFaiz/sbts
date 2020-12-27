@@ -90,7 +90,7 @@ const createTeamResultsOutput = (teamSummaryResults, fullTeamResults) => {
     return outputCells;
 }
 
-function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
+function TabulateTeamBallots(ballotsRange, startRound, endRound) {
     let fullTeamResults = {};
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
@@ -134,4 +134,4 @@ let ballots = [
     [1, 'Bob', 1234, 5678, 'Plaintiff', 7, 1],
     [1, 'Bob', 5678, 1234, 'Plaintiff', -7, 0]
 ]
-console.log(TABULATETEAMBALLOTS(ballots));
+console.log(TabulateTeamBallots(ballots));

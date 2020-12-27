@@ -14,11 +14,11 @@ function filterBallots(ballotIngressRange, rowsPerBallot, readyIndex) {
     }).map(ballot => ballot.slice(0, -1)); // Remove ready for tab row
 }
 
-function FILTERTEAMBALLOTS(ballotIngressRange) {
+function FilterTeamBallots(ballotIngressRange) {
     return filterBallots(ballotIngressRange, ROWS_PER_TEAM_BALLOT, TEAM_READY_INDEX);
 }
 
-function FILTERINDIVIDUALBALLOTS(ballotIngressRange) {
+function FilterIndividualBallots(ballotIngressRange) {
     return filterBallots(ballotIngressRange, ROWS_PER_INDIVIDUAL_BALLOT, INDIVIDUAL_READY_INDEX);
 }
 
@@ -28,4 +28,4 @@ const testArr = [
     [2, false],
     [3, true]
 ]
-console.log(FILTERTEAMBALLOTS(testArr))
+console.log(FilterTeamBallots(testArr))
