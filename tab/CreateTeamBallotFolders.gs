@@ -6,20 +6,18 @@
 function CreateTeamBallotFolders() {
     const tabFolderId = "1rXR0MBLuOh2W0mbQKyugg3yVCWJc2SPI";
     const tabFolder = DriveApp.getFolderById(tabFolderId);
-    // const test = DriveApp.getFileById("d");
-    // const test1 = test.getAs('');
-    // test1.setName()
     const ballots = getAllBallots(tabFolder);
-    const exportFolder = getExportFolder(tabFolder)
+    const exportFolder = getChildFolder(tabFolder, "Team Ballots")
     exportBallots(ballots, exportFolder);
     console.log(ballots.length);
 }
 
 function exportBallots(ballots, exportFolder) {
     for (let ballot of ballots) {
-        const ballotSheet = SpreadsheetApp.openById(ballot.getId());
+        const ballotSheet = sheetForFile(ballot);
         const submittedRange = ballotSheet.getRangeByName("SubmitCheckboxRange");
         if (!submittedRange || !submittedRange.getValue()) {
+            console.log(`${ballotSheet.getName()} not submitted, skipping...`)
             continue;
         }
         const plaintiffTeam = ballotSheet.getRangeByName("PlaintiffTeamRange").getValue();
@@ -38,6 +36,9 @@ function exportBallots(ballots, exportFolder) {
                 pdfBallot.setName(pdfName);
                 existingBallot = pdfBallot; // We can save half of the exports by saving the ballot blob for the second go-round.
                 teamRoundFolder.createFile(pdfBallot);
+                console.log(`Adding ${pdfName} to ${teamFolder.getName()}...`)
+            } else {
+                console.log(`${pdfName} already present in ${teamFolder.getName()}, skipping...`);
             }
         }
     }
@@ -45,23 +46,10 @@ function exportBallots(ballots, exportFolder) {
 
 function getChildFolder(parentFolder, childName) {
     const childFolderIterator = parentFolder.searchFolders(`title contains "${childName}"`);
-    let childFolder;
     if (childFolderIterator.hasNext()) {
-        childFolder = childFolderIterator.next();
+        return childFolderIterator.next();
     }
-    else {
-        childFolder = parentFolder.createFolder(childName);
-    }
-    return childFolder;
-}
-
-function getExportFolder(tabFolder) {
-    const exportFolderName = "Team Ballots";
-    const exportFolderIterator = tabFolder.getFoldersByName(exportFolderName);
-    if (exportFolderIterator.hasNext()) {
-        return exportFolderIterator.next();
-    }
-    return tabFolder.createFolder(exportFolderName);
+    return parentFolder.createFolder(childName);
 }
 
 function getAllBallots(tabFolder) {
