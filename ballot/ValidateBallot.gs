@@ -1,23 +1,3 @@
-function LockSubmitCheckbox() {
-    const submitLockDescription = "Submit Checkbox Readiness Lock";
-    const readyToSubmit = validationIssues().length === 0;
-    const currentSheet = SpreadsheetApp.getActive().getSheetByName("Scores");
-    let existingProtection = currentSheet.getProtections(SpreadsheetApp.ProtectionType.RANGE).find(pr => pr.getDescription() === submitLockDescription);
-    if (!existingProtection) {
-        const lockCheckbox = currentSheet.getRange("LockedRange");
-        existingProtection = lockCheckbox.protect();
-        existingProtection.setDescription(submitLockDescription)
-    }
-
-    if (!readyToSubmit) {
-        existingProtection.setWarningOnly(false);
-        removeNonWhitelistedEditors(existingProtection);
-    }
-    else {
-        existingProtection.setWarningOnly(true);
-    }
-}
-
 function ValidationMessages() {
     const issues = validationIssues();
     if (issues.length === 0) {
@@ -49,16 +29,25 @@ function validationIssues() {
         }
     ];
     const namedRanges = SpreadsheetApp.getActive().getSheetByName("Scores").getNamedRanges();
+    const otherValidationIssues = new Set();
     namedRanges.forEach(range => {
         for (let rangeType of rangeTypes) {
             if (range.getName().startsWith(rangeType.prefix)) {
-                const blankCellFound = range.getRange().getValues().some(row => row.some(val => val == null || val === ""));
+                const rangeValues = range.getRange().getValues();
+                if (rangeType.prefix === "RankingRange") {
+                    const rankingValues = rangeValues.map(row => row[0]).filter(name => name !== "");
+                    if (rankingValues.length !== new Set(rankingValues).size) {
+                        otherValidationIssues.add("Duplicate competitor ranking found.")
+                    }
+                }
+                const blankCellFound = rangeValues.some(row => row.some(val => val == null || val === ""));
                 if (blankCellFound) {
                     rangeType.issueFound = true;
                     break;
                 }
             }
         }
-    })
-    return rangeTypes.filter(rt => rt.issueFound).map(rt => "Missing " + rt.output + ".")
+    });
+    const completionValidations = rangeTypes.filter(rt => rt.issueFound).map(rt => "Missing " + rt.output + ".");
+    return [...completionValidations, ...otherValidationIssues];
 }
