@@ -5,6 +5,7 @@ const IndividualResultsIndices = {
     JUDGE_NAME: 1,
     TEAM_NUMBER: 2,
     COMPETITOR_NAME: 3,
+    SIDE: 4,
     TYPE: 5,
     RANK_VALUE: 6,
     OUTPUT_RANK_VALUE: 2,
@@ -28,7 +29,7 @@ const createIndividualResultsOutput = (competitorMap) => {
             const roundRankValue = roundRanks.reduce((accumulator, rankValue) => accumulator + rankValue, 0);
             totalRankValue += normalizeValue(roundRankValue, normalizingFactor);
         });
-        const individualResult = [competitorInfo["team"], competitorInfo["name"], totalRankValue];
+        const individualResult = [competitorInfo["team"], competitorInfo["name"], competitorInfo["side"], totalRankValue];
         resultsArr.push(individualResult);
     });
     resultsArr.sort(compareIndividualResults);
@@ -38,7 +39,7 @@ const createIndividualResultsOutput = (competitorMap) => {
 const tabulateIndividualBallot = (ballot, index, rankingType, firstRound, lastRound, competitorMap) => {
     const roundNumber = ballot[IndividualResultsIndices.ROUND];
     if (ballot[IndividualResultsIndices.TYPE] !== rankingType ||
-        ballot[IndividualResultsIndices.TEAM_NUMBER].trim() === "" ||
+        ballot[IndividualResultsIndices.TEAM_NUMBER] === "" ||
         ballot[IndividualResultsIndices.COMPETITOR_NAME].trim() === "" ||
         roundNumber < firstRound ||
         roundNumber > lastRound
@@ -46,7 +47,8 @@ const tabulateIndividualBallot = (ballot, index, rankingType, firstRound, lastRo
         return;
     const competitorKey = {
         team: ballot[IndividualResultsIndices.TEAM_NUMBER],
-        name: ballot[IndividualResultsIndices.COMPETITOR_NAME].trim()
+        name: ballot[IndividualResultsIndices.COMPETITOR_NAME].trim(),
+        side: ballot[IndividualResultsIndices.SIDE]
     };
     let competitorObject;
     if (competitorMap.has(competitorKey)) {

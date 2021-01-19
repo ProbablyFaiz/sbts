@@ -1,12 +1,10 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 const ballotsPerTrial = 2;
-const roundNames = ["4"];
+const roundNames = ["1"];
 const courtroomNames = ["Girvetz", "Buchanan", "Campbell", "Phelps", "Ellison", "Harold Frank", "Kerr", "North", "Cheadle", "Kohn", "Broida", "Elings", "South"]
-// const roundNames = ["1","2","3","4"];
-// const courtroomNames = ["Girvetz", "Buchanan"]
-
-// const courtroomNames = ["Girvetz", "Campbell"];
+const bailiffEmails = ["boaitey@umail.ucsb.edu", "alia@umail.ucsb.edu", "amrutabaradwaj@umail.ucsb.edu", "carissaalmazan@umail.ucsb.edu", "carolinebaldan@umail.ucsb.edu", "junhyungseo@umail.ucsb.edu", "hunterwright@umail.ucsb.edu", "kristenwu@umail.ucsb.edu", "mwhalen@umail.ucsb.edu", "nlswetlin@umail.ucsb.edu", "raananaghieh@umail.ucsb.edu", "seanignatuk@umail.ucsb.edu", "svakili@umail.ucsb.edu"];
+const courtroomInfos = courtroomNames.map((ctrm, idx) => {return {name: ctrm, bailiffEmail: bailiffEmails[idx]}})
 
 // DO NOT RUN THIS DURING THE TOURNAMENT UNDER ANY CIRCUMSTANCES. THIS IS ONLY FOR GENERATING FOLDERS BEFOREHAND.
 function SetupTabulationFolder() {
@@ -40,14 +38,16 @@ function SetupTabulationFolder() {
             return;
         }
         const roundFolder = tabFolder.createFolder(roundFolderName);
-        courtroomNames.forEach(ctrm => createTrialFolder(roundFolder, round, ctrm, ballotTemplate, captainsFormTemplate));
+        roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
+        courtroomInfos.forEach(({name, bailiffEmail}) => createTrialFolder(roundFolder, round, name, bailiffEmail, ballotTemplate, captainsFormTemplate));
     }
-    console.log(`Created ${roundNames.length * courtroomNames.length * ballotsPerTrial} ballots for ${roundNames.length} round(s).`);
+    console.log(`Created ${roundNames.length * courtroomInfos.length * ballotsPerTrial} ballots for ${roundNames.length} round(s).`);
 }
 
-function createTrialFolder(roundFolder, round, courtroom, ballotTemplate, captainsFormTemplate) {
+function createTrialFolder(roundFolder, round, courtroom, bailiffEmail, ballotTemplate, captainsFormTemplate) {
     const trialFolderName = `R${round} - ${courtroom}`;
     const trialFolder = roundFolder.createFolder(trialFolderName);
+    trialFolder.addEditor(bailiffEmail);
     const trialPrefix = `R${round} ${courtroom}`
     const trialCaptainsForm = prepareCaptainsForm(trialFolder, trialPrefix, round, courtroom, captainsFormTemplate);
     const trialBallots = [];
@@ -62,7 +62,6 @@ function createTrialFolder(roundFolder, round, courtroom, ballotTemplate, captai
 
 function prepareCaptainsForm(trialFolder, trialPrefix, round, courtroom, captainsFormTemplate) {
     const captainsForm = captainsFormTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
-
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRanges.ROUND).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRanges.COURTROOM).setValue(`${courtroom} Hall`); // Kind of hacky, could cause issues later
