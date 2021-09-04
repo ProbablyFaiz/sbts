@@ -1,16 +1,16 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 function PopulateTeamBallots() {
-  populateBallots(MasterRanges.TEAM_BALLOTS, BallotRanges.TEAM_RESULTS, 2);
+  populateBallots(MasterRange.TeamBallots, BallotRange.TeamResults, 2);
 }
 
 function PopulateIndividualBallots() {
- populateBallots(MasterRanges.INDIVIDUAL_BALLOTS, BallotRanges.INDIVIDUAL_RESULTS, 8);
+ populateBallots(MasterRange.IndividualBallots, BallotRange.IndividualResults, 8);
 }
 
 function populateBallots(outputRangeName, resultsRangeName, rowsPerBallot) {
   const masterSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const ballotLinksRange = masterSheet.getRangeByName(MasterRanges.BALLOT_LINKS);
+  const ballotLinksRange = masterSheet.getRangeByName(MasterRange.BallotLinks);
   const outputRange = masterSheet.getRangeByName(outputRangeName);
   const ballotLinks = getValidatedBallotLinks(ballotLinksRange);
   const outputCells = [];
@@ -30,7 +30,7 @@ function getResultImportFormula(link, resultsRange) {
 }
 
 function getCaptainsFormUrlImportFormula(link) {
-  return `=IMPORTRANGE("${link}","${BallotRanges.CAPTAINS_FORM_URL}")`
+  return `=IMPORTRANGE("${link}","${BallotRange.CaptainsFormUrl}")`
 }
 
 function getValidatedBallotLinks(ballotLinksRange) {

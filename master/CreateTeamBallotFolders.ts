@@ -3,9 +3,12 @@
 // NOTE: This should be run from the master spreadsheet's script editor, not the template's.
 // It is safe to run this after every round without making any manual change to the Team Ballots folder.
 // The script is smart enough to see existing ballot PDFs and not recreate or overwrite them.
+
+import Folder = GoogleAppsScript.Drive.Folder;
+
 function CreateTeamBallotFolders() {
   const tabFolder = getTabFolder();
-  const ballots = getAllBallots(tabFolder);  
+  const ballots = getAllBallots(tabFolder);
   const exportFolder = getChildFolder(tabFolder, EXPORT_FOLDER_NAME)
   exportBallots(ballots, exportFolder);
   console.log(ballots.length);
@@ -13,16 +16,16 @@ function CreateTeamBallotFolders() {
 
 function exportBallots(ballots, exportFolder) {
   for (let ballot of ballots) {
-    const ballotSheet = sheetForFile(ballot);
-    const submittedRange = ballotSheet.getRangeByName(BallotRanges.SUBMITTED);
+    const ballotSheet = sheetForFile(ballot) as BallotSpreadsheet;
+    const submittedRange = ballotSheet.getRangeByName(BallotRange.Submitted);
     if (!submittedRange || !submittedRange.getValue()) {
       console.log(`${ballotSheet.getName()} not submitted, skipping...`)
       continue;
     }
-    const plaintiffTeam = ballotSheet.getRangeByName(BallotRanges.PLAINTIFF_TEAM).getValue();
-    const defenseTeam = ballotSheet.getRangeByName(BallotRanges.DEFENSE_TEAM).getValue();
-    const round = ballotSheet.getRangeByName(BallotRanges.ROUND).getValue();
-    const judgeName = ballotSheet.getRangeByName(BallotRanges.JUDGE_NAME).getValue();
+    const plaintiffTeam = ballotSheet.getRangeByName(BallotRange.PlaintiffTeam).getValue();
+    const defenseTeam = ballotSheet.getRangeByName(BallotRange.DefenseTeam).getValue();
+    const round = ballotSheet.getRangeByName(BallotRange.Round).getValue();
+    const judgeName = ballotSheet.getRangeByName(BallotRange.JudgeName).getValue();
     const pdfName = `R${round} - ${plaintiffTeam} v. ${defenseTeam} (Judge ${judgeName}).pdf`;
 
     let existingBallot;

@@ -10,7 +10,7 @@ function PopulateBallotLinks() {
   const startRow = 2; const endRow = startRow + ballots.length - 1;
   const outputCells = ballots.map((b, idx) => [
       b.getUrl(),
-      `=IF(A${startRow + idx} <> "", HYPERLINK(IMPORTRANGE(A2,"${BallotRanges.CAPTAINS_FORM_URL}"), "Captain's Form"),"")`,
+      `=IF(A${startRow + idx} <> "", HYPERLINK(IMPORTRANGE(A2,"${BallotRange.CaptainsFormUrl}"), "Captain's Form"),"")`,
       b.getName(),
   ]).sort((b1, b2) => { // Sort by ballot name so they're in order
       if(b1[1] < b2[1]) { return -1; }

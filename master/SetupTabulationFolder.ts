@@ -13,7 +13,7 @@ function SetupTabulationFolder() {
   const orchestratorTemplate = DriveApp.getFileById(ORCHESTRATOR_TEMPLATE_ID);
   const ballotTemplate = DriveApp.getFileById(BALLOT_TEMPLATE_ID);
   const captainsFormTemplate = DriveApp.getFileById(CAPTAINS_FORM_TEMPLATE_ID);
-  
+
   let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
   if (masterSheetFile) {
     console.log("Existing master spreadsheet found, not creating a new one...")
@@ -26,9 +26,9 @@ function SetupTabulationFolder() {
   } else {
     orchestratorFile = orchestratorTemplate.makeCopy(ORCHESTRATOR_SPREADSHEET_NAME, tabFolder);
     const orchestratorSheet = sheetForFile(orchestratorFile);
-    orchestratorSheet.getRangeByName(OrchestratorRanges.MASTER_LINK).setValue(masterSheetFile.getUrl());
+    orchestratorSheet.getRangeByName(OrchestratorRange.MasterLink).setValue(masterSheetFile.getUrl());
   }
-  
+
   getChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
   for (let round of roundNames) {
@@ -63,8 +63,8 @@ function createTrialFolder(roundFolder, round, courtroom, bailiffEmail, ballotTe
 function prepareCaptainsForm(trialFolder, trialPrefix, round, courtroom, captainsFormTemplate) {
   const captainsForm = captainsFormTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
   const captainsFormSheet = sheetForFile(captainsForm);
-  captainsFormSheet.getRangeByName(CaptainsFormRanges.ROUND).setValue(round);
-  captainsFormSheet.getRangeByName(CaptainsFormRanges.COURTROOM).setValue(`${courtroom} Hall`); // Kind of hacky, could cause issues later
+  captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
+  captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(`${courtroom} Hall`); // Kind of hacky, could cause issues later
 
   return captainsForm;
 }
@@ -74,7 +74,7 @@ function linkTrialSheets(captainsForm, ballots) {
   const captainsFormUrl = captainsForm.getUrl();
   for (let ballot of ballots) {
     const ballotSheet = sheetForFile(ballot);
-    const urlRange = ballotSheet.getRangeByName(BallotRanges.CAPTAINS_FORM_URL);
+    const urlRange = ballotSheet.getRangeByName(BallotRange.CaptainsFormUrl);
     urlRange.setValue(captainsFormUrl);
   }
 }

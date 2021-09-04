@@ -1,5 +1,9 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
+import Folder = GoogleAppsScript.Drive.Folder;
+import File = GoogleAppsScript.Drive.File;
+import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
+
 const TAB_FOLDER_ID = "1Am7h0hqFeMOxKW1crHFu6k6EaNljD8Bg";
 
 const MASTER_SPREADSHEET_NAME = "Mocktopia Master Spreadsheet";
@@ -12,19 +16,19 @@ const CAPTAINS_FORM_TEMPLATE_ID = "1gujJVuGmNORqUx4MnSZg0nHPJmm_ikAHHcoIyCKtCnw"
 
 const NUM_BALLOTS = 2;
 
-function sheetForFile(file) {
+function sheetForFile(file: File): Spreadsheet {
   return SpreadsheetApp.openById(file.getId())
 }
 
-function getTabFolder() {
+function getTabFolder(): Folder {
   return DriveApp.getFolderById(TAB_FOLDER_ID);
 }
 
-function getMasterSheet(tabFolder) {
+function getMasterSheet(tabFolder: Folder): MasterSpreadsheet {
   return sheetForFile(getFileByName(tabFolder, MASTER_SPREADSHEET_NAME));
 }
 
-function getChildFolder(parentFolder, childName) {
+function getChildFolder(parentFolder: Folder, childName: string): Folder {
   const childFolderIterator = parentFolder.searchFolders(`title contains "${childName}"`);
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -32,7 +36,7 @@ function getChildFolder(parentFolder, childName) {
   return parentFolder.createFolder(childName);
 }
 
-function getFileByName(parentFolder, name) {
+function getFileByName(parentFolder: Folder, name: string): File | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
     return fileIterator.next();
@@ -40,8 +44,8 @@ function getFileByName(parentFolder, name) {
   return undefined;
 }
 
-function getAllBallots(tabFolder) {
-  const ballots = [];
+function getAllBallots(tabFolder: Folder): File[] {
+  const ballots: File[] = [];
   const roundFolders = tabFolder.searchFolders('title contains "Round"');
   while (roundFolders.hasNext()) {
     const roundFolder = roundFolders.next();
