@@ -9,6 +9,7 @@ enum GeneratorRange {
     TournamentName = 'TournamentNameRange',
     CourtroomNames = 'CourtroomNamesRange',
     RoundNames = 'RoundNamesRange',
+    BallotsPerTrial = 'BallotsPerTrialRange',
 }
 
 interface ISetupContext {
@@ -20,6 +21,7 @@ interface ISetupContext {
     tournamentName: string;
     courtroomNames: string[];
     roundNames: string[];
+    ballotsPerTrial: number;
 }
 
 class SetupContext implements ISetupContext {
@@ -62,6 +64,11 @@ class SetupContext implements ISetupContext {
     @memoize
     get roundNames(): string[] {
         return this.getRangeValues(GeneratorRange.RoundNames)[0];
+    }
+
+    @memoize
+    get ballotsPerTrial(): number {
+        return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
     }
 
     private getRangeValue(rangeName: GeneratorRange): string {
