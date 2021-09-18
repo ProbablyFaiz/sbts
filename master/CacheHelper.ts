@@ -1,4 +1,4 @@
-function memoize(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function memoize(target: any, propertyKey: string, descriptor: PropertyDescriptor): any {
     let fn: Function = descriptor.value;
     let cache = {};
     descriptor.value = function (...args: any[]) {

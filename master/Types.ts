@@ -1,4 +1,6 @@
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
+import Folder = GoogleAppsScript.Drive.Folder;
+import GoogleFile = GoogleAppsScript.Drive.File;
 
 enum BallotRange {
     CaptainsFormUrl = "CaptainsFormUrlRange",

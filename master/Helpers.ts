@@ -1,8 +1,5 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-import Folder = GoogleAppsScript.Drive.Folder;
-import File = GoogleAppsScript.Drive.File;
-import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
 
 const TAB_FOLDER_ID = "1Am7h0hqFeMOxKW1crHFu6k6EaNljD8Bg";
 
@@ -16,7 +13,7 @@ const CAPTAINS_FORM_TEMPLATE_ID = "1gujJVuGmNORqUx4MnSZg0nHPJmm_ikAHHcoIyCKtCnw"
 
 const NUM_BALLOTS = 2;
 
-function sheetForFile(file: File): Spreadsheet {
+function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId())
 }
 
@@ -36,7 +33,7 @@ function getChildFolder(parentFolder: Folder, childName: string): Folder {
   return parentFolder.createFolder(childName);
 }
 
-function getFileByName(parentFolder: Folder, name: string): File | undefined {
+function getFileByName(parentFolder: Folder, name: string): GoogleFile | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
     return fileIterator.next();
@@ -44,8 +41,8 @@ function getFileByName(parentFolder: Folder, name: string): File | undefined {
   return undefined;
 }
 
-function getAllBallots(tabFolder: Folder): File[] {
-  const ballots: File[] = [];
+function getAllBallots(tabFolder: Folder): GoogleFile[] {
+  const ballots: GoogleFile[] = [];
   const roundFolders = tabFolder.searchFolders('title contains "Round"');
   while (roundFolders.hasNext()) {
     const roundFolder = roundFolders.next();

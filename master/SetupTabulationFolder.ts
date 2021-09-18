@@ -1,5 +1,4 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
-import File = GoogleAppsScript.Drive.File;
 
 const ballotsPerTrial = 2;
 const roundNames = ["1"];

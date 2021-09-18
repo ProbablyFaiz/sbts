@@ -1,6 +1,3 @@
-import File = GoogleAppsScript.Drive.File;
-import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
-
 enum GeneratorRange {
     MasterSheetTemplate = 'MasterSheetTemplateRange',
     OrchestratorTemplate = 'OrchestratorTemplateRange',
@@ -13,10 +10,10 @@ enum GeneratorRange {
 }
 
 interface ISetupContext {
-    masterSheetTemplate: File;
-    orchestratorTemplate: File;
-    ballotTemplate: File;
-    captainsFormTemplate: File;
+    masterSheetTemplate: GoogleFile;
+    orchestratorTemplate: GoogleFile;
+    ballotTemplate: GoogleFile;
+    captainsFormTemplate: GoogleFile;
 
     tournamentName: string;
     courtroomNames: string[];
@@ -32,22 +29,22 @@ class SetupContext implements ISetupContext {
     }
 
     @memoize
-    get masterSheetTemplate(): File {
+    get masterSheetTemplate(): GoogleFile {
         return DriveApp.getFileById(this.getRangeValue(GeneratorRange.MasterSheetTemplate));
     }
 
     @memoize
-    get orchestratorTemplate(): File {
+    get orchestratorTemplate(): GoogleFile {
         return DriveApp.getFileById(this.getRangeValue(GeneratorRange.OrchestratorTemplate));
     }
 
     @memoize
-    get ballotTemplate(): File {
+    get ballotTemplate(): GoogleFile {
         return DriveApp.getFileById(this.getRangeValue(GeneratorRange.BallotTemplate));
     }
 
     @memoize
-    get captainsFormTemplate(): File {
+    get captainsFormTemplate(): GoogleFile {
         return DriveApp.getFileById(this.getRangeValue(GeneratorRange.CaptainsFormTemplate));
     }
 

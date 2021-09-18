@@ -1,9 +1,7 @@
 {
-  "isolatedModules": true,
-  "noLib": true,
-  "noResolve": true,
-  "target": "ES3",
-  "module": "None",
-  "noImplicitUseStrict": true,
-  "experimentalDecorators": true,
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ES5",
+    "lib": ["esnext"],
+  }
 }
