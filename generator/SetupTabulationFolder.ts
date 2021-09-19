@@ -42,13 +42,16 @@ function SetupTabulationFolder() {
 }
 
 function createTemplatesFolder(setupContext: ISetupContext) {
+    console.log("Creating templates folder in tab directory...");
     const templateFolder = setupContext.tabFolder.createFolder("Templates");
 
+    console.log("Creating ballot template...");
     setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy("Ballot Template", templateFolder);
     const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
     ballotTemplateSheet.getRangeByName(BallotRange.TournamentName).setValue(setupContext.tournamentName);
     ballotTemplateSheet.getRangeByName(BallotRange.FirstPartyName).setValue(setupContext.firstPartyName);
 
+    console.log("Creating Captains' Form template...");
     setupContext.captainsFormTemplate = setupContext.captainsFormBaseTemplate.makeCopy("Captains' Form Template", templateFolder);
     const captainsFormTemplateSheet = sheetForFile(setupContext.captainsFormTemplate);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
@@ -64,7 +67,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
     const trialBallots = [];
     console.log(`Creating ${trialPrefix} ballots and captain's form...`);
     for (let i = 1; i <= setupContext.ballotsPerTrial; i++) {
-        const createdBallot = setupContext.ballotBaseTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
+        const createdBallot = setupContext.ballotTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
         createdBallot.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
         trialBallots.push(createdBallot);
     }
@@ -72,7 +75,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
 }
 
 function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: string | number, courtroomInfo: ICourtroomInfo) {
-    const captainsForm = setupContext.captainsFormBaseTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
+    const captainsForm = setupContext.captainsFormTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);

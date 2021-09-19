@@ -6,7 +6,7 @@ enum GeneratorRange {
     CaptainsFormTemplate = 'CaptainsFormTemplateRange',
     TournamentName = 'TournamentNameRange',
     FirstPartyName = 'FirstPartyNameRange',
-    CourtroomNames = 'CourtroomNamesRange',
+    CourtroomNames = 'CourtroomsInfoRange',
     RoundNames = 'RoundNamesRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
 }
@@ -19,12 +19,13 @@ interface ICourtroomInfo {
 interface ISetupContext {
     isValid: boolean;
 
-    tabFolder: Folder;
-    masterSheetTemplate: GoogleFile;
-    orchestratorTemplate: GoogleFile;
+    masterSpreadsheet: Spreadsheet;
     ballotTemplate: GoogleFile;
     captainsFormTemplate: GoogleFile;
 
+    tabFolder: Folder;
+    masterSheetTemplate: GoogleFile;
+    orchestratorTemplate: GoogleFile;
     ballotBaseTemplate: GoogleFile;
     captainsFormBaseTemplate: GoogleFile;
 
@@ -36,6 +37,7 @@ interface ISetupContext {
 }
 
 class SetupContext implements ISetupContext {
+    masterSpreadsheet: Spreadsheet;
     ballotTemplate: GoogleFile;
     captainsFormTemplate: GoogleFile;
 
@@ -51,36 +53,44 @@ class SetupContext implements ISetupContext {
         return tabFolderIsEmpty;
     }
 
+    @memoize
     get tabFolder(): Folder {
         return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)));
     }
 
+    @memoize
     get masterSheetTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.MasterSheetTemplate)));
     }
 
+    @memoize
     get orchestratorTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.OrchestratorTemplate)));
     }
 
+    @memoize
     get ballotBaseTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)));
     }
 
+    @memoize
     get captainsFormBaseTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)));
     }
 
+    @memoize
     get tournamentName(): string {
         return this.getRangeValue(GeneratorRange.TournamentName);
     }
 
+    @memoize
     get firstPartyName(): string {
         return this.getRangeValue(GeneratorRange.FirstPartyName);
     }
 
+    @memoize
     get courtroomsInfo(): ICourtroomInfo[] {
-        return this.getRangeValues(GeneratorRange.CourtroomNames).map(courtroomCells => {
+        return compactRange(this.getRangeValues(GeneratorRange.CourtroomNames)).map(courtroomCells => {
             return {
                 name: courtroomCells[0],
                 bailiffEmails: courtroomCells[1].split(','),
@@ -88,10 +98,12 @@ class SetupContext implements ISetupContext {
         });
     }
 
+    @memoize
     get roundNames(): string[] {
-        return this.getRangeValues(GeneratorRange.RoundNames)[0];
+        return compactRange(this.getRangeValues(GeneratorRange.RoundNames)).map(row => row[0]);
     }
 
+    @memoize
     get ballotsPerTrial(): number {
         return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
     }

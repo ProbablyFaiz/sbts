@@ -1,19 +1,15 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-const TAB_FOLDER_ID = "1Am7h0hqFeMOxKW1crHFu6k6EaNljD8Bg";
-
-const MASTER_SPREADSHEET_NAME = "Mocktopia Master Spreadsheet";
-const ORCHESTRATOR_SPREADSHEET_NAME = "Mocktopia Orchestrator";
+const MASTER_SPREADSHEET_NAME = "Tab Master Spreadsheet";
+const ORCHESTRATOR_SPREADSHEET_NAME = "Tab Orchestrator";
 const EXPORT_FOLDER_NAME = "Team Ballots";
 
-const NUM_BALLOTS = 2;
+function compactRange(rangeArr: string[][]): string[][] {
+    return rangeArr.filter(row => row.some(cell => !['', null, undefined].includes(cell)));
+}
 
 function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId())
-}
-
-function getTabFolder(): Folder {
-  return DriveApp.getFolderById(TAB_FOLDER_ID);
 }
 
 function getOrCreateChildFolder(parentFolder: Folder, childName: string): Folder {
