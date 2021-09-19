@@ -11,6 +11,8 @@ enum BallotRange {
     Submitted = "SubmittedRange",
     TeamResults = "TeamResults",
     IndividualResults = "IndividualResults",
+    TournamentName = "TournamentNameRange",
+    FirstPartyName = "FirstPartyNameRange",
 }
 
 enum MasterRange {
@@ -22,6 +24,8 @@ enum MasterRange {
 enum CaptainsFormRange {
     Round = "RoundNum",
     Courtroom = "CourtroomLetter",
+    TournamentName = "TournamentNameRange",
+    FirstPartyName = "FirstPartyNameRange",
 }
 
 enum OrchestratorRange {

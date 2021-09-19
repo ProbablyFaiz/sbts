@@ -1,11 +1,16 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 
-const roundNames = ["1"];
-
 function SetupTabulationFolder() {
     const setupContext = new SetupContext();
-    const tabFolder = getTabFolder();
+
+    if (!setupContext.isValid) {
+        console.log("Tab folder is not empty. Aborting tabulation folder setup.");
+        return;
+    }
+    const tabFolder = setupContext.tabFolder;
+    createTemplatesFolder(setupContext);
+
     let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
     if (masterSheetFile) {
         console.log("Existing master spreadsheet found, not creating a new one...")
@@ -23,7 +28,7 @@ function SetupTabulationFolder() {
 
     getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
-    for (let round of roundNames) {
+    for (let round of setupContext.roundNames) {
         const roundFolderName = `Round ${round}`;
         if (tabFolder.getFoldersByName(roundFolderName).hasNext()) {
             logDuplicate();
@@ -33,14 +38,24 @@ function SetupTabulationFolder() {
         roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
         setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
-    console.log(`Created ${roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${roundNames.length} round(s).`);
+    console.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
 }
 
-function createTemplatesFolder() {
+function createTemplatesFolder(setupContext: ISetupContext) {
+    const templateFolder = setupContext.tabFolder.createFolder("Templates");
 
+    setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy("Ballot Template", templateFolder);
+    const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
+    ballotTemplateSheet.getRangeByName(BallotRange.TournamentName).setValue(setupContext.tournamentName);
+    ballotTemplateSheet.getRangeByName(BallotRange.FirstPartyName).setValue(setupContext.firstPartyName);
+
+    setupContext.captainsFormTemplate = setupContext.captainsFormBaseTemplate.makeCopy("Captains' Form Template", templateFolder);
+    const captainsFormTemplateSheet = sheetForFile(setupContext.captainsFormTemplate);
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.FirstPartyName).setValue(setupContext.firstPartyName);
 }
 
-function createTrialFolder(setupContext: ISetupContext, roundFolder: GoogleAppsScript.Drive.Folder, round: string, courtroomInfo: ICourtroomInfo) {
+function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: string, courtroomInfo: ICourtroomInfo) {
     const trialFolderName = `R${round} - ${courtroomInfo.name}`;
     const trialFolder = roundFolder.createFolder(trialFolderName);
     courtroomInfo.bailiffEmails.forEach(email => trialFolder.addEditor(email));

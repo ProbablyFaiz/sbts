@@ -5,6 +5,7 @@ enum GeneratorRange {
     BallotTemplate = 'BallotTemplateRange',
     CaptainsFormTemplate = 'CaptainsFormTemplateRange',
     TournamentName = 'TournamentNameRange',
+    FirstPartyName = 'FirstPartyNameRange',
     CourtroomNames = 'CourtroomNamesRange',
     RoundNames = 'RoundNamesRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
@@ -28,6 +29,7 @@ interface ISetupContext {
     captainsFormBaseTemplate: GoogleFile;
 
     tournamentName: string;
+    firstPartyName: string;
     courtroomsInfo: ICourtroomInfo[];
     roundNames: string[];
     ballotsPerTrial: number;
@@ -49,37 +51,34 @@ class SetupContext implements ISetupContext {
         return tabFolderIsEmpty;
     }
 
-    @memoize
     get tabFolder(): Folder {
         return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)));
     }
 
-    @memoize
     get masterSheetTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.MasterSheetTemplate)));
     }
 
-    @memoize
     get orchestratorTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.OrchestratorTemplate)));
     }
 
-    @memoize
     get ballotBaseTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)));
     }
 
-    @memoize
     get captainsFormBaseTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)));
     }
 
-    @memoize
     get tournamentName(): string {
         return this.getRangeValue(GeneratorRange.TournamentName);
     }
 
-    @memoize
+    get firstPartyName(): string {
+        return this.getRangeValue(GeneratorRange.FirstPartyName);
+    }
+
     get courtroomsInfo(): ICourtroomInfo[] {
         return this.getRangeValues(GeneratorRange.CourtroomNames).map(courtroomCells => {
             return {
@@ -89,12 +88,10 @@ class SetupContext implements ISetupContext {
         });
     }
 
-    @memoize
     get roundNames(): string[] {
         return this.getRangeValues(GeneratorRange.RoundNames)[0];
     }
 
-    @memoize
     get ballotsPerTrial(): number {
         return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
     }
