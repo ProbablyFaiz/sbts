@@ -61,7 +61,8 @@ function createTemplatesFolder(setupContext: ISetupContext) {
 function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: string, courtroomInfo: ICourtroomInfo) {
     const trialFolderName = `R${round} - ${courtroomInfo.name}`;
     const trialFolder = roundFolder.createFolder(trialFolderName);
-    courtroomInfo.bailiffEmails.forEach(email => trialFolder.addEditor(email));
+    trialFolder.addEditors(courtroomInfo.bailiffEmails);
+
     const trialPrefix = `R${round} ${courtroomInfo.name}`
     const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];

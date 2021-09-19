@@ -1,7 +1,7 @@
 function OnPublishBallotsClick() {
-  var ui = SpreadsheetApp.getUi(); // Same variations.
+  const ui = SpreadsheetApp.getUi(); // Same variations.
 
-  var result = ui.alert(
+  const result = ui.alert(
      'Please confirm',
      'Are you sure you want to publish PDF ballots to the team ballot folders?',
       ui.ButtonSet.YES_NO);

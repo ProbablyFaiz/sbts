@@ -47,7 +47,7 @@ const tabulateRound = (roundResults) => {
     });
     ballotsWon = normalizeTotal(ballotsWon, normalizingFactor);
     pointDifferential = normalizeTotal(pointDifferential, normalizingFactor);
-    const wasPlaintiff = roundResults.side === 'Plaintiff'
+    const wasPlaintiff = roundResults.side !== 'Defense';
     return {
         ballotsWon,
         pointDifferential,
