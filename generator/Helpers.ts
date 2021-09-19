@@ -16,7 +16,7 @@ function getTabFolder(): Folder {
   return DriveApp.getFolderById(TAB_FOLDER_ID);
 }
 
-function getChildFolder(parentFolder: Folder, childName: string): Folder {
+function getOrCreateChildFolder(parentFolder: Folder, childName: string): Folder {
   const childFolderIterator = parentFolder.searchFolders(`title contains "${childName}"`);
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -49,6 +49,10 @@ function getAllBallots(tabFolder: Folder): GoogleFile[] {
   return ballots;
 }
 
+function getIdFromUrl(url) {
+    return url.match(/[-\w]{25,}/);
+}
+
 // This is a really stupid hack to allow me to use tuple keys with ES6 maps.
 // It is very brittle, and should be fired into the sun at earliest convenience.
 // When iterating over keys, remember to deserialize the JSON back into an object.
@@ -65,33 +69,4 @@ class TupleMap extends Map {
     has(key) {
         return super.has(JSON.stringify(key))
     }
-}
-
-const teamNameMap = {
-  "1007": "Macalester A",
-  "1008": "Macalester B ",
-  "1023": "UC Davis B",
-  "1024": "UC Davis C ",
-  "1087": "Cal State Fresno B",
-  "1088": "Cal State Fresno C",
-  "1109": "UCLA E",
-  "1124": "UC Berkeley ",
-  "1129": "Washington & Lee A",
-  "1134": "Cal Poly SLO C",
-  "1135": "Cal Poly SLO D",
-  "1277": "Redlands A",
-  "1281": "ASU A",
-  "1282": "ASU B",
-  "1303": "Alabama A",
-  "1304": "Alabama B",
-  "1322": "Irvine A",
-  "1323": "Irvine B",
-  "1337": "George Washington C",
-  "1386": "Oregon B",
-  "1387": "Oregon C",
-  "1388": "Oregon D",
-  "1391": "Cal Poly Pomona A",
-  "1393": "Scripps A",
-  "1395": "Michigan A",
-  "1632": "MIT B",
 }

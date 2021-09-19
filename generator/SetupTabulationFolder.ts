@@ -1,16 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 
-const ballotsPerTrial = 2;
 const roundNames = ["1"];
-const courtroomNames = ["Girvetz", "Buchanan", "Campbell", "Phelps", "Ellison", "Harold Frank", "Kerr", "North", "Cheadle", "Kohn", "Broida", "Elings", "South"]
-const bailiffEmails = ["boaitey@umail.ucsb.edu", "alia@umail.ucsb.edu", "amrutabaradwaj@umail.ucsb.edu", "carissamstewart@umail.ucsb.edu", "carolinebaldan@umail.ucsb.edu", "junhyungseo@umail.ucsb.edu", "hunterwright@umail.ucsb.edu", "kristenwu@umail.ucsb.edu", "mwhalen@umail.ucsb.edu", "nlswetlin@umail.ucsb.edu", "raananaghieh@umail.ucsb.edu", "seanignatuk@umail.ucsb.edu", "svakili@umail.ucsb.edu"];
-const courtroomInfos = courtroomNames.map((ctrm, idx) => {
-    return {name: ctrm, bailiffEmail: bailiffEmails[idx]}
-})
 
-
-// DO NOT RUN THIS DURING THE TOURNAMENT UNDER ANY CIRCUMSTANCES. THIS IS ONLY FOR GENERATING FOLDERS BEFOREHAND.
 function SetupTabulationFolder() {
     const setupContext = new SetupContext();
     const tabFolder = getTabFolder();
@@ -29,7 +21,7 @@ function SetupTabulationFolder() {
         orchestratorSheet.getRangeByName(OrchestratorRange.MasterLink).setValue(masterSheetFile.getUrl());
     }
 
-    getChildFolder(tabFolder, EXPORT_FOLDER_NAME);
+    getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
     for (let round of roundNames) {
         const roundFolderName = `Round ${round}`;
@@ -39,35 +31,36 @@ function SetupTabulationFolder() {
         }
         const roundFolder = tabFolder.createFolder(roundFolderName);
         roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
-        courtroomInfos.forEach(({
-                                    name,
-                                    bailiffEmail
-                                }) => createTrialFolder(roundFolder, round, name, bailiffEmail, setupContext.ballotTemplate, setupContext.captainsFormTemplate));
+        setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
-    console.log(`Created ${roundNames.length * courtroomInfos.length * ballotsPerTrial} ballots for ${roundNames.length} round(s).`);
+    console.log(`Created ${roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${roundNames.length} round(s).`);
 }
 
-function createTrialFolder(roundFolder, round, courtroom, bailiffEmail, ballotTemplate, captainsFormTemplate) {
-    const trialFolderName = `R${round} - ${courtroom}`;
+function createTemplatesFolder() {
+
+}
+
+function createTrialFolder(setupContext: ISetupContext, roundFolder: GoogleAppsScript.Drive.Folder, round: string, courtroomInfo: ICourtroomInfo) {
+    const trialFolderName = `R${round} - ${courtroomInfo.name}`;
     const trialFolder = roundFolder.createFolder(trialFolderName);
-    trialFolder.addEditor(bailiffEmail);
-    const trialPrefix = `R${round} ${courtroom}`
-    const trialCaptainsForm = prepareCaptainsForm(trialFolder, trialPrefix, round, courtroom, captainsFormTemplate);
+    courtroomInfo.bailiffEmails.forEach(email => trialFolder.addEditor(email));
+    const trialPrefix = `R${round} ${courtroomInfo.name}`
+    const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];
     console.log(`Creating ${trialPrefix} ballots and captain's form...`);
-    for (let i = 1; i <= ballotsPerTrial; i++) {
-        const createdBallot = ballotTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
+    for (let i = 1; i <= setupContext.ballotsPerTrial; i++) {
+        const createdBallot = setupContext.ballotBaseTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
         createdBallot.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
         trialBallots.push(createdBallot);
     }
     linkTrialSheets(trialCaptainsForm, trialBallots);
 }
 
-function prepareCaptainsForm(trialFolder, trialPrefix, round, courtroom, captainsFormTemplate) {
-    const captainsForm = captainsFormTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
+function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: string | number, courtroomInfo: ICourtroomInfo) {
+    const captainsForm = setupContext.captainsFormBaseTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
-    captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(`${courtroom} Hall`); // Kind of hacky, could cause issues later
+    captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
 
     return captainsForm;
 }

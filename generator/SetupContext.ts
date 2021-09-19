@@ -1,4 +1,5 @@
 enum GeneratorRange {
+    TabFolder = 'TabFolderRange',
     MasterSheetTemplate = 'MasterSheetTemplateRange',
     OrchestratorTemplate = 'OrchestratorTemplateRange',
     BallotTemplate = 'BallotTemplateRange',
@@ -9,43 +10,68 @@ enum GeneratorRange {
     BallotsPerTrial = 'BallotsPerTrialRange',
 }
 
+interface ICourtroomInfo {
+    name: string;
+    bailiffEmails: string[];
+}
+
 interface ISetupContext {
+    isValid: boolean;
+
+    tabFolder: Folder;
     masterSheetTemplate: GoogleFile;
     orchestratorTemplate: GoogleFile;
     ballotTemplate: GoogleFile;
     captainsFormTemplate: GoogleFile;
 
+    ballotBaseTemplate: GoogleFile;
+    captainsFormBaseTemplate: GoogleFile;
+
     tournamentName: string;
-    courtroomNames: string[];
+    courtroomsInfo: ICourtroomInfo[];
     roundNames: string[];
     ballotsPerTrial: number;
 }
 
 class SetupContext implements ISetupContext {
+    ballotTemplate: GoogleFile;
+    captainsFormTemplate: GoogleFile;
+
     private generatorSpreadsheet: Spreadsheet;
 
     constructor() {
         this.generatorSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     }
 
+    get isValid(): boolean {
+        // noinspection UnnecessaryLocalVariableJS
+        const tabFolderIsEmpty = !this.tabFolder.getFiles().hasNext();
+        return tabFolderIsEmpty;
+    }
+
+    @memoize
+    get tabFolder(): Folder {
+        return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)));
+    }
+
     @memoize
     get masterSheetTemplate(): GoogleFile {
-        return DriveApp.getFileById(this.getRangeValue(GeneratorRange.MasterSheetTemplate));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.MasterSheetTemplate)));
     }
 
     @memoize
     get orchestratorTemplate(): GoogleFile {
-        return DriveApp.getFileById(this.getRangeValue(GeneratorRange.OrchestratorTemplate));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.OrchestratorTemplate)));
     }
 
     @memoize
-    get ballotTemplate(): GoogleFile {
-        return DriveApp.getFileById(this.getRangeValue(GeneratorRange.BallotTemplate));
+    get ballotBaseTemplate(): GoogleFile {
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)));
     }
 
     @memoize
-    get captainsFormTemplate(): GoogleFile {
-        return DriveApp.getFileById(this.getRangeValue(GeneratorRange.CaptainsFormTemplate));
+    get captainsFormBaseTemplate(): GoogleFile {
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)));
     }
 
     @memoize
@@ -54,8 +80,13 @@ class SetupContext implements ISetupContext {
     }
 
     @memoize
-    get courtroomNames(): string[] {
-        return this.getRangeValues(GeneratorRange.CourtroomNames)[0];
+    get courtroomsInfo(): ICourtroomInfo[] {
+        return this.getRangeValues(GeneratorRange.CourtroomNames).map(courtroomCells => {
+            return {
+                name: courtroomCells[0],
+                bailiffEmails: courtroomCells[1].split(','),
+            };
+        });
     }
 
     @memoize

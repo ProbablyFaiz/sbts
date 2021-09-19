@@ -2,6 +2,9 @@
 
 // This script should only be run once the master spreadsheet and all the ballots have been generated; it will crash or do bad things otherwise.
 // Do not run this script thereafter, as it may result in unexpected behavior including but not limited to overwriting existing data in the master sheet.
+
+// TODO: Add master sheet getting so this can be used.
+/*
 function PopulateBallotLinks() {
   const tabFolder = getTabFolder();
   const ballots = getAllBallots(tabFolder);
@@ -22,3 +25,4 @@ function PopulateBallotLinks() {
   const linksRange = masterSheet.getRange(rangeStr);
   linksRange.setValues(outputCells);
 }
+*/
