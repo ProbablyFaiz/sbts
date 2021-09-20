@@ -6,23 +6,29 @@
 // TODO: Add master sheet getting so this can be used.
 /*
 function PopulateBallotLinks() {
-  const tabFolder = getTabFolder();
-  const ballots = getAllBallots(tabFolder);
-  const masterSheet = getMasterSheet(tabFolder);
-  if (ballots.length === 0) return;
-  const startRow = 2; const endRow = startRow + ballots.length - 1;
-  const outputCells = ballots.map((b, idx) => [
-      b.getUrl(),
-      `=IF(A${startRow + idx} <> "", HYPERLINK(IMPORTRANGE(A2,"${BallotRange.CaptainsFormUrl}"), "Captain's Form"),"")`,
-      b.getName(),
-  ]).sort((b1, b2) => { // Sort by ballot name so they're in order
-      if(b1[1] < b2[1]) { return -1; }
-      if(b1[1] > b2[1]) { return 1; }
-      return 0;
+    const setupContext = new SetupContext();
+    const tabFolder = getTabFolder();
+    const ballots = getAllBallots(tabFolder);
+    const masterSheet = getMasterSheet(tabFolder);
+    if (ballots.length === 0) return;
+    const startRow = 2;
+    const endRow = startRow + ballots.length - 1;
+    const outputCells = ballots.map((b, idx) => [
+        b.getUrl(),
+        `=IF(A${startRow + idx} <> "", HYPERLINK(IMPORTRANGE(A2,"${BallotRange.CaptainsFormUrl}"), "Captain's Form"),"")`,
+        b.getName(),
+    ]).sort((b1, b2) => { // Sort by ballot name so they're in order
+        if (b1[1] < b2[1]) {
+            return -1;
+        }
+        if (b1[1] > b2[1]) {
+            return 1;
+        }
+        return 0;
     });
-  const rangeStr = `Ballot Links!A${startRow}:C${endRow}`;
+    const rangeStr = `Ballot Links!A${startRow}:C${endRow}`;
 
-  const linksRange = masterSheet.getRange(rangeStr);
-  linksRange.setValues(outputCells);
+    const linksRange = masterSheet.getRange(rangeStr);
+    linksRange.setValues(outputCells);
 }
 */
