@@ -1,16 +1,19 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-const TeamResultsIndices = {
-  ROUND: 0,
-  JUDGE_NAME: 1,
-  TEAM_NUMBER: 2,
-  OPPONENT_NUMBER: 3,
-  SIDE: 4,
-  PD: 5,
-  WON: 6,
-  OUTPUT_BALLOTS_WON: 2,
-  OUTPUT_PD: 4,
-  OUTPUT_CS: 3,
+enum TeamResultsIndex {
+    Round = 0,
+    JudgeName = 1,
+    TeamNumber = 2,
+    OpponentNumber = 3,
+    Side = 4,
+    PD = 5,
+    Won = 6,
+}
+
+enum TeamResultsOutputIndex {
+    BallotsWon = 2,
+    PD = 4,
+    CS = 3,
 }
 
 const normalizeTotal = (total, factor) => {
@@ -18,22 +21,22 @@ const normalizeTotal = (total, factor) => {
 }
 
 const tabulateBallot = (ballot, resultsContainer) => {
-    const teamNumber = ballot[TeamResultsIndices.TEAM_NUMBER];
+    const teamNumber = ballot[TeamResultsIndex.TeamNumber];
     if (!(teamNumber in resultsContainer)) {
         resultsContainer[teamNumber] = {};
     }
-    const roundNumber = ballot[TeamResultsIndices.ROUND];
+    const roundNumber = ballot[TeamResultsIndex.Round];
     if (!(roundNumber in resultsContainer[teamNumber])) {
         resultsContainer[teamNumber][roundNumber] = {
-            opponent: ballot[TeamResultsIndices.OPPONENT_NUMBER],
-            side: ballot[TeamResultsIndices.SIDE],
+            opponent: ballot[TeamResultsIndex.OpponentNumber],
+            side: ballot[TeamResultsIndex.Side],
             ballots: []
         }
     }
     resultsContainer[teamNumber][roundNumber].ballots.push({
-        judgeName: ballot[TeamResultsIndices.JUDGE_NAME],
-        pointDifferential: ballot[TeamResultsIndices.PD],
-        ballotResult: ballot[TeamResultsIndices.WON]
+        judgeName: ballot[TeamResultsIndex.JudgeName],
+        pointDifferential: ballot[TeamResultsIndex.PD],
+        ballotResult: ballot[TeamResultsIndex.Won]
     });
 }
 
@@ -55,29 +58,26 @@ const tabulateRound = (roundResults) => {
     };
 }
 
+const TEAM_SORT_ORDER = [
+    TeamResultsOutputIndex.BallotsWon,
+    TeamResultsOutputIndex.CS,
+    TeamResultsOutputIndex.PD,
+];
 const compareTeamResults = (first, second) => {
-  // return first[0] - second[0];
-    // First, compare by ballots won
-    if (second[TeamResultsIndices.OUTPUT_BALLOTS_WON] - first[TeamResultsIndices.OUTPUT_BALLOTS_WON] !== 0) {
-        return second[TeamResultsIndices.OUTPUT_BALLOTS_WON] - first[TeamResultsIndices.OUTPUT_BALLOTS_WON];
+    for (let currentSortIndex of TEAM_SORT_ORDER) {
+        let difference = second[currentSortIndex] - first[currentSortIndex];
+        if (difference !== 0) {
+            return difference;
+        }
     }
-    // Then, by CS
-    else if (second[TeamResultsIndices.OUTPUT_CS] - first[TeamResultsIndices.OUTPUT_CS] !== 0) {
-        return second[TeamResultsIndices.OUTPUT_CS] - first[TeamResultsIndices.OUTPUT_CS];
-    }
-    // Then, by PD
-    else if (second[TeamResultsIndices.OUTPUT_PD] - first[TeamResultsIndices.OUTPUT_PD] !== 0) {
-        return second[TeamResultsIndices.OUTPUT_PD] - first[TeamResultsIndices.OUTPUT_PD];
-    }
-    // If both are the same, it's a tie
     return 0;
 }
 
-const createTeamResultsOutput = (teamSummaryResults, fullTeamResults) => {
+const createTeamResultsOutput = (teamSummaryResults: Record<string, any>, fullTeamResults) => {
     const outputCells = [];
     Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
         let combinedStrength = 0;
-        let teamRounds = Object.values(fullTeamResults[teamNumber]);
+        let teamRounds = Object.values(fullTeamResults[teamNumber]) as any[];
         const opponents = teamRounds.map(roundResult => roundResult.opponent);
         opponents.forEach(oppTeamNumber => combinedStrength += teamSummaryResults[oppTeamNumber].ballotsWon);
         teamSummary.combinedStrength = combinedStrength;
@@ -99,13 +99,14 @@ const createTeamResultsOutput = (teamSummaryResults, fullTeamResults) => {
 
 function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
     let fullTeamResults = {};
-    const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
-    const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
+    const firstRound = startRound ?? Number.NEGATIVE_INFINITY;
+    const lastRound = endRound ?? Number.POSITIVE_INFINITY;
     ballotsRange.forEach((ballot, i) => {
-        if (ballot[TeamResultsIndices.ROUND] === '' ||
-            ballot[TeamResultsIndices.ROUND] < firstRound ||
-            ballot[TeamResultsIndices.ROUND] > lastRound)  // Skip first row, blank rows, and rounds past limit
+        if (ballot[TeamResultsIndex.Round] === '' ||
+            ballot[TeamResultsIndex.Round] < firstRound ||
+            ballot[TeamResultsIndex.Round] > lastRound) {  // Skip first row, blank rows, and rounds past limit
             return;
+        }
         tabulateBallot(ballot, fullTeamResults)
     });
 

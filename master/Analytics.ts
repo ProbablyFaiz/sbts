@@ -1,10 +1,10 @@
 function CalculateSideBias(teamBallotsRange) {
   const resultsDict = {"Plaintiff": 0, "Defense": 0, "Tie": 0};
   for (let ballot of teamBallotsRange) {
-    if (ballot[TeamResultsIndices.WON] == 0.5) {
-      resultsDict["Tie"] += ballot[TeamResultsIndices.WON]
+    if (ballot[TeamResultsIndex.Won] == 0.5) {
+      resultsDict["Tie"] += ballot[TeamResultsIndex.Won]
     } else {
-      resultsDict[ballot[TeamResultsIndices.SIDE]] += ballot[TeamResultsIndices.WON];
+      resultsDict[ballot[TeamResultsIndex.Side]] += ballot[TeamResultsIndex.Won];
     }
   }
   return [
