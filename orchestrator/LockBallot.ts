@@ -1,6 +1,6 @@
-function modifyBallotLock(ballotSheet, submitCheckboxValue) {
+function setBallotLock(ballotSheet, enableBallotLock) {
   const currentSheet = ballotSheet.getSheetByName("Scores");
-  if (submitCheckboxValue === true) {
+  if (enableBallotLock === true) {
     const protection = currentSheet.protect();
     protection.setDescription("Ballot Completion Lock")
     removeNonWhitelistedEditors(protection);

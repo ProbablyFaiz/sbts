@@ -38,7 +38,8 @@ function updateBallot(ballotObject) {
     submitCheckboxRange.setValue(false);
     failedSubmissionRange.setValue(true);
   } else {
-    modifyBallotLock(ballotSheet, ballotObject.submitCheckbox);
+    fixCommentBoxHeights(ballotSheet);
+    setBallotLock(ballotSheet, ballotObject.submitCheckbox);
     submittedRange.setValue(ballotObject.submitCheckbox);
     failedSubmissionRange.setValue(false);
   }
