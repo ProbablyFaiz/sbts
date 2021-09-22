@@ -4,13 +4,11 @@ function ValidationMessages() {
     return ["Ballot Status: Ready to submit."];
   }
   const validationOutput = [["Ballot Status: Not ready to submit."]]
-  issues.forEach(issue => {
-    validationOutput.push([issue]);
-  });
+  issues.forEach(issue => validationOutput.push([issue]));
   return validationOutput;
 }
 
-function validationIssues() {
+function validationIssues(): string[] {
   const rangeTypes = [
     {
       prefix: "BallotRange",
@@ -29,7 +27,7 @@ function validationIssues() {
     }
   ];
   const namedRanges = SpreadsheetApp.getActive().getSheetByName("Scores").getNamedRanges();
-  const otherValidationIssues = new Set();
+  const otherValidationIssues: Set<string> = new Set();
   namedRanges.forEach(range => {
     for (let rangeType of rangeTypes) {
       if (range.getName().startsWith(rangeType.prefix)) {
@@ -49,5 +47,5 @@ function validationIssues() {
     }
   });
   const completionValidations = rangeTypes.filter(rt => rt.issueFound).map(rt => "Missing " + rt.output + ".");
-  return [...completionValidations, ...otherValidationIssues];
+  return [...completionValidations, ...Array.from(otherValidationIssues)];
 }
