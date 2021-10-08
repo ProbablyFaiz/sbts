@@ -13,6 +13,10 @@ const CAPTAINS_FORM_TEMPLATE_ID = "1gujJVuGmNORqUx4MnSZg0nHPJmm_ikAHHcoIyCKtCnw"
 
 const NUM_BALLOTS = 2;
 
+function compactRange(rangeArr: string[][]): string[][] {
+  return rangeArr.filter(row => row.some(cell => !['', null, undefined].includes(cell)));
+}
+
 function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId())
 }

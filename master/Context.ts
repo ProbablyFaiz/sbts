@@ -5,9 +5,27 @@ interface IContext {
     masterSpreadsheet: MasterSpreadsheet;
     ballotFiles: File[];
     ballotSpreadsheets: BallotSpreadsheet[];
+    teamNameMap: Record<string, string>;
 }
 
 class Context implements IContext {
+    @memoize
+    get teamNameMap(): Record<string, string> {
+        const teamNumberNameMapping: Record<string, string> = {};
+        compactRange(this.getRangeValues(MasterRange.TeamNameMap)).forEach(row => {
+            teamNumberNameMapping[row[0]] = row[1];
+        });
+        return teamNumberNameMapping;
+    }
+
+    private getRangeValue(rangeName: MasterRange): string {
+        return this.masterSpreadsheet.getRangeByName(rangeName).getValue().toString();
+    }
+
+    private getRangeValues(rangeName: MasterRange): string[][] {
+        return this.masterSpreadsheet.getRangeByName(rangeName).getValues().map(arr => arr.map(cell => cell.toString()));
+    }
+
     @memoize
     get tabFolder(): Folder {
         return DriveApp.getFolderById(TAB_FOLDER_ID);
@@ -15,8 +33,7 @@ class Context implements IContext {
 
     @memoize
     get masterSpreadsheet(): MasterSpreadsheet {
-        let masterSpreadsheetFile = getFileByName(this.tabFolder, MASTER_SPREADSHEET_NAME);
-        return sheetForFile(masterSpreadsheetFile);
+        return SpreadsheetApp.getActiveSpreadsheet();
     }
 
     @memoize
