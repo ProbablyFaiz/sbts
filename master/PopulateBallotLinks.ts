@@ -20,10 +20,10 @@ function PopulateBallotLinks() {
         "")`.replace("\n", ""),
         b.getName(),
     ]).sort((b1, b2) => { // Sort by ballot name so they're in order
-        if (b1[1] < b2[1]) {
+        if (b1[1] > b2[1]) {
             return -1;
         }
-        if (b1[1] > b2[1]) {
+        if (b1[1] < b2[1]) {
             return 1;
         }
         return 0;

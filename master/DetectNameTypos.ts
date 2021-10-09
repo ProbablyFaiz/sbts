@@ -1,7 +1,7 @@
 enum RankingRangeIndex {
     TeamNumber = 0,
-    CompetitorName = 2,
-    Side = 3,
+    Side = 1,
+    CompetitorName = 3,
 }
 
 interface TeamSideKey {
@@ -10,7 +10,7 @@ interface TeamSideKey {
 }
 
 function DetectNameTypos(rankingRange: string[][]): string[][] {
-    const groupedNames = groupRankings(rankingRange);
+    const groupedNames = groupRankings(compactRange(rankingRange));
     const potentialDuplicateResults: string[][] = [];
     groupedNames.forEach((nameSet, groupKey) => {
         const groupKeyObject: TeamSideKey = JSON.parse(groupKey);
