@@ -7,11 +7,12 @@
 import Folder = GoogleAppsScript.Drive.Folder;
 
 function CreateTeamBallotFolders() {
-  const tabFolder = getTabFolder();
-  const ballots = getAllBallots(tabFolder);
+  const context = new Context();
+  const tabFolder = context.tabFolder;
+  const ballots = context.ballotFiles;
   const exportFolder = getChildFolder(tabFolder, EXPORT_FOLDER_NAME)
   exportBallots(ballots, exportFolder);
-  console.log(ballots.length);
+  console.log(ballots.length.toString());
 }
 
 function exportBallots(ballots, exportFolder) {

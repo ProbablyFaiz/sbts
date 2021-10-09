@@ -5,15 +5,13 @@ function UpdateBallotLocks() {
   const scriptLock = LockService.getScriptLock();
   scriptLock.waitLock(30000);
   const orchestratorSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const ballotInfo = orchestratorSheet.getRangeByName("BallotInfoRange").getValues();
-  let consecutiveBlanks = 0; let numUpdated = 0;
-  for (let i = 0; i < ballotInfo.length && consecutiveBlanks < 5; i++) {
+  const ballotInfo = compactRange(orchestratorSheet.getRangeByName("BallotInfoRange").getValues());
+  let numUpdated = 0;
+  for (let i = 0; i < ballotInfo.length; i++) {
     const currentBallot = ballotInfo[i];
     if (currentBallot[0] === "") {
-      consecutiveBlanks++;
       continue;
     }
-    consecutiveBlanks = 0;
     const ballotObject = { url: currentBallot[0], notReady: currentBallot[1] === BALLOT_STATUS_NOT_READY, submitCheckbox: currentBallot[2], submitted: currentBallot[3] };
     if (ballotObject.submitCheckbox !== ballotObject.submitted) {
       try {

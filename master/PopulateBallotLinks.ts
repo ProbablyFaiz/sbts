@@ -3,19 +3,21 @@
 // This script should only be run once the master spreadsheet and all the ballots have been generated; it will crash or do bad things otherwise.
 // Do not run this script thereafter, as it may result in unexpected behavior including but not limited to overwriting existing data in the master sheet.
 
-// TODO: Add master sheet getting so this can be used.
-/*
 function PopulateBallotLinks() {
-    const setupContext = new SetupContext();
-    const tabFolder = getTabFolder();
-    const ballots = getAllBallots(tabFolder);
-    const masterSheet = getMasterSheet(tabFolder);
+    const context = new Context();
+    const ballots = context.ballotFiles;
+    const masterSheet = context.masterSpreadsheet;
     if (ballots.length === 0) return;
     const startRow = 2;
     const endRow = startRow + ballots.length - 1;
     const outputCells = ballots.map((b, idx) => [
         b.getUrl(),
-        `=IF(A${startRow + idx} <> "", HYPERLINK(IMPORTRANGE(A2,"${BallotRange.CaptainsFormUrl}"), "Captain's Form"),"")`,
+        `=IF(
+            A${startRow + idx} <> "", 
+            HYPERLINK(
+                IMPORTRANGE(A2,"${BallotRange.CaptainsFormUrl}"),
+            "Captain's Form"),
+        "")`.replace("\n", ""),
         b.getName(),
     ]).sort((b1, b2) => { // Sort by ballot name so they're in order
         if (b1[1] < b2[1]) {
@@ -31,4 +33,3 @@ function PopulateBallotLinks() {
     const linksRange = masterSheet.getRange(rangeStr);
     linksRange.setValues(outputCells);
 }
-*/

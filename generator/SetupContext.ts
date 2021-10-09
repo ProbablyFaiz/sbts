@@ -9,8 +9,6 @@ enum GeneratorRange {
     CourtroomNames = 'CourtroomsInfoRange',
     RoundNames = 'RoundNamesRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
-    ExistingBallots = 'ExistingBallotsRange',
-    ExistingCaptainsForms = 'ExistingCaptainsFormsRange',
 }
 
 interface ICourtroomInfo {
@@ -36,11 +34,6 @@ interface ISetupContext {
     courtroomsInfo: ICourtroomInfo[];
     roundNames: string[];
     ballotsPerTrial: number;
-    //
-    // saveCaptainsFormRecord: (round, courtroom, link) => void;
-    // saveBallotRecord: (round, courtroom, index, link, captainsFormLink) => void;
-    // captainsFormExists: (round, courtroom) => boolean;
-    // ballotExists: (round, courtroom, index, link) => boolean;
 }
 
 class SetupContext implements ISetupContext {
@@ -49,11 +42,6 @@ class SetupContext implements ISetupContext {
     captainsFormTemplate: GoogleFile;
 
     private generatorSpreadsheet: Spreadsheet;
-    // private _masterSpreadsheet: Spreadsheet;
-    // private _ballotTemplate: GoogleFile;
-    // private _captainsFormTemplate: GoogleFile;
-    private existingCaptainsForms: Set<string>;
-    private existingBallotRecords: Set<string>;
 
     constructor() {
         this.generatorSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -127,10 +115,6 @@ class SetupContext implements ISetupContext {
     @memoize
     get ballotsPerTrial(): number {
         return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
-    }
-
-    saveCaptainsFormRecord(round, courtroom) {
-
     }
 
     private getRangeValue(rangeName: GeneratorRange): string {

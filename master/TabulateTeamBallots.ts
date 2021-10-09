@@ -73,7 +73,7 @@ const compareTeamResults = (first, second) => {
     return 0;
 }
 
-const createTeamResultsOutput = (teamSummaryResults: Record<string, any>, fullTeamResults) => {
+const createTeamResultsOutput = (context: Context, teamSummaryResults: Record<string, any>, fullTeamResults) => {
     const outputCells = [];
     Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
         let combinedStrength = 0;
@@ -85,7 +85,7 @@ const createTeamResultsOutput = (teamSummaryResults: Record<string, any>, fullTe
         // Order is team #, ballots won, PD, CS, times plaintiff, times defense
         outputCells.push([
             teamNumber,
-            teamNameMap[teamNumber],
+            context.teamNameMap[teamNumber],
             teamSummary.ballotsWon,
             teamSummary.combinedStrength,
             teamSummary.pointDifferential,
@@ -98,6 +98,7 @@ const createTeamResultsOutput = (teamSummaryResults: Record<string, any>, fullTe
 }
 
 function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
+    const context = new Context();
     let fullTeamResults = {};
     const firstRound = startRound ?? Number.NEGATIVE_INFINITY;
     const lastRound = endRound ?? Number.POSITIVE_INFINITY;
@@ -133,5 +134,5 @@ function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
             timesDefense
         }
     });
-    return createTeamResultsOutput(teamSummaryResults, fullTeamResults);
+    return createTeamResultsOutput(context, teamSummaryResults, fullTeamResults);
 }

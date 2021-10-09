@@ -17,6 +17,8 @@ enum MasterRange {
     TeamBallots = "TeamBallotsRange",
     IndividualBallots = "IndividualBallotsRange",
     TeamNameMap = "TeamNameMapRange",
+    OrchestratorLink = "OrchestratorLinkRange",
+    ParentFolderLink = "ParentFolderLinkRange",
 }
 
 enum CaptainsFormRange {

@@ -25,6 +25,9 @@ function SetupTabulationFolder() {
         const orchestratorSheet = sheetForFile(orchestratorFile);
         orchestratorSheet.getRangeByName(OrchestratorRange.MasterLink).setValue(masterSheetFile.getUrl());
     }
+    const masterSheet: MasterSpreadsheet = sheetForFile(masterSheetFile);
+    masterSheet.getRangeByName(MasterRange.OrchestratorLink).setValue(orchestratorFile.getUrl());
+    masterSheet.getRangeByName(MasterRange.ParentFolderLink).setValue(tabFolder.getUrl());
 
     getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 

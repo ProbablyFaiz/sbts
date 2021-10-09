@@ -1,5 +1,5 @@
 function OnPublishBallotsClick() {
-  const ui = SpreadsheetApp.getUi(); // Same variations.
+  const ui = SpreadsheetApp.getUi();
 
   const result = ui.alert(
      'Please confirm',
@@ -18,6 +18,33 @@ function OnPublishBallotsClick() {
     ui.showModelessDialog(htmlOutput, 'Success!');
   } else {
     // User clicked "No" or X in the title bar.
+  }
+}
+
+function OnSetupTriggersClick() {
+  const ui = SpreadsheetApp.getUi();
+  const result = ui.alert(
+      'Please confirm',
+      'Are you sure you want to setup the master spreadsheet? Only run this once, prior to the start of the tournament.',
+      ui.ButtonSet.YES_NO);
+
+  // Process the user's response.
+  if (result == ui.Button.YES) {
+    if (ScriptApp.getProjectTriggers().length > 0) {
+      ui.alert('Detected existing setup configuration, aborting...');
+    } else {
+      ui.alert('Adding ballot links...');
+      PopulateBallotLinks();
+      ui.alert('Creating triggers...');
+      SetupTriggers();
+      const htmlOutput = HtmlService
+          .createHtmlOutput('<p>Ballots were successfully published to team folders.</p>')
+          .setWidth(250)
+          .setHeight(100);
+      ui.showModelessDialog(htmlOutput, 'Success!');
+    }
+  } else {
+
   }
 
 }

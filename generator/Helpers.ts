@@ -28,23 +28,6 @@ function getFileByName(parentFolder: Folder, name: string): GoogleFile | undefin
   return undefined;
 }
 
-function getAllBallots(tabFolder: Folder): GoogleFile[] {
-  const ballots: GoogleFile[] = [];
-  const roundFolders = tabFolder.searchFolders('title contains "Round"');
-  while (roundFolders.hasNext()) {
-    const roundFolder = roundFolders.next();
-    const trialFolders = roundFolder.getFolders();
-    while (trialFolders.hasNext()) {
-      const ballotFiles = trialFolders.next().searchFiles('title contains "Ballot"');
-      while (ballotFiles.hasNext()) {
-        const file = ballotFiles.next();
-        ballots.push(file);
-      }
-    }
-  }
-  return ballots;
-}
-
 function getIdFromUrl(url) {
     return url.match(/[-\w]{25,}/);
 }
