@@ -33,17 +33,17 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
     return potentialDuplicateResults;
 }
 
-const groupRankings = (rankingRange: string[][]): Map<any, FuzzySet> => {
-    const teamSideGroups: Map<object, FuzzySet> = new TupleMap();
+const groupRankings = (rankingRange: string[][]): Map<string, FuzzySet> => {
+    const teamSideGroups: Map<string, FuzzySet> = new Map();
     rankingRange.forEach(rankRow => {
         const groupKey: TeamSideKey = {
             team: rankRow[RankingRangeIndex.TeamNumber],
             side: rankRow[RankingRangeIndex.Side],
         }
-        if (!teamSideGroups.has(groupKey)) {
-            teamSideGroups.set(groupKey, FuzzySet());
+        if (!teamSideGroups.has(JSON.stringify(groupKey))) {
+            teamSideGroups.set(JSON.stringify(groupKey), FuzzySet());
         }
-        teamSideGroups.get(groupKey).add(rankRow[RankingRangeIndex.CompetitorName]);
+        teamSideGroups.get(JSON.stringify(groupKey)).add(rankRow[RankingRangeIndex.CompetitorName]);
     });
     return teamSideGroups;
 }

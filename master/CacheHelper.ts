@@ -1,13 +1,18 @@
-function memoize(target: any, propertyKey: string, descriptor: PropertyDescriptor): any {
-    let fn: Function = descriptor.value;
-    let cache = {};
-    descriptor.value = function (...args: any[]) {
-        let key = args.join("-");
-        if (!cache[key]) {
-            cache[key] = fn.apply(target, args);
-        } else {
+function memoize(target: any, prop: string, descriptor: PropertyDescriptor) {
+    let original = descriptor.get;
+
+    descriptor.get = function (...args: any[]) {
+        const privateProp = `__memoized_${prop}`;
+
+        if (!this.hasOwnProperty(privateProp)) {
+            Object.defineProperty(this, privateProp, {
+                configurable: false,
+                enumerable: false,
+                writable: false,
+                value: original.apply(this, args)
+            });
         }
-        return cache[key];
-    }
-    return descriptor;
+
+        return this[privateProp];
+    };
 }

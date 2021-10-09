@@ -28,7 +28,7 @@ class Context implements IContext {
 
     @memoize
     get tabFolder(): Folder {
-        return DriveApp.getFolderById(getIdFromUrl(this.masterSpreadsheet.getRangeByName(MasterRange.ParentFolderLink)));
+        return DriveApp.getFolderById(getIdFromUrl(this.masterSpreadsheet.getRangeByName(MasterRange.ParentFolderLink).getValue()).toString());
     }
 
     @memoize

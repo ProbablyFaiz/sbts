@@ -15,7 +15,7 @@ function populateBallots(outputRangeName, resultsRangeName, rowsPerBallot) {
   const ballotLinks = getValidatedBallotLinks(ballotLinksRange);
   const outputCells = [];
   const emptyRow = ["", "", "", "", "", "", "", "", ""];
-  console.log(ballotLinks.length);
+  Logger.log(ballotLinks.length);
   for (let link of ballotLinks) {
     outputCells.push([getResultImportFormula(link, resultsRangeName), "", "", "", "", "", "", link, getCaptainsFormUrlImportFormula(link)]);
     for (let i = 0; i < rowsPerBallot - 1; i++) { outputCells.push(emptyRow); }

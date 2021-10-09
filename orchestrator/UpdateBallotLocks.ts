@@ -19,11 +19,11 @@ function UpdateBallotLocks() {
         numUpdated++;
       }
       catch (error) {
-        console.log(`Error on line ${i + 2}.`)
+        Logger.log(`Error on line ${i + 2}.`)
       }
     }
   }
-  console.log(`Updated ${numUpdated} ballots.`);
+  Logger.log(`Updated ${numUpdated} ballots.`);
   scriptLock.releaseLock();
 }
 

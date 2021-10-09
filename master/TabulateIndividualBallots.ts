@@ -53,11 +53,11 @@ const tabulateIndividualBallot = (context: Context, ballot, index, rankingType, 
         side: ballot[IndividualResultsIndices.SIDE]
     };
     let competitorObject;
-    if (competitorMap.has(competitorKey)) {
-        competitorObject = competitorMap.get(competitorKey);
+    if (competitorMap.has(JSON.stringify(competitorKey))) {
+        competitorObject = competitorMap.get(JSON.stringify(competitorKey));
     } else {
         competitorObject = {};
-        competitorMap.set(competitorKey, competitorObject);
+        competitorMap.set(JSON.stringify(competitorKey), competitorObject);
     }
     if (!(roundNumber in competitorObject)) {
         competitorObject[roundNumber] = [];
@@ -72,7 +72,7 @@ function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound, endRou
     const context = new Context();
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
-    const competitorMap = new TupleMap();
+    const competitorMap = new Map();
     ballotsRange.forEach((ballot, index) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap));
     return createIndividualResultsOutput(context, competitorMap);
 }

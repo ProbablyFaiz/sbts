@@ -12,7 +12,7 @@ function CreateTeamBallotFolders() {
   const ballots = context.ballotFiles;
   const exportFolder = getChildFolder(tabFolder, EXPORT_FOLDER_NAME)
   exportBallots(ballots, exportFolder);
-  console.log(ballots.length.toString());
+  Logger.log(ballots.length.toString());
 }
 
 function exportBallots(ballots, exportFolder) {
@@ -20,7 +20,7 @@ function exportBallots(ballots, exportFolder) {
     const ballotSheet = sheetForFile(ballot) as BallotSpreadsheet;
     const submittedRange = ballotSheet.getRangeByName(BallotRange.Submitted);
     if (!submittedRange || !submittedRange.getValue()) {
-      console.log(`${ballotSheet.getName()} not submitted, skipping...`)
+      Logger.log(`${ballotSheet.getName()} not submitted, skipping...`)
       continue;
     }
     const plaintiffTeam = ballotSheet.getRangeByName(BallotRange.PlaintiffTeam).getValue();
@@ -40,9 +40,9 @@ function exportBallots(ballots, exportFolder) {
         pdfBallot.setName(pdfName);
         existingBallot = pdfBallot; // We can save half of the exports by saving the ballot blob for the second go-round.
         teamRoundFolder.createFile(pdfBallot);
-        console.log(`Adding ${pdfName} to ${teamFolder.getName()}...`)
+        Logger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`)
       } else {
-        console.log(`${pdfName} already present in ${teamFolder.getName()}, skipping...`);
+        Logger.log(`${pdfName} already present in ${teamFolder.getName()}, skipping...`);
       }
     }
   }
