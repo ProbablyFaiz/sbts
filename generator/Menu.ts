@@ -13,7 +13,7 @@ function function1() {
 }
 
 function function2() {
-  console.log('FUNCTION 2');
+  SheetLogger.log('FUNCTION 2');
 }
 
 function DebugOutput() {

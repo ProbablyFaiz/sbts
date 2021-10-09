@@ -5,7 +5,7 @@ function SetupTabulationFolder() {
     const setupContext = new SetupContext();
 
     if (!setupContext.isValid) {
-        console.log("Tab folder is not empty. Aborting tabulation folder setup.");
+        SheetLogger.log("Tab folder is not empty. Aborting tabulation folder setup.");
         return;
     }
     const tabFolder = setupContext.tabFolder;
@@ -13,13 +13,13 @@ function SetupTabulationFolder() {
 
     let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
     if (masterSheetFile) {
-        console.log("Existing master spreadsheet found, not creating a new one...")
+        SheetLogger.log("Existing master spreadsheet found, not creating a new one...")
     } else {
         masterSheetFile = setupContext.masterSheetTemplate.makeCopy(MASTER_SPREADSHEET_NAME, tabFolder);
     }
     let orchestratorFile = getFileByName(tabFolder, ORCHESTRATOR_SPREADSHEET_NAME);
     if (orchestratorFile) {
-        console.log("Orchestrator file found, not creating a new one...");
+        SheetLogger.log("Orchestrator file found, not creating a new one...");
     } else {
         orchestratorFile = setupContext.orchestratorTemplate.makeCopy(ORCHESTRATOR_SPREADSHEET_NAME, tabFolder);
         const orchestratorSheet = sheetForFile(orchestratorFile);
@@ -41,20 +41,20 @@ function SetupTabulationFolder() {
         roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
         setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
-    console.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
+    SheetLogger.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
 }
 
 function createTemplatesFolder(setupContext: ISetupContext) {
-    console.log("Creating templates folder in tab directory...");
+    SheetLogger.log("Creating templates folder in tab directory...");
     const templateFolder = setupContext.tabFolder.createFolder("Templates");
 
-    console.log("Creating ballot template...");
+    SheetLogger.log("Creating ballot template...");
     setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy("Ballot Template", templateFolder);
     const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
     ballotTemplateSheet.getRangeByName(BallotRange.TournamentName).setValue(setupContext.tournamentName);
     ballotTemplateSheet.getRangeByName(BallotRange.FirstPartyName).setValue(setupContext.firstPartyName);
 
-    console.log("Creating Captains' Form template...");
+    SheetLogger.log("Creating Captains' Form template...");
     setupContext.captainsFormTemplate = setupContext.captainsFormBaseTemplate.makeCopy("Captains' Form Template", templateFolder);
     const captainsFormTemplateSheet = sheetForFile(setupContext.captainsFormTemplate);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
@@ -69,7 +69,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
     const trialPrefix = `R${round} ${courtroomInfo.name}`
     const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];
-    console.log(`Creating ${trialPrefix} ballots and captain's form...`);
+    SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
     for (let i = 1; i <= setupContext.ballotsPerTrial; i++) {
         const createdBallot = setupContext.ballotTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
         createdBallot.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
@@ -98,6 +98,6 @@ function linkTrialSheets(captainsForm, ballots) {
 }
 
 function logDuplicate() {
-    console.log("Terminating tabulation folder setup because I found something I tried to create already existed. This probably means you accidentally ran the script again.")
-    console.log("If you want to completely regenerate the folder, first delete all the existing stuff (being aware of the fact you'll lose any data you have in the existing files), then run this script again.")
+    SheetLogger.log("Terminating tabulation folder setup because I found something I tried to create already existed. This probably means you accidentally ran the script again.")
+    SheetLogger.log("If you want to completely regenerate the folder, first delete all the existing stuff (being aware of the fact you'll lose any data you have in the existing files), then run this script again.")
 }

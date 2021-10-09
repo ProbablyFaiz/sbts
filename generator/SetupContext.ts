@@ -9,6 +9,9 @@ enum GeneratorRange {
     CourtroomNames = 'CourtroomsInfoRange',
     RoundNames = 'RoundNamesRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
+    NumberOfCourtrooms = 'NumberOfCourtroomsRange',
+    NumberOfRounds = 'NumberOfRoundsRange',
+    GenerationLog = 'GenerationLogRange',
 }
 
 interface ICourtroomInfo {
@@ -64,27 +67,27 @@ class SetupContext implements ISetupContext {
 
     @memoize
     get tabFolder(): Folder {
-        return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)));
+        return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)).toString());
     }
 
     @memoize
     get masterSheetTemplate(): GoogleFile {
-        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.MasterSheetTemplate)));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.MasterSheetTemplate)).toString());
     }
 
     @memoize
     get orchestratorTemplate(): GoogleFile {
-        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.OrchestratorTemplate)));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.OrchestratorTemplate)).toString());
     }
 
     @memoize
     get ballotBaseTemplate(): GoogleFile {
-        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)).toString());
     }
 
     @memoize
     get captainsFormBaseTemplate(): GoogleFile {
-        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)));
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)).toString());
     }
 
     @memoize
@@ -104,17 +107,27 @@ class SetupContext implements ISetupContext {
                 name: courtroomCells[0],
                 bailiffEmails: courtroomCells[1].split(','),
             };
-        });
+        }).slice(0, this.numCourtrooms);
     }
 
     @memoize
     get roundNames(): string[] {
-        return compactRange(this.getRangeValues(GeneratorRange.RoundNames)).map(row => row[0]);
+        return compactRange(this.getRangeValues(GeneratorRange.RoundNames)).map(row => row[0]).slice(0, this.numRounds);
     }
 
     @memoize
     get ballotsPerTrial(): number {
         return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
+    }
+
+    @memoize
+    get numCourtrooms(): number {
+        return parseInt(this.getRangeValue(GeneratorRange.NumberOfCourtrooms));
+    }
+
+    @memoize
+    get numRounds(): number {
+        return parseInt(this.getRangeValue(GeneratorRange.NumberOfRounds));
     }
 
     private getRangeValue(rangeName: GeneratorRange): string {
