@@ -8,19 +8,15 @@ import Folder = GoogleAppsScript.Drive.Folder;
 
 function PublishTeamBallots() {
   const context = new Context();
-  const tabFolder = context.tabFolder;
-  const ballots = context.ballotFiles;
-  const exportFolder = getChildFolder(tabFolder, EXPORT_FOLDER_NAME)
-  exportBallots(ballots, exportFolder);
-  Logger.log(ballots.length.toString());
+  exportBallots(context);
 }
 
-function exportBallots(ballots, exportFolder) {
-  for (let ballot of ballots) {
+function exportBallots(context: Context) {
+  for (let ballot of context.ballotFiles) {
     const ballotSheet = sheetForFile(ballot) as BallotSpreadsheet;
     const submittedRange = ballotSheet.getRangeByName(BallotRange.Submitted);
     if (!submittedRange || !submittedRange.getValue()) {
-      Logger.log(`${ballotSheet.getName()} not submitted, skipping...`)
+      SheetLogger.log(`${ballotSheet.getName()} not submitted, skipping...`)
       continue;
     }
     const plaintiffTeam = ballotSheet.getRangeByName(BallotRange.PlaintiffTeam).getValue();
@@ -32,18 +28,19 @@ function exportBallots(ballots, exportFolder) {
     let existingBallot;
     for (let team of [plaintiffTeam, defenseTeam]) {
       if (team === "") continue;
-      const teamFolder = getChildFolder(exportFolder, "Team " + team + " ") // The "Team" and space are important so we don't get a snafu where one team number is a prefix/suffix of another.
-      const teamRoundFolder = getChildFolder(teamFolder, `Round ${round} `);
+      const teamFolder = context.teamBallotFolder(team)
+      const teamRoundFolder = getChildFolder(teamFolder, `Round ${round} `); // The trailing space is important so we don't get a snafu where one round number is a prefix/suffix of another.
       let pdfBallot = getFileByName(teamRoundFolder, pdfName);
       if (!pdfBallot) {
         pdfBallot = existingBallot || ballot.getAs("application/pdf");
         pdfBallot.setName(pdfName);
         existingBallot = pdfBallot; // We can save half of the exports by saving the ballot blob for the second go-round.
         teamRoundFolder.createFile(pdfBallot);
-        Logger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`)
+        SheetLogger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`)
       } else {
-        Logger.log(`${pdfName} already present in ${teamFolder.getName()}, skipping...`);
+        SheetLogger.log(`${pdfName} already present in ${teamFolder.getName()}, skipping...`);
       }
     }
   }
+  SheetLogger.log(context.ballotFiles.length.toString());
 }

@@ -6,6 +6,7 @@ interface IContext {
     ballotFiles: File[];
     ballotSpreadsheets: BallotSpreadsheet[];
     teamInfoMap: Record<string, TeamInfo>;
+    exportFolder: Folder;
 }
 
 class Context implements IContext {
@@ -22,17 +23,32 @@ class Context implements IContext {
         return teamInfoMapping;
     }
 
-    private getRangeValue(rangeName: MasterRange): string {
-        return this.masterSpreadsheet.getRangeByName(rangeName).getValue().toString();
+    // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.
+    setTeamBallotFolderLink(teamNumber: string, ballotFolderLink: string): boolean {
+        const teamInfoRange = this.masterSpreadsheet.getRangeByName(MasterRange.TeamInfo);
+        const teamInfoValues = teamInfoRange.getValues();
+        const teamRow = teamInfoValues.find(teamRow => teamRow[0] === teamNumber);
+        if (!teamRow) return false;
+        teamRow[2] = ballotFolderLink;
+        teamInfoRange.setValues(teamInfoValues);
+        return true;
     }
 
-    private getRangeValues(rangeName: MasterRange): string[][] {
-        return this.masterSpreadsheet.getRangeByName(rangeName).getValues().map(arr => arr.map(cell => cell.toString()));
+    @memoize
+    teamBallotFolder(teamNumber: string): Folder | undefined {
+        const folderLink = this.teamInfoMap[teamNumber]?.ballotFolderLink;
+        if (!folderLink) return undefined;
+        return DriveApp.getFolderById(getIdFromUrl(folderLink))
+    }
+
+    @memoize
+    get exportFolder(): Folder {
+        return DriveApp.getFolderById(getIdFromUrl(this.masterSpreadsheet.getRangeByName(MasterRange.ExportFolderLink).getValue()));
     }
 
     @memoize
     get tabFolder(): Folder {
-        return DriveApp.getFolderById(getIdFromUrl(this.masterSpreadsheet.getRangeByName(MasterRange.ParentFolderLink).getValue()).toString());
+        return DriveApp.getFolderById(getIdFromUrl(this.masterSpreadsheet.getRangeByName(MasterRange.ParentFolderLink).getValue()));
     }
 
     @memoize
@@ -62,5 +78,13 @@ class Context implements IContext {
     @memoize
     get ballotSpreadsheets(): BallotSpreadsheet[] {
         return this.ballotFiles.map(file => sheetForFile(file));
+    }
+
+    private getRangeValue(rangeName: MasterRange): string {
+        return this.masterSpreadsheet.getRangeByName(rangeName).getValue().toString();
+    }
+
+    private getRangeValues(rangeName: MasterRange): string[][] {
+        return this.masterSpreadsheet.getRangeByName(rangeName).getValues().map(arr => arr.map(cell => cell.toString()));
     }
 }

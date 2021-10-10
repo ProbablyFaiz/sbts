@@ -32,14 +32,40 @@ function OnSetupMasterSpreadsheetClick() {
     if (ScriptApp.getProjectTriggers().length > 0) {
       ui.alert('Detected existing setup configuration, aborting...');
     } else {
-      Logger.log('Adding ballot links...');
+      SheetLogger.log('Adding ballot links...');
       PopulateBallotLinks();
-      Logger.log('Creating triggers...');
+      SheetLogger.log('Creating triggers...');
       SetupTriggers();
+      SheetLogger.log('Creating team ballot folders...');
       const htmlOutput = HtmlService
           .createHtmlOutput(
               '<p>Master spreadsheet was successfully configured for use.' +
               'Remember to set up the orchestrator as well.</p>')
+          .setWidth(250)
+          .setHeight(100);
+      ui.showModelessDialog(htmlOutput, 'Success!');
+    }
+  } else {
+
+  }
+}
+
+function OnCreateTeamBallotFolderClick() {
+  const ui = SpreadsheetApp.getUi();
+  const result = ui.alert(
+      'Please confirm',
+      'Are you sure you want to create team ballot folders? Only run this once, prior to the start of the tournament' +
+      'and once you have added team numbers and names to the Teams sheet.',
+      ui.ButtonSet.YES_NO);
+  // Process the user's response.
+  if (result == ui.Button.YES) {
+    if (ScriptApp.getProjectTriggers().length > 0) {
+      ui.alert('Detected existing setup configuration, aborting...');
+    } else {
+      SheetLogger.log('Creating team ballot folders...');
+      CreateTeamBallotFolders();
+      const htmlOutput = HtmlService
+          .createHtmlOutput('<p>Successfully created team ballot folders.</p>')
           .setWidth(250)
           .setHeight(100);
       ui.showModelessDialog(htmlOutput, 'Success!');

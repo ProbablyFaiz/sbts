@@ -19,6 +19,8 @@ enum MasterRange {
     TeamInfo = "TeamInfoRange",
     OrchestratorLink = "OrchestratorLinkRange",
     ParentFolderLink = "ParentFolderLinkRange",
+    ExportFolderLink = "ExportFolderLinkRange",
+    ExecutionLog = "ExecutionLogRange",
 }
 
 enum CaptainsFormRange {

@@ -28,8 +28,8 @@ function getFileByName(parentFolder: Folder, name: string): GoogleFile | undefin
   return undefined;
 }
 
-function getIdFromUrl(url: string) {
-  return url.match(/[-\w]{25,}/);
+function getIdFromUrl(url: string): string {
+  return url.match(/[-\w]{25,}/).toString();
 }
 
 // This is a really stupid hack to allow me to use tuple keys with ES6 maps.
