@@ -85,7 +85,7 @@ const createTeamResultsOutput = (context: Context, teamSummaryResults: Record<st
         // Order is team #, ballots won, PD, CS, times plaintiff, times defense
         outputCells.push([
             teamNumber,
-            context.teamNameMap[teamNumber],
+            context.teamInfoMap[teamNumber].teamName,
             teamSummary.ballotsWon,
             teamSummary.combinedStrength,
             teamSummary.pointDifferential,

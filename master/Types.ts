@@ -16,7 +16,7 @@ enum MasterRange {
     BallotLinks = "BallotLinksRange",
     TeamBallots = "TeamBallotsRange",
     IndividualBallots = "IndividualBallotsRange",
-    TeamNameMap = "TeamNameMapRange",
+    TeamInfo = "TeamInfoRange",
     OrchestratorLink = "OrchestratorLinkRange",
     ParentFolderLink = "ParentFolderLinkRange",
 }
@@ -36,4 +36,10 @@ interface BallotSpreadsheet extends Spreadsheet {
 
 interface MasterSpreadsheet extends Spreadsheet {
     getRangeByName(name: MasterRange);
+}
+
+interface TeamInfo {
+    teamName: string;
+    ballotFolderLink: string;
+    emails: string[];
 }

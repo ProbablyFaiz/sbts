@@ -10,7 +10,7 @@ function OnPublishBallotsClick() {
   if (result == ui.Button.YES) {
     // User clicked "Yes".
     ui.alert('Publishing ballots...');
-    CreateTeamBallotFolders();
+    PublishTeamBallots();
     const htmlOutput = HtmlService
     .createHtmlOutput('<p>Ballots were successfully published to team folders.</p>')
     .setWidth(250)

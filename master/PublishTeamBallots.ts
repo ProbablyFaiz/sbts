@@ -6,7 +6,7 @@
 
 import Folder = GoogleAppsScript.Drive.Folder;
 
-function CreateTeamBallotFolders() {
+function PublishTeamBallots() {
   const context = new Context();
   const tabFolder = context.tabFolder;
   const ballots = context.ballotFiles;

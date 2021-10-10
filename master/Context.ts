@@ -5,17 +5,21 @@ interface IContext {
     masterSpreadsheet: MasterSpreadsheet;
     ballotFiles: File[];
     ballotSpreadsheets: BallotSpreadsheet[];
-    teamNameMap: Record<string, string>;
+    teamInfoMap: Record<string, TeamInfo>;
 }
 
 class Context implements IContext {
     @memoize
-    get teamNameMap(): Record<string, string> {
-        const teamNumberNameMapping: Record<string, string> = {};
-        compactRange(this.getRangeValues(MasterRange.TeamNameMap)).forEach(row => {
-            teamNumberNameMapping[row[0]] = row[1];
+    get teamInfoMap(): Record<string, TeamInfo> {
+        const teamInfoMapping: Record<string, TeamInfo> = {};
+        compactRange(this.getRangeValues(MasterRange.TeamInfo)).forEach(row => {
+            teamInfoMapping[row[0]] = {
+                teamName: row[1],
+                ballotFolderLink: row[2],
+                emails: row[3].split(','),
+            };
         });
-        return teamNumberNameMapping;
+        return teamInfoMapping;
     }
 
     private getRangeValue(rangeName: MasterRange): string {

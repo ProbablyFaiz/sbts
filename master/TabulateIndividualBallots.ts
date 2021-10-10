@@ -30,7 +30,7 @@ const createIndividualResultsOutput = (context: Context, competitorMap) => {
             const roundRankValue = roundRanks.reduce((accumulator, rankInfo) => accumulator + rankInfo.rankValue, 0);
             totalRankValue += normalizeValue(roundRankValue, normalizingFactor);
         });
-        const individualResult = [competitorInfo["team"], competitorInfo["side"], totalRankValue, competitorInfo["name"], context.teamNameMap[competitorInfo["team"]],];
+        const individualResult = [competitorInfo["team"], competitorInfo["side"], totalRankValue, competitorInfo["name"], context.teamInfoMap[competitorInfo["team"]].teamName,];
         resultsArr.push(individualResult);
     });
     resultsArr.sort(compareIndividualResults);
