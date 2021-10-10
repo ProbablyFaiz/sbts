@@ -45,8 +45,10 @@ class SetupContext implements ISetupContext {
     captainsFormTemplate: GoogleFile;
 
     private generatorSpreadsheet: Spreadsheet;
+    private tabFolderLink: string;
 
-    constructor() {
+    constructor(tabFolderLink: string) {
+        this.tabFolderLink = tabFolderLink;
         this.generatorSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     }
 
@@ -67,7 +69,7 @@ class SetupContext implements ISetupContext {
 
     @memoize
     get tabFolder(): Folder {
-        return DriveApp.getFolderById(getIdFromUrl(this.getRangeValue(GeneratorRange.TabFolder)).toString());
+        return DriveApp.getFolderById(getIdFromUrl(this.tabFolderLink).toString());
     }
 
     @memoize

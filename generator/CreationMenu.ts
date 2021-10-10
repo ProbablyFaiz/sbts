@@ -7,8 +7,12 @@ function OnCreateSystemClick() {
 
     // Process the user's response.
     if (result == ui.Button.YES) {
+        const tabFolderLinkResponse = ui.prompt("Enter the link to the folder you want to generate the tab system in (must be empty):")
+        if (tabFolderLinkResponse.getSelectedButton() != ui.Button.OK) {
+            return;
+        }
         SheetLogger.log('Generating files...');
-        SetupTabulationFolder();
+        SetupTabulationFolder(tabFolderLinkResponse.getResponseText());
         const htmlOutput = HtmlService
             .createHtmlOutput(
                 '<p>Successfully generated tab system. Godspeed.</p>')

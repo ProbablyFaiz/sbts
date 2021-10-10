@@ -1,8 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 
-function SetupTabulationFolder() {
-    const setupContext = new SetupContext();
+function SetupTabulationFolder(tabFolderLink: string) {
+    const setupContext = new SetupContext(tabFolderLink);
 
     if (!setupContext.isValid) {
         SheetLogger.log("Tab folder is not empty. Aborting tabulation folder setup.");
