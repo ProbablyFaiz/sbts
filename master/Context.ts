@@ -20,7 +20,7 @@ class Context implements IContext {
             teamInfoMapping[row[0]] = {
                 teamName: row[1],
                 ballotFolderLink: row[2],
-                emails: row[3].split(','),
+                emails: row[3],
             };
         });
         return teamInfoMapping;
@@ -40,7 +40,7 @@ class Context implements IContext {
     setTeamBallotFolderLink(teamNumber: string, ballotFolderLink: string): boolean {
         const teamInfoRange = this.masterSpreadsheet.getRangeByName(MasterRange.TeamInfo);
         const teamInfoValues = teamInfoRange.getValues();
-        const teamRow = teamInfoValues.find(teamRow => teamRow[0] === teamNumber);
+        const teamRow = teamInfoValues.find(teamRow => teamRow[0].toString() === teamNumber);
         if (!teamRow) return false;
         teamRow[2] = ballotFolderLink;
         teamInfoRange.setValues(teamInfoValues);

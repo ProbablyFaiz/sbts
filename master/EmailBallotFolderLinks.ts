@@ -5,8 +5,9 @@ function EmailBallotFolderLinks() {
     const teamInfoMap = context.teamInfoMap;
     Object.entries(teamInfoMap).forEach(
         ([teamNumber, teamInfo]) => {
-            if (!teamInfo.emails?.length) {
+            if (!teamInfo.emails.length) {
                 SheetLogger.log(`No emails listed for team ${teamNumber}, skipping...`);
+                return;
             }
             SheetLogger.log(`Emailing ballot folder link for team ${teamNumber}...`);
             MailApp.sendEmail(ballotFolderEmail(context, teamNumber, teamInfo));
@@ -15,8 +16,9 @@ function EmailBallotFolderLinks() {
 
 const ballotFolderEmail = (context: Context, teamNumber: string, teamInfo: TeamInfo): Email => {
     return {
+        name: context.tournamentName,
         subject: `${context.tournamentName}: Team ${teamNumber} Ballot Folder`,
-        to: teamInfo.emails.join(","),
+        to: teamInfo.emails,
         replyTo: context.tournamentEmail,
         body: `Hi,
 

@@ -45,5 +45,5 @@ interface MasterSpreadsheet extends Spreadsheet {
 interface TeamInfo {
     teamName: string;
     ballotFolderLink: string;
-    emails: string[];
+    emails: string;
 }
