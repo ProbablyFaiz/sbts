@@ -69,5 +69,25 @@ function OnCreateTeamBallotFolderClick() {
     } else {
 
     }
+}
 
+function OnEmailBallotFolderLinksClick() {
+    const ui = SpreadsheetApp.getUi();
+    const result = ui.alert(
+        'Please confirm',
+        'Are you sure you want to email links to ballot folders? Be careful about running this so as to not spam ' +
+        'the competing teams.',
+        ui.ButtonSet.YES_NO);
+    // Process the user's response.
+    if (result == ui.Button.YES) {
+        SheetLogger.log('Creating team ballot folders...');
+        EmailBallotFolderLinks();
+        const htmlOutput = HtmlService
+            .createHtmlOutput('<p>Successfully emailed ballot folder links.</p>')
+            .setWidth(250)
+            .setHeight(100);
+        ui.showModelessDialog(htmlOutput, 'Success!');
+    } else {
+
+    }
 }
