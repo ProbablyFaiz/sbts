@@ -11,7 +11,7 @@ function PublishTeamBallots() {
   exportBallots(context);
 }
 
-function exportBallots(context: Context) {
+function exportBallots(context: IContext) {
   for (let ballot of context.ballotFiles) {
     const ballotSheet = sheetForFile(ballot) as BallotSpreadsheet;
     const submittedRange = ballotSheet.getRangeByName(BallotRange.Submitted);

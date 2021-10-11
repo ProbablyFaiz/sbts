@@ -64,13 +64,13 @@ function createTemplatesFolder(setupContext: ISetupContext) {
 
 function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: string, courtroomInfo: ICourtroomInfo) {
     const trialFolderName = `R${round} - ${courtroomInfo.name}`;
+    const trialPrefix = `R${round} ${courtroomInfo.name}`
+    SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
     const trialFolder = roundFolder.createFolder(trialFolderName);
     trialFolder.addEditors(courtroomInfo.bailiffEmails);
 
-    const trialPrefix = `R${round} ${courtroomInfo.name}`
     const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];
-    SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
     for (let i = 1; i <= setupContext.ballotsPerTrial; i++) {
         const createdBallot = setupContext.ballotTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
         createdBallot.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
@@ -88,7 +88,7 @@ function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, t
     return captainsForm;
 }
 
-function linkTrialSheets(captainsForm, ballots) {
+function linkTrialSheets(captainsForm: GoogleFile, ballots: GoogleFile[]) {
     captainsForm.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
     const captainsFormUrl = captainsForm.getUrl();
     for (let ballot of ballots) {

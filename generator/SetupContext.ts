@@ -7,7 +7,6 @@ enum GeneratorRange {
     TournamentName = 'TournamentNameRange',
     FirstPartyName = 'FirstPartyNameRange',
     CourtroomNames = 'CourtroomsInfoRange',
-    RoundNames = 'RoundNamesRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
     NumberOfCourtrooms = 'NumberOfCourtroomsRange',
     NumberOfRounds = 'NumberOfRoundsRange',
@@ -114,7 +113,7 @@ class SetupContext implements ISetupContext {
 
     @memoize
     get roundNames(): string[] {
-        return compactRange(this.getRangeValues(GeneratorRange.RoundNames)).map(row => row[0]).slice(0, this.numRounds);
+        return range(1, this.numRounds, 1);
     }
 
     @memoize

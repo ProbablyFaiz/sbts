@@ -20,7 +20,7 @@ const compareIndividualResults = (first, second) => {
     return second[IndividualResultsIndices.OUTPUT_RANK_VALUE] - first[IndividualResultsIndices.OUTPUT_RANK_VALUE];
 }
 
-const createIndividualResultsOutput = (context: Context, competitorMap) => {
+const createIndividualResultsOutput = (context: IContext, competitorMap) => {
     const resultsArr = [];
     competitorMap.forEach((competitorObject, competitorKey) => {
         const competitorInfo = JSON.parse(competitorKey);
@@ -37,7 +37,7 @@ const createIndividualResultsOutput = (context: Context, competitorMap) => {
     return resultsArr;
 }
 
-const tabulateIndividualBallot = (context: Context, ballot, index, rankingType, firstRound, lastRound, competitorMap) => {
+const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, firstRound, lastRound, competitorMap) => {
     const roundNumber = ballot[IndividualResultsIndices.ROUND];
     if (ballot[IndividualResultsIndices.TYPE] !== rankingType ||
         ballot[IndividualResultsIndices.TEAM_NUMBER] === "" ||

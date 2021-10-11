@@ -7,6 +7,8 @@ interface IContext {
     ballotSpreadsheets: BallotSpreadsheet[];
     teamInfoMap: Record<string, TeamInfo>;
     exportFolder: Folder;
+    teamBallotFolder: (teamNumber: string) => Folder | undefined;
+    setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
 }
 
 class Context implements IContext {
@@ -34,7 +36,6 @@ class Context implements IContext {
         return true;
     }
 
-    @memoize
     teamBallotFolder(teamNumber: string): Folder | undefined {
         const folderLink = this.teamInfoMap[teamNumber]?.ballotFolderLink;
         if (!folderLink) return undefined;

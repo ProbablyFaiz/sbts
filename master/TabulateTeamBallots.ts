@@ -73,7 +73,7 @@ const compareTeamResults = (first, second) => {
     return 0;
 }
 
-const createTeamResultsOutput = (context: Context, teamSummaryResults: Record<string, any>, fullTeamResults) => {
+const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<string, any>, fullTeamResults) => {
     const outputCells = [];
     Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
         let combinedStrength = 0;
