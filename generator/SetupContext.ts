@@ -10,6 +10,7 @@ enum GeneratorRange {
     BallotsPerTrial = 'BallotsPerTrialRange',
     NumberOfCourtrooms = 'NumberOfCourtroomsRange',
     NumberOfRounds = 'NumberOfRoundsRange',
+    TournamentContactEmail = "TournamentContactEmailRange",
     GenerationLog = 'GenerationLogRange',
 }
 
@@ -32,6 +33,7 @@ interface ISetupContext {
     captainsFormBaseTemplate: GoogleFile;
 
     tournamentName: string;
+    tournamentContactEmail: string;
     firstPartyName: string;
     courtroomsInfo: ICourtroomInfo[];
     roundNames: string[];
@@ -94,6 +96,11 @@ class SetupContext implements ISetupContext {
     @memoize
     get tournamentName(): string {
         return this.getRangeValue(GeneratorRange.TournamentName);
+    }
+
+    @memoize
+    get tournamentContactEmail(): string {
+        return this.getRangeValue(GeneratorRange.TournamentContactEmail);
     }
 
     @memoize

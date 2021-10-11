@@ -9,6 +9,7 @@ interface IContext {
     exportFolder: Folder;
     teamBallotFolder: (teamNumber: string) => Folder | undefined;
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
+    tournamentEmail: string;
 }
 
 class Context implements IContext {
@@ -23,6 +24,16 @@ class Context implements IContext {
             };
         });
         return teamInfoMapping;
+    }
+
+    @memoize
+    get tournamentName(): string {
+        return this.getRangeValue(MasterRange.TournamentName);
+    }
+
+    @memoize
+    get tournamentEmail(): string {
+        return this.getRangeValue(MasterRange.TournamentEmail);
     }
 
     // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.

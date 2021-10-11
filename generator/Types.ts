@@ -22,6 +22,8 @@ enum MasterRange {
     OrchestratorLink = "OrchestratorLinkRange",
     ParentFolderLink = "ParentFolderLinkRange",
     ExportFolderLink = "ExportFolderLinkRange",
+    TournamentName = "TournamentNameRange",
+    TournamentEmail = "TournamentEmailRange",
 }
 
 enum CaptainsFormRange {

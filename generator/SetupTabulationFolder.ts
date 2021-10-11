@@ -31,6 +31,8 @@ function SetupTabulationFolder(tabFolderLink: string) {
     masterSheet.getRangeByName(MasterRange.OrchestratorLink).setValue(orchestratorFile.getUrl());
     masterSheet.getRangeByName(MasterRange.ParentFolderLink).setValue(tabFolder.getUrl());
     masterSheet.getRangeByName(MasterRange.ExportFolderLink).setValue(exportFolder.getUrl());
+    masterSheet.getRangeByName(MasterRange.TournamentName).setValue(setupContext.tournamentName);
+    masterSheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
 
     for (let round of setupContext.roundNames) {
         const roundFolderName = `Round ${round}`;
