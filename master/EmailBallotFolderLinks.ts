@@ -2,7 +2,7 @@ type Email = GoogleAppsScript.Mail.MailAdvancedParameters;
 
 function EmailBallotFolderLinks() {
     const context = new Context();
-    const teamInfoMap = context.teamInfoMap;
+    const teamInfoMap = context.teamInfo;
     Object.entries(teamInfoMap).forEach(
         ([teamNumber, teamInfo]) => {
             if (!teamInfo.emails.length) {
@@ -17,7 +17,7 @@ function EmailBallotFolderLinks() {
 const ballotFolderEmail = (context: Context, teamNumber: string, teamInfo: TeamInfo): Email => {
     return {
         name: context.tournamentName,
-        subject: `${context.tournamentName}: Team ${teamNumber} Ballot Folder`,
+        subject: `Team ${teamNumber} Ballot Folder`,
         to: teamInfo.emails,
         replyTo: context.tournamentEmail,
         body: `Hi,

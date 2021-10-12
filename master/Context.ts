@@ -5,25 +5,44 @@ interface IContext {
     masterSpreadsheet: MasterSpreadsheet;
     ballotFiles: File[];
     ballotSpreadsheets: BallotSpreadsheet[];
-    teamInfoMap: Record<string, TeamInfo>;
+    teamInfo: Record<string, TeamInfo>;
     exportFolder: Folder;
     teamBallotFolder: (teamNumber: string) => Folder | undefined;
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
     tournamentEmail: string;
+
+    teamResults: Record<string, TeamSummary>;
 }
 
 class Context implements IContext {
     @memoize
-    get teamInfoMap(): Record<string, TeamInfo> {
+    get teamInfo(): Record<string, TeamInfo> {
         const teamInfoMapping: Record<string, TeamInfo> = {};
         compactRange(this.getRangeValues(MasterRange.TeamInfo)).forEach(row => {
             teamInfoMapping[row[0]] = {
                 teamName: row[1],
-                ballotFolderLink: row[2],
+                schoolName: row[2],
                 emails: row[3],
+                ballotFolderLink: row[4],
             };
         });
         return teamInfoMapping;
+    }
+
+    @memoize
+    get teamResults(): Record<string, TeamSummary> {
+        const teamResultMapping: Record<string, TeamSummary> = {};
+        compactRange(this.getRangeValues(MasterRange.TeamResults)).forEach(row => {
+            teamResultMapping[row[TeamResultsOutputIndex.TeamNumber]] = {
+                ballotsWon: parseFloat(row[TeamResultsOutputIndex.BallotsWon]),
+                combinedStrength: parseFloat(row[TeamResultsOutputIndex.CS]),
+                pointDifferential: parseFloat(row[TeamResultsOutputIndex.PD]),
+                timesPlaintiff: parseInt(row[TeamResultsOutputIndex.TimesPlaintiff]),
+                timesDefense: parseInt(row[TeamResultsOutputIndex.TimesDefense]),
+                pastOpponents: row[TeamResultsOutputIndex.PastOpponents].split(",")
+            };
+        });
+        return teamResultMapping;
     }
 
     @memoize
@@ -48,7 +67,7 @@ class Context implements IContext {
     }
 
     teamBallotFolder(teamNumber: string): Folder | undefined {
-        const folderLink = this.teamInfoMap[teamNumber]?.ballotFolderLink;
+        const folderLink = this.teamInfo[teamNumber]?.ballotFolderLink;
         if (!folderLink) return undefined;
         return DriveApp.getFolderById(getIdFromUrl(folderLink))
     }

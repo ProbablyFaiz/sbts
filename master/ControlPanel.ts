@@ -39,7 +39,7 @@ function OnSetupMasterSpreadsheetClick() {
             SheetLogger.log('Creating team ballot folders...');
             const htmlOutput = HtmlService
                 .createHtmlOutput(
-                    '<p>Master spreadsheet was successfully configured for use.' +
+                    '<p>Master spreadsheet was successfully configured for use. ' +
                     'Remember to set up the orchestrator as well.</p>')
                 .setWidth(250)
                 .setHeight(100);

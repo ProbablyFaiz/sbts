@@ -23,6 +23,7 @@ enum MasterRange {
     ExecutionLog = "ExecutionLogRange",
     TournamentName = "TournamentNameRange",
     TournamentEmail = "TournamentEmailRange",
+    TeamResults = "TeamResultsRange"
 }
 
 enum CaptainsFormRange {
@@ -44,6 +45,7 @@ interface MasterSpreadsheet extends Spreadsheet {
 
 interface TeamInfo {
     teamName: string;
+    schoolName: string;
     ballotFolderLink: string;
     emails: string;
 }
