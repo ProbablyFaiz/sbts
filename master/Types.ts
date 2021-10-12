@@ -1,5 +1,6 @@
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
 import GoogleFile = GoogleAppsScript.Drive.File;
+import Range = GoogleAppsScript.Spreadsheet.Range;
 
 type Cell = string | number | undefined;
 type SpreadsheetOutput = Cell | Cell[] | Cell[][]
@@ -39,16 +40,17 @@ enum OrchestratorRange {
 }
 
 interface BallotSpreadsheet extends Spreadsheet {
-    getRangeByName(name: BallotRange);
+    getRangeByName(name: BallotRange): Range | null;
 }
 
 interface MasterSpreadsheet extends Spreadsheet {
-    getRangeByName(name: MasterRange);
+    getRangeByName(name: MasterRange): Range | null;
 }
 
 interface TeamInfo {
     teamName: string;
     schoolName: string;
+    byeBust: boolean;
     ballotFolderLink: string;
     emails: string;
 }

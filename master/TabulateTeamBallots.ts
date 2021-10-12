@@ -24,7 +24,7 @@ enum TeamResultsOutputIndex {
 }
 
 interface TeamSummary {
-    [key: string]: number | string[] | undefined; // So we can index it by []
+    [key: string]: number | boolean | string[] | undefined; // So we can index it by []
 
     ballotsWon: number;
     pointDifferential: number;
@@ -32,6 +32,8 @@ interface TeamSummary {
     pastOpponents?: string[];
     timesPlaintiff: number;
     timesDefense: number;
+    rankOverride?: number;
+    byeBust: boolean;
 }
 
 const normalizeTotal = (total: number, factor: number): number => {
@@ -86,8 +88,12 @@ const teamSortOrder = (roundsCompleted: number) => {
     return TEAM_SORT_ORDER.filter(key => key !== "combinedStrength"); // Otherwise, exclude it.
 }
 const compareTeamResults = (first: TeamSummary, second: TeamSummary): number => {
+    const byeBustOverride = Number(first.byeBust) - Number(second.byeBust); // First - second so bye bust teams are further down
+    if (byeBustOverride !== 0) return byeBustOverride;
+
     for (let currentSortIndex of TEAM_SORT_ORDER) {
-        let difference = second[currentSortIndex] - first[currentSortIndex];
+        if (first[currentSortIndex] == undefined || second[currentSortIndex] == undefined) continue;
+        let difference = <number> second[currentSortIndex] - <number> first[currentSortIndex]; // Descending order by doing second - first
         if (difference !== 0) {
             return difference;
         }
@@ -156,7 +162,8 @@ function TABULATETEAMBALLOTS(ballotsRange: Cell[][], startRound: number, endRoun
             ballotsWon: totalBallotsWon,
             pointDifferential: totalPointDifferential,
             timesPlaintiff,
-            timesDefense
+            timesDefense,
+            byeBust: context.teamInfo[teamNumber].byeBust,
         }
     });
     return createTeamResultsOutput(context, teamSummaryResults, fullTeamResults);

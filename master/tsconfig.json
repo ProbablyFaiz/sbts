@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
-    "target": "ES5",
+    "target": "ES6",
     "lib": ["esnext"],
     "strictNullChecks": true,
     "noImplicitAny": true,
