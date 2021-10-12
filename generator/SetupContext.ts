@@ -54,7 +54,6 @@ class SetupContext implements ISetupContext {
     }
 
     get isValid(): boolean {
-        // noinspection UnnecessaryLocalVariableJS
         const tabFolderIsEmpty = !this.tabFolder.getFiles().hasNext();
         return tabFolderIsEmpty;
     }
