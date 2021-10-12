@@ -1,6 +1,9 @@
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
 import GoogleFile = GoogleAppsScript.Drive.File;
 
+type Cell = string | number | undefined;
+type SpreadsheetOutput = Cell | Cell[] | Cell[][]
+
 enum BallotRange {
     CaptainsFormUrl = "CaptainsFormUrlRange",
     PlaintiffTeam = "PlaintiffTeamRange",

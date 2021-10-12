@@ -24,15 +24,17 @@ enum TeamResultsOutputIndex {
 }
 
 interface TeamSummary {
+    [key: string]: number | string[] | undefined; // So we can index it by []
+
     ballotsWon: number;
     pointDifferential: number;
-    combinedStrength: number;
-    pastOpponents: string[];
+    combinedStrength?: number;
+    pastOpponents?: string[];
     timesPlaintiff: number;
     timesDefense: number;
 }
 
-const normalizeTotal = (total, factor) => {
+const normalizeTotal = (total: number, factor: number): number => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
 
@@ -113,26 +115,28 @@ const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<s
             teamSummary.pointDifferential,
             teamSummary.timesPlaintiff,
             teamSummary.timesDefense,
-            teamSummary.pastOpponents.join(",")
+            teamSummary.pastOpponents?.join(",")
         ]);
 }
 
 // TODO: Figure out the typings on all of these random structures
-function TABULATETEAMBALLOTS(ballotsRange, startRound, endRound) {
+function TABULATETEAMBALLOTS(ballotsRange: Cell[][], startRound: number, endRound: number) {
     const context = new Context();
     let fullTeamResults = {};
     const firstRound = startRound ?? Number.NEGATIVE_INFINITY;
     const lastRound = endRound ?? Number.POSITIVE_INFINITY;
     ballotsRange.forEach((ballot, i) => {
-        if (ballot[TeamResultsIndex.Round] === '' ||
-            ballot[TeamResultsIndex.Round] < firstRound ||
-            ballot[TeamResultsIndex.Round] > lastRound) {  // Skip first row, blank rows, and rounds past limit
+        const ballotRound = ballot[TeamResultsIndex.Round];
+        if (ballotRound === undefined ||
+            ballotRound === '' ||
+            ballotRound < firstRound ||
+            ballotRound > lastRound) {  // Skip first row, blank rows, and rounds past limit
             return;
         }
         tabulateBallot(ballot, fullTeamResults)
     });
 
-    const teamSummaryResults = {};
+    const teamSummaryResults: Record<string, TeamSummary> = {};
     Object.entries(fullTeamResults).forEach(([teamNumber, teamResults]) => {
         let totalBallotsWon = 0;
         let totalPointDifferential = 0;

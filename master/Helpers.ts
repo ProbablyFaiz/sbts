@@ -29,5 +29,5 @@ function getFileByName(parentFolder: Folder, name: string): GoogleFile | undefin
 }
 
 function getIdFromUrl(url: string): string {
-    return url.match(/[-\w]{25,}/).toString();
+    return url.match(/[-\w]{25,}/)?.toString() ?? "";
 }

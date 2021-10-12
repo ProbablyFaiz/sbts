@@ -59,7 +59,7 @@ class Context implements IContext {
     setTeamBallotFolderLink(teamNumber: string, ballotFolderLink: string): boolean {
         const teamInfoRange = this.masterSpreadsheet.getRangeByName(MasterRange.TeamInfo);
         const teamInfoValues = teamInfoRange.getValues();
-        const teamRow = teamInfoValues.find(teamRow => teamRow[0].toString() === teamNumber);
+        const teamRow = teamInfoValues.find((teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber);
         if (!teamRow) return false;
         teamRow[2] = ballotFolderLink;
         teamInfoRange.setValues(teamInfoValues);
@@ -116,6 +116,6 @@ class Context implements IContext {
     }
 
     private getRangeValues(rangeName: MasterRange): string[][] {
-        return this.masterSpreadsheet.getRangeByName(rangeName).getValues().map(arr => arr.map(cell => cell.toString()));
+        return this.masterSpreadsheet.getRangeByName(rangeName).getValues().map((arr: Cell[][]) => arr.map(cell => cell.toString()));
     }
 }
