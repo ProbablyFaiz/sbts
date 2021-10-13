@@ -1,6 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-const EXPORT_FOLDER_NAME = "Team Ballots";
+import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
+import GoogleFile = GoogleAppsScript.Drive.File;
+import Range = GoogleAppsScript.Spreadsheet.Range;
 
 const NUM_BALLOTS = 2;
 

@@ -12,16 +12,16 @@ const IndividualResultsIndices = {
     OUTPUT_RANK_VALUE: 2,
 }
 
-const normalizeValue = (total, factor) => {
+const normalizeValue = (total: number, factor: number): number => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
 
-const compareIndividualResults = (first, second) => {
+const compareIndividualResults = (first: number[], second: number[]): number => {
     return second[IndividualResultsIndices.OUTPUT_RANK_VALUE] - first[IndividualResultsIndices.OUTPUT_RANK_VALUE];
 }
 
 const createIndividualResultsOutput = (context: IContext, competitorMap) => {
-    const resultsArr = [];
+    const resultsArr: Cell[][] = [];
     competitorMap.forEach((competitorObject, competitorKey) => {
         const competitorInfo = JSON.parse(competitorKey);
         let totalRankValue = 0;
@@ -74,11 +74,11 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
     });
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound, endRound) {
+function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound: number, endRound: number) {
     const context = new Context();
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
     const competitorMap = new Map();
-    ballotsRange.forEach((ballot, index) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap));
+    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap));
     return createIndividualResultsOutput(context, competitorMap);
 }

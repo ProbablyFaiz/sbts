@@ -1,15 +1,15 @@
-import File = GoogleAppsScript.Drive.File;
 
 interface IContext {
     tabFolder: Folder;
     masterSpreadsheet: MasterSpreadsheet;
-    ballotFiles: File[];
+    ballotFiles: GoogleFile[];
     ballotSpreadsheets: BallotSpreadsheet[];
     teamInfo: Record<string, TeamInfo>;
     exportFolder: Folder;
     teamBallotFolder: (teamNumber: string) => Folder | undefined;
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
     tournamentEmail: string;
+    courtroomNames: string[];
 
     teamResults: Record<string, TeamSummary>;
 }
@@ -88,13 +88,19 @@ class Context implements IContext {
     }
 
     @memoize
+    get courtroomNames(): string[] {
+        // TODO
+        return ["TODO"];
+    }
+
+    @memoize
     get masterSpreadsheet(): MasterSpreadsheet {
         return SpreadsheetApp.getActiveSpreadsheet();
     }
 
     @memoize
-    get ballotFiles(): File[] {
-        const ballots: File[] = [];
+    get ballotFiles(): GoogleFile[] {
+        const ballots: GoogleFile[] = [];
         // TODO: Make this use the list of ballots in the master spreadsheet instead of this search
         const roundFolders = this.tabFolder.searchFolders('title contains "Round"');
         while (roundFolders.hasNext()) {

@@ -1,7 +1,3 @@
-import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
-import GoogleFile = GoogleAppsScript.Drive.File;
-import Range = GoogleAppsScript.Spreadsheet.Range;
-
 type Cell = string | number | undefined;
 type SpreadsheetOutput = Cell | Cell[] | Cell[][]
 
@@ -27,7 +23,7 @@ enum MasterRange {
     ExecutionLog = "ExecutionLogRange",
     TournamentName = "TournamentNameRange",
     TournamentEmail = "TournamentEmailRange",
-    TeamResults = "TeamResultsRange"
+    TeamResults = "TeamResultsRange",
     Courtrooms = "CourtroomsRange",
 }
 

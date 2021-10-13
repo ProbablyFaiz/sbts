@@ -1,16 +1,30 @@
 type Pairing = [team1: string, team2: string];
 type Swap = [team1: string, team2: string];
 
+// TODO: Implement the courtroom stuff that'll let this work
+/*
+function PairTeamsWithCourtrooms(): SpreadsheetOutput {
+    const context = new Context();
+    if (Object.entries(context.teamResults).length % 2) {
+        return "Error: Pairing is not supported with an odd number of teams.";
+    }
+    let pairings = (roundsCompleted(context) % 2 ? pairTeamsEvenRound : pairTeamsOddRound)(context)
+    if (typeof pairings === "string") return pairings;
+    pairings.sort(_ => Math.random() - 0.5); // Shuffle the pairings to avoid leaking standings information
+    // pairings.map(pairing => [...pairing, cont])
+}
+*/
+
 function PairTeams(): SpreadsheetOutput {
     const context = new Context();
     if (Object.entries(context.teamResults).length % 2) {
-        return "Pairing is not supported with an odd number of teams.";
+        return "Error: Pairing is not supported with an odd number of teams.";
     }
     if (roundsCompleted(context) % 2) return pairTeamsEvenRound(context);
     return pairTeamsOddRound(context);
 }
 
-const pairTeamsOddRound = (context: IContext): SpreadsheetOutput => {
+const pairTeamsOddRound = (context: IContext): Cell[][] | string => {
     // Snake: 1 vs. 2, 4 vs. 3, 5 vs. 6 etc. Randomly decide whether 1,4,5 are P or D.
     const sortedTeams = sortedTeamResults(context);
     const side1Teams = sortedTeams
@@ -28,13 +42,13 @@ const pairTeamsOddRound = (context: IContext): SpreadsheetOutput => {
     while (pairings.some(pairingConflicts) && iterations < pairings.length) {
         pairings.forEach((currentPairing, i) => {
             if (!pairingConflicts(currentPairing)) return;
-            let possibleSwapIndices: [number, number][];
+            let possibleSwapIndexPairs: [number, number][];
             if (i % 2 === 0) { // Then the closest ranked neighbor will be above and below, respectively
-                possibleSwapIndices = [[i - 1, 0], [i + 1, 1]];
+                possibleSwapIndexPairs = [[i - 1, 0], [i + 1, 1]];
             } else { // Closest ranked neighbor is below and above, respectively
-                possibleSwapIndices = [[i + 1, 0], [i - 1, 0]];
+                possibleSwapIndexPairs = [[i + 1, 0], [i - 1, 1]];
             }
-            const swapToMake: Swap | undefined = possibleSwapIndices
+            const swapToMake: Swap | undefined = possibleSwapIndexPairs
                 .filter(([x, y]) => x >= 0 && x < pairings.length) // Filter indices outside of pairing bounds
                 .map(([x, y]) => [currentPairing[y], pairings[x][y]] as Swap)
                 .filter(swap => !swaps.has(serializedSwap(swap))) // Exclude previously made swaps
@@ -42,7 +56,7 @@ const pairTeamsOddRound = (context: IContext): SpreadsheetOutput => {
                 .sort(compareSwaps(context)) // Sort possible swaps by "least difference" metric
                 [0]; // Select best possible swap, undefined if no swaps are possible.
             if (swapToMake) {
-                const [indexToSwap, positionToSwap] = possibleSwapIndices.find(([x, y]) => pairings[x][y] === swapToMake[1])!;
+                const [indexToSwap, positionToSwap] = possibleSwapIndexPairs.find(([x, y]) => pairings[x][y] === swapToMake[1])!;
                 currentPairing[positionToSwap] = swapToMake[1];
                 pairings[indexToSwap][positionToSwap] = swapToMake[0];
                 swaps.add(serializedSwap(swapToMake));
@@ -56,7 +70,7 @@ const pairTeamsOddRound = (context: IContext): SpreadsheetOutput => {
     return pairings;
 }
 
-const pairTeamsEvenRound = (context: IContext): SpreadsheetOutput => {
+const pairTeamsEvenRound = (context: IContext): Cell[][] | string => {
     const sortedTeams = sortedTeamResults(context);
     const plaintiffTeams = sortedTeams
         .filter(([_, teamSummary]) => teamSummary.timesDefense > teamSummary.timesPlaintiff)
