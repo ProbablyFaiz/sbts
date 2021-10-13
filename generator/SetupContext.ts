@@ -4,6 +4,7 @@ enum GeneratorRange {
     OrchestratorTemplate = 'OrchestratorTemplateRange',
     BallotTemplate = 'BallotTemplateRange',
     CaptainsFormTemplate = 'CaptainsFormTemplateRange',
+    AutocompleteTemplate = 'AutocompleteTemplateRange',
     TournamentName = 'TournamentNameRange',
     FirstPartyName = 'FirstPartyNameRange',
     CourtroomNames = 'CourtroomsInfoRange',
@@ -31,6 +32,7 @@ interface ISetupContext {
     orchestratorTemplate: GoogleFile;
     ballotBaseTemplate: GoogleFile;
     captainsFormBaseTemplate: GoogleFile;
+    autocompleteEngineTemplate: GoogleFile;
 
     tournamentName: string;
     tournamentContactEmail: string;
@@ -58,15 +60,6 @@ class SetupContext implements ISetupContext {
         return tabFolderIsEmpty;
     }
 
-    // @memoize
-    // get masterSpreadsheet(): Spreadsheet {
-    //
-    // }
-    //
-    // set masterSpreadsheet(spreadsheet: Spreadsheet) {
-    //
-    // }
-
     @memoize
     get tabFolder(): Folder {
         return DriveApp.getFolderById(getIdFromUrl(this.tabFolderLink).toString());
@@ -90,6 +83,11 @@ class SetupContext implements ISetupContext {
     @memoize
     get captainsFormBaseTemplate(): GoogleFile {
         return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.CaptainsFormTemplate)).toString());
+    }
+
+    @memoize
+    get autocompleteEngineTemplate(): GoogleFile {
+        return DriveApp.getFileById(getIdFromUrl(this.getRangeValue(GeneratorRange.AutocompleteTemplate)).toString());
     }
 
     @memoize

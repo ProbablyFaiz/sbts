@@ -17,6 +17,13 @@ function SetupTabulationFolder(tabFolderLink: string) {
     } else {
         masterSheetFile = setupContext.masterSheetTemplate.makeCopy(MASTER_SPREADSHEET_NAME, tabFolder);
     }
+    let autocompleteEngineFile = getFileByName(tabFolder, AUTOCOMPLETE_SPREADSHEET_NAME);
+    if (autocompleteEngineFile) {
+        SheetLogger.log("Existing autocomplete engine spreadsheet found, not creating a new one...")
+    } else {
+        autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(AUTOCOMPLETE_SPREADSHEET_NAME, tabFolder);
+        autocompleteEngineFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    }
     let orchestratorFile = getFileByName(tabFolder, ORCHESTRATOR_SPREADSHEET_NAME);
     if (orchestratorFile) {
         SheetLogger.log("Orchestrator file found, not creating a new one...");
@@ -24,6 +31,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
         orchestratorFile = setupContext.orchestratorTemplate.makeCopy(ORCHESTRATOR_SPREADSHEET_NAME, tabFolder);
         const orchestratorSheet = sheetForFile(orchestratorFile);
         orchestratorSheet.getRangeByName(OrchestratorRange.MasterLink).setValue(masterSheetFile.getUrl());
+        orchestratorSheet.getRangeByName(OrchestratorRange.AutocompleteEngineLink).setValue(autocompleteEngineFile.getUrl());
     }
     const exportFolder = getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 

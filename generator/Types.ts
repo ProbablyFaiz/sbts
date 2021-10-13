@@ -35,6 +35,7 @@ enum CaptainsFormRange {
 
 enum OrchestratorRange {
     MasterLink = "MasterSpreadsheetLinkRange",
+    AutocompleteEngineLink = "AutocompleteLinkRange"
 }
 
 interface BallotSpreadsheet extends Spreadsheet {
