@@ -10,7 +10,8 @@ interface ICaptainsFormRecord {
     dNames: string[];
 }
 
-enum AutocompleteRange {
+enum OrchestratorRange {
+    AutocompleteEngineLink = "AutocompleteLinkRange",
     CaptainsFormData = "CaptainsFormData"
 }
 
@@ -24,9 +25,9 @@ enum CaptainsFormRowIndex {
     DNamesEnd = 24,
 }
 
-class AutocompleteContext implements IAutocompleteContext {
+class OrchestratorContext implements IAutocompleteContext {
     get captainsFormData(): ICaptainsFormRecord[] {
-        return compactRange(this.getRangeValues(AutocompleteRange.CaptainsFormData)!)
+        return compactRange(this.getRangeValues(OrchestratorRange.CaptainsFormData)!)
             .map(row => {
                 return {
                     captainsFormLink: row[CaptainsFormRowIndex.Link],
@@ -39,15 +40,20 @@ class AutocompleteContext implements IAutocompleteContext {
     }
 
     @memoize
-    get autocompleteSpreadsheet(): Spreadsheet {
+    get orchestratorSpreadsheet(): Spreadsheet {
         return SpreadsheetApp.getActiveSpreadsheet();
     }
 
-    private getRangeValue(rangeName: AutocompleteRange): string | undefined {
+    @memoize
+    get autocompleteSpreadsheet(): Spreadsheet {
+        return sheetForFile(DriveApp.getFileById(getIdFromUrl(this.getRangeValue(OrchestratorRange.AutocompleteEngineLink))));
+    }
+
+    private getRangeValue(rangeName: OrchestratorRange): string | undefined {
         return this.autocompleteSpreadsheet.getRangeByName(rangeName)?.getValue().toString();
     }
 
-    private getRangeValues(rangeName: AutocompleteRange): string[][] | undefined {
+    private getRangeValues(rangeName: OrchestratorRange): string[][] | undefined {
         return this.autocompleteSpreadsheet.getRangeByName(rangeName)?.getValues().map((arr: Cell[][]) => arr.map(cell => cell.toString()));
     }
 }
