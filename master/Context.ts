@@ -42,7 +42,7 @@ class Context implements IContext {
                 pointDifferential: parseFloat(row[TeamResultsOutputIndex.PD]),
                 timesPlaintiff: parseInt(row[TeamResultsOutputIndex.TimesPlaintiff]),
                 timesDefense: parseInt(row[TeamResultsOutputIndex.TimesDefense]),
-                pastOpponents: row[TeamResultsOutputIndex.PastOpponents].split(","),
+                pastOpponents: row[TeamResultsOutputIndex.PastOpponents].split(PAST_OPPONENTS_SEPARATOR),
                 byeBust: this.teamInfo[row[TeamResultsOutputIndex.TeamNumber]].byeBust, // Hacky, but we need it
             };
         });

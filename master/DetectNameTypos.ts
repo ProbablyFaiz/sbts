@@ -34,7 +34,7 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
             }
         });
     });
-    potentialDuplicateResults.sort((a, b) => parseFloat(a[4]) - parseFloat(b[4]));
+    potentialDuplicateResults.sort((a, b) => parseFloat(b[4]) - parseFloat(a[4]));
     return potentialDuplicateResults;
 }
 

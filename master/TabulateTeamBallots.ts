@@ -23,6 +23,8 @@ enum TeamResultsOutputIndex {
     PastOpponents = 7,
 }
 
+const PAST_OPPONENTS_SEPARATOR = ", ";
+
 interface TeamSummary {
     [key: string]: number | boolean | string[] | undefined; // So we can index it by []
 
@@ -121,7 +123,7 @@ const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<s
             teamSummary.pointDifferential,
             teamSummary.timesPlaintiff,
             teamSummary.timesDefense,
-            teamSummary.pastOpponents?.join(",")
+            teamSummary.pastOpponents?.join(PAST_OPPONENTS_SEPARATOR)
         ]);
 }
 
