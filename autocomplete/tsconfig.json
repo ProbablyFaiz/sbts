@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ES6",
+    "lib": ["esnext"],
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+  }
+}

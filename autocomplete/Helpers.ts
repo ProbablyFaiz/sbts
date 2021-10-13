@@ -2,9 +2,11 @@
 
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
 import GoogleFile = GoogleAppsScript.Drive.File;
+import Folder = GoogleAppsScript.Drive.Folder;
 import Range = GoogleAppsScript.Spreadsheet.Range;
 
-const NUM_BALLOTS = 2;
+type Cell = string | number | undefined;
+type SpreadsheetOutput = Cell | Cell[] | Cell[][]
 
 function compactRange(rangeArr: string[][]): string[][] {
     return rangeArr.filter(row => row.some(cell => !['', null, undefined].includes(cell)));
