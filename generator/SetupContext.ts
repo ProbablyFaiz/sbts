@@ -24,6 +24,7 @@ interface ISetupContext {
     isValid: boolean;
 
     masterSpreadsheet: Spreadsheet;
+    autocompleteEngine: Spreadsheet;
     ballotTemplate: GoogleFile;
     captainsFormTemplate: GoogleFile;
 
@@ -44,6 +45,7 @@ interface ISetupContext {
 
 class SetupContext implements ISetupContext {
     masterSpreadsheet: Spreadsheet;
+    autocompleteEngine: Spreadsheet;
     ballotTemplate: GoogleFile;
     captainsFormTemplate: GoogleFile;
 

@@ -9,7 +9,6 @@ function SetupTabulationFolder(tabFolderLink: string) {
         return;
     }
     const tabFolder = setupContext.tabFolder;
-    createTemplatesFolder(setupContext);
 
     let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
     if (masterSheetFile) {
@@ -23,6 +22,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     } else {
         autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(AUTOCOMPLETE_SPREADSHEET_NAME, tabFolder);
         autocompleteEngineFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        setupContext.autocompleteEngine = sheetForFile(autocompleteEngineFile);
     }
     let orchestratorFile = getFileByName(tabFolder, ORCHESTRATOR_SPREADSHEET_NAME);
     if (orchestratorFile) {
@@ -41,6 +41,8 @@ function SetupTabulationFolder(tabFolderLink: string) {
     masterSheet.getRangeByName(MasterRange.ExportFolderLink).setValue(exportFolder.getUrl());
     masterSheet.getRangeByName(MasterRange.TournamentName).setValue(setupContext.tournamentName);
     masterSheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
+
+    createTemplatesFolder(setupContext);
 
     for (let round of setupContext.roundNames) {
         const roundFolderName = `Round ${round}`;
@@ -70,6 +72,7 @@ function createTemplatesFolder(setupContext: ISetupContext) {
     const captainsFormTemplateSheet = sheetForFile(setupContext.captainsFormTemplate);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.FirstPartyName).setValue(setupContext.firstPartyName);
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
 }
 
 function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: string, courtroomInfo: ICourtroomInfo) {

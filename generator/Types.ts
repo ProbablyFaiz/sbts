@@ -31,6 +31,7 @@ enum CaptainsFormRange {
     Courtroom = "CourtroomLetter",
     TournamentName = "TournamentNameRange",
     FirstPartyName = "FirstPartyNameRange",
+    AutocompleteEngineLink = "AutocompleteLinkRange"
 }
 
 enum OrchestratorRange {
