@@ -93,7 +93,7 @@ const compareTeamResults = (first: TeamSummary, second: TeamSummary): number => 
     const byeBustOverride = Number(first.byeBust) - Number(second.byeBust); // First - second so bye bust teams are further down
     if (byeBustOverride !== 0) return byeBustOverride;
 
-    for (let currentSortIndex of TEAM_SORT_ORDER) {
+    for (let currentSortIndex of teamSortOrder(first.timesPlaintiff + first.timesPlaintiff)) {
         if (first[currentSortIndex] == undefined || second[currentSortIndex] == undefined) continue;
         let difference = <number> second[currentSortIndex] - <number> first[currentSortIndex]; // Descending order by doing second - first
         if (difference !== 0) {
