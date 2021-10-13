@@ -1,7 +1,7 @@
 enum RankingRangeIndex {
     TeamNumber = 0,
-    Side = 1,
-    CompetitorName = 3,
+    CompetitorName = 2,
+    Side = 3,
 }
 
 interface TeamSideKey {

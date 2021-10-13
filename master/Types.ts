@@ -28,6 +28,7 @@ enum MasterRange {
     TournamentName = "TournamentNameRange",
     TournamentEmail = "TournamentEmailRange",
     TeamResults = "TeamResultsRange"
+    Courtrooms = "CourtroomsRange",
 }
 
 enum CaptainsFormRange {
