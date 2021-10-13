@@ -50,10 +50,10 @@ class OrchestratorContext implements IAutocompleteContext {
     }
 
     private getRangeValue(rangeName: OrchestratorRange): string | undefined {
-        return this.autocompleteSpreadsheet.getRangeByName(rangeName)?.getValue().toString();
+        return this.orchestratorSpreadsheet.getRangeByName(rangeName)?.getValue().toString();
     }
 
     private getRangeValues(rangeName: OrchestratorRange): string[][] | undefined {
-        return this.autocompleteSpreadsheet.getRangeByName(rangeName)?.getValues().map((arr: Cell[][]) => arr.map(cell => cell.toString()));
+        return this.orchestratorSpreadsheet.getRangeByName(rangeName)?.getValues().map((arr: Cell[][]) => arr.map(cell => cell.toString()));
     }
 }
