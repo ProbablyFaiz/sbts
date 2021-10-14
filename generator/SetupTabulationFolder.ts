@@ -97,6 +97,7 @@ function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, t
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
+    captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
 
     return captainsForm;
 }

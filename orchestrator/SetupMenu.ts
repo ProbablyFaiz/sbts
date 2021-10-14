@@ -10,7 +10,7 @@ function OnSetupOrchestratorClick() {
         SetupTriggers();
         const htmlOutput = HtmlService
             .createHtmlOutput(
-                '<p>Successfully configured the orchestrator. Godspeed.</p>')
+                '<p>Successfully configured the orchestrator.</p>')
             .setWidth(250)
             .setHeight(100);
         ui.showModelessDialog(htmlOutput, 'Success!');
