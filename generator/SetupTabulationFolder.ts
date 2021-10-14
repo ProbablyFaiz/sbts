@@ -22,7 +22,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     } else {
         autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(AUTOCOMPLETE_SPREADSHEET_NAME, tabFolder);
         autocompleteEngineFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        setupContext.autocompleteEngine = sheetForFile(autocompleteEngineFile);
+        setupContext.autocompleteEngine = autocompleteEngineFile;
     }
     let orchestratorFile = getFileByName(tabFolder, ORCHESTRATOR_SPREADSHEET_NAME);
     if (orchestratorFile) {
