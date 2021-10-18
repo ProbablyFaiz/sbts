@@ -25,6 +25,16 @@ enum TeamResultsOutputIndex {
 
 const PAST_OPPONENTS_SEPARATOR = ", ";
 
+interface BallotResult {
+    ballotResult: number;
+    pointDifferential: number;
+}
+
+interface RoundResult {
+    ballots: BallotResult[];
+    side: string;
+}
+
 interface TeamSummary {
     [key: string]: number | boolean | string[] | undefined; // So we can index it by []
 
@@ -42,7 +52,7 @@ const normalizeTotal = (total: number, factor: number): number => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
 
-const tabulateBallot = (ballot, resultsContainer) => {
+const tabulateBallot = (ballot: string[], resultsContainer) => {
     const teamNumber = ballot[TeamResultsIndex.TeamNumber];
     if (!(teamNumber in resultsContainer)) {
         resultsContainer[teamNumber] = {};
@@ -62,17 +72,17 @@ const tabulateBallot = (ballot, resultsContainer) => {
     });
 }
 
-const tabulateRound = (roundResults) => {
-    const normalizingFactor = NUM_BALLOTS / roundResults.ballots.length;
+const tabulateRound = (roundResult: RoundResult) => {
+    const normalizingFactor = NUM_BALLOTS / roundResult.ballots.length;
     let ballotsWon = 0;
     let pointDifferential = 0;
-    roundResults.ballots.forEach(b => {
+    roundResult.ballots.forEach(b => {
         ballotsWon += b.ballotResult;
         pointDifferential += b.pointDifferential;
     });
     ballotsWon = normalizeTotal(ballotsWon, normalizingFactor);
     pointDifferential = normalizeTotal(pointDifferential, normalizingFactor);
-    const wasPlaintiff = roundResults.side !== 'Defense';
+    const wasPlaintiff = roundResult.side !== 'Defense';
     return {
         ballotsWon,
         pointDifferential,
