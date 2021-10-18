@@ -1,6 +1,18 @@
 type Pairing = [team1: string, team2: string];
 type Swap = [team1: string, team2: string];
 
+type PairingMetadata = SwapMetadata[];
+
+type SwapMetadata = {
+    pairingSnapshot: Pairing[];
+    swapMade: Swap;
+    conflictResolved: Pairing;
+} | {
+    pairingSnapshot: Pairing[];
+    swapMade: undefined;
+    conflictResolved: undefined;
+}
+
 // TODO: Implement the courtroom stuff that'll let this work
 /*
 function PairTeamsWithCourtrooms(): SpreadsheetOutput {
@@ -15,6 +27,23 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
 }
 */
 
+function PairTeamsWithMetadata(): SpreadsheetOutput {
+    const pairingMetadata: PairingMetadata = [];
+    const output: string[][] = [];
+    pairingMetadata.forEach(({swapMade, conflictResolved, pairingSnapshot}, i) => {
+        if (!swapMade || !conflictResolved) {
+            output.push(["Initial pairings, before conflict resolution:", ""]);
+        } else {
+            output.push([`Swapping teams ${swapMade[0]} and ${swapMade[1]} to resolve ` +
+            `impermissible matchup ${conflictResolved[0]} v. ${conflictResolved[1]}:`, ""])
+        }
+        output.push(...pairingSnapshot);
+        output.push(["", ""]);
+    });
+    output.push(["All conflicts resolved, above pairings are final.", ""]);
+    return output;
+}
+
 function PairTeams(): SpreadsheetOutput {
     const context = new Context();
     if (Object.entries(context.teamResults).length % 2) {
@@ -24,7 +53,7 @@ function PairTeams(): SpreadsheetOutput {
     return pairTeamsOddRound(context);
 }
 
-const pairTeamsOddRound = (context: IContext): Cell[][] | string => {
+const pairTeamsOddRound = (context: IContext, pairingMetadata?: PairingMetadata): Cell[][] | string => {
     // Snake: 1 vs. 2, 4 vs. 3, 5 vs. 6 etc. Randomly decide whether 1,4,5 are P or D.
     const sortedTeams = sortedTeamResults(context);
     const side1Teams = sortedTeams
@@ -34,14 +63,18 @@ const pairTeamsOddRound = (context: IContext): Cell[][] | string => {
         .filter((_, i) => [1, 2].includes(i % 4))
         .map(([teamNumber, _]) => teamNumber);
     const pairings: Pairing[] = side1Teams.map((side1Team, i) => [side1Team, side2Teams[i]]);
+    if (pairingMetadata) {
+        pairingMetadata.push({pairingSnapshot: deepCopyPairings(pairings), swapMade: undefined, conflictResolved: undefined})
+    }
+
     const swaps: Set<string> = new Set();
     let iterations = 0;
     // Keep resolving conflicts until there are none left or we're just in an irreconcilable situation.
     // Typically this should only take 1 or 2 iterations though to deal with all conflicts.
     const pairingConflicts = teamsConflict(context);
     while (pairings.some(pairingConflicts) && iterations < pairings.length) {
-        pairings.forEach((currentPairing, i) => {
-            if (!pairingConflicts(currentPairing)) return;
+        pairings.forEach(([team1, team2], i) => {
+            if (!pairingConflicts(pairings[i])) return;
             let possibleSwapIndexPairs: [number, number][];
             if (i % 2 === 0) { // Then the closest ranked neighbor will be above and below, respectively
                 possibleSwapIndexPairs = [[i - 1, 0], [i + 1, 1]];
@@ -50,16 +83,19 @@ const pairTeamsOddRound = (context: IContext): Cell[][] | string => {
             }
             const swapToMake: Swap | undefined = possibleSwapIndexPairs
                 .filter(([x, y]) => x >= 0 && x < pairings.length) // Filter indices outside of pairing bounds
-                .map(([x, y]) => [currentPairing[y], pairings[x][y]] as Swap)
+                .map(([x, y]) => [pairings[i][y], pairings[x][y]] as Swap)
                 .filter(swap => !swaps.has(serializedSwap(swap))) // Exclude previously made swaps
-                .filter(swap => !pairingConflicts(postSwapPairing(currentPairing)(swap)))
+                .filter(swap => !pairingConflicts(postSwapPairing(pairings[i])(swap)))
                 .sort(compareSwaps(context)) // Sort possible swaps by "least difference" metric
                 [0]; // Select best possible swap, undefined if no swaps are possible.
             if (swapToMake) {
                 const [indexToSwap, positionToSwap] = possibleSwapIndexPairs.find(([x, y]) => pairings[x][y] === swapToMake[1])!;
-                currentPairing[positionToSwap] = swapToMake[1];
+                pairings[i][positionToSwap] = swapToMake[1];
                 pairings[indexToSwap][positionToSwap] = swapToMake[0];
                 swaps.add(serializedSwap(swapToMake));
+                if (pairingMetadata) {
+                    pairingMetadata.push({swapMade: swapToMake, conflictResolved: [team1, team2], pairingSnapshot: deepCopyPairings(pairings)})
+                }
             }
         });
         iterations += 1;
@@ -70,7 +106,7 @@ const pairTeamsOddRound = (context: IContext): Cell[][] | string => {
     return pairings;
 }
 
-const pairTeamsEvenRound = (context: IContext): Cell[][] | string => {
+const pairTeamsEvenRound = (context: IContext, pairingMetadata?: PairingMetadata): Cell[][] | string => {
     const sortedTeams = sortedTeamResults(context);
     const plaintiffTeams = sortedTeams
         .filter(([_, teamSummary]) => teamSummary.timesDefense > teamSummary.timesPlaintiff)
@@ -82,6 +118,10 @@ const pairTeamsEvenRound = (context: IContext): Cell[][] | string => {
         return "Unequal number of plaintiff and defense teams found. This should be impossible and the tab system can't handle this case";
     }
     const pairings: Pairing[] = plaintiffTeams.map((plaintiffTeam, i) => [plaintiffTeam, defenseTeams[i]]);
+    if (pairingMetadata) {
+        pairingMetadata.push({pairingSnapshot: deepCopyPairings(pairings), swapMade: undefined, conflictResolved: undefined})
+    }
+
     const swaps: Set<string> = new Set();
     let iterations = 0;
     // Keep resolving conflicts until there are none left or we're just in an irreconcilable situation.
@@ -105,6 +145,9 @@ const pairTeamsEvenRound = (context: IContext): Cell[][] | string => {
                     pairings[i][0] = swapToMake[1];
                     pairings[indexToSwap][0] = swapToMake[0];
                     swaps.add(serializedSwap(swapToMake));
+                    if (pairingMetadata) {
+                        pairingMetadata.push({swapMade: swapToMake, conflictResolved: [team1, team2], pairingSnapshot: deepCopyPairings(pairings)})
+                    }
                 } else { // If there are no swaps we can make, look further out
                     swapDistance += 1;
                 }
@@ -158,6 +201,10 @@ const teamsConflict = (context: IContext) => (pairing: Pairing): boolean => {
 
 const serializedSwap = (swap: Swap): string => {
     return JSON.stringify(Array.from(swap).sort()); // We copy the swap array to avoid modifying it with the sort.
+}
+
+const deepCopyPairings = (pairings: Pairing[]): Pairing[] => {
+    return pairings.map(pairing => [...pairing]);
 }
 
 const positionForRank = (rank: number): [x: number, y: number] => {
