@@ -10,6 +10,7 @@ interface IContext {
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
     tournamentEmail: string;
     courtroomNames: string[];
+    roundsCompleted: number;
 
     teamResults: Record<string, TeamSummary>;
 }
@@ -47,6 +48,12 @@ class Context implements IContext {
             };
         });
         return teamResultMapping;
+    }
+
+    @memoize
+    get roundsCompleted(): number {
+        const topTeam = Object.values(this.teamResults)[0];
+        return topTeam.timesDefense + topTeam.timesPlaintiff;
     }
 
     @memoize

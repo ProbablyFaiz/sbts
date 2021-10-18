@@ -29,6 +29,7 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
 
 function PairTeamsWithMetadata(): SpreadsheetOutput {
     const pairingMetadata: PairingMetadata = [];
+    PairTeams(pairingMetadata);
     const output: string[][] = [];
     pairingMetadata.forEach(({swapMade, conflictResolved, pairingSnapshot}, i) => {
         if (!swapMade || !conflictResolved) {
@@ -44,13 +45,13 @@ function PairTeamsWithMetadata(): SpreadsheetOutput {
     return output;
 }
 
-function PairTeams(): SpreadsheetOutput {
+function PairTeams(pairingMetadata?: PairingMetadata): SpreadsheetOutput {
     const context = new Context();
     if (Object.entries(context.teamResults).length % 2) {
         return "Error: Pairing is not supported with an odd number of teams.";
     }
-    if (roundsCompleted(context) % 2) return pairTeamsEvenRound(context);
-    return pairTeamsOddRound(context);
+    const pairingFunction = context.roundsCompleted % 2 ? pairTeamsEvenRound : pairTeamsOddRound;
+    return pairingFunction(context, pairingMetadata)
 }
 
 const pairTeamsOddRound = (context: IContext, pairingMetadata?: PairingMetadata): Cell[][] | string => {
@@ -174,7 +175,7 @@ const compareSwaps = (context: IContext) => (swap1: Swap, swap2: Swap): number =
     const swap2TeamResults = context.teamResults[swap2[1]];
 
 
-    for (let key of teamSortOrder(roundsCompleted(context))) {
+    for (let key of teamSortOrder(context.roundsCompleted)) {
         const diff = Math.abs(<number>swap1TeamResults[key] - <number>swap1OldTeamResults[key])
             - Math.abs(<number>swap2TeamResults[key] - <number>swap2OldTeamResults[key]);
         if (diff) return diff;
@@ -185,11 +186,6 @@ const compareSwaps = (context: IContext) => (swap1: Swap, swap2: Swap): number =
 const postSwapPairing = (pairing: Pairing) => (swap: Swap): Pairing => {
     if (pairing[0] === swap[0]) return [swap[1], pairing[1]];
     return [pairing[0], swap[1]];
-}
-
-const roundsCompleted = (context: IContext): number => {
-    const topTeam = Object.values(context.teamResults)[0];
-    return topTeam.timesDefense + topTeam.timesPlaintiff;
 }
 
 const teamsConflict = (context: IContext) => (pairing: Pairing): boolean => {
