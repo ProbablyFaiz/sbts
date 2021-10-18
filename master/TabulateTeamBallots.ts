@@ -26,13 +26,19 @@ enum TeamResultsOutputIndex {
 const PAST_OPPONENTS_SEPARATOR = ", ";
 
 interface BallotResult {
+    judgeName: string;
     ballotResult: number;
     pointDifferential: number;
 }
 
 interface RoundResult {
     ballots: BallotResult[];
+    opponent: string;
     side: string;
+}
+
+interface TeamResultsContainer {
+    [teamNumber: string]: { [round: string]: RoundResult }
 }
 
 interface TeamSummary {
@@ -52,23 +58,23 @@ const normalizeTotal = (total: number, factor: number): number => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
 
-const tabulateBallot = (ballot: string[], resultsContainer) => {
-    const teamNumber = ballot[TeamResultsIndex.TeamNumber];
+const tabulateBallot = (ballot: Cell[], resultsContainer: TeamResultsContainer) => {
+    const teamNumber = ballot[TeamResultsIndex.TeamNumber] as string;
     if (!(teamNumber in resultsContainer)) {
         resultsContainer[teamNumber] = {};
     }
-    const roundNumber = ballot[TeamResultsIndex.Round];
+    const roundNumber = ballot[TeamResultsIndex.Round] as string;
     if (!(roundNumber in resultsContainer[teamNumber])) {
         resultsContainer[teamNumber][roundNumber] = {
-            opponent: ballot[TeamResultsIndex.OpponentNumber],
-            side: ballot[TeamResultsIndex.Side],
+            opponent: ballot[TeamResultsIndex.OpponentNumber] as string,
+            side: ballot[TeamResultsIndex.Side] as string,
             ballots: []
         }
     }
     resultsContainer[teamNumber][roundNumber].ballots.push({
-        judgeName: ballot[TeamResultsIndex.JudgeName],
-        pointDifferential: ballot[TeamResultsIndex.PD],
-        ballotResult: ballot[TeamResultsIndex.Won]
+        judgeName: ballot[TeamResultsIndex.JudgeName] as string,
+        pointDifferential: ballot[TeamResultsIndex.PD] as number,
+        ballotResult: ballot[TeamResultsIndex.Won] as number,
     });
 }
 
@@ -113,11 +119,9 @@ const compareTeamResults = (first: TeamSummary, second: TeamSummary): number => 
     return 0;
 }
 
-const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<string, TeamSummary>, fullTeamResults) => {
-    const outputCells: (string | number)[][] = []; // TODO: Define a helper type for output cells like this.
+const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<string, TeamSummary>, fullTeamResults: TeamResultsContainer) => {
     Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
-        let combinedStrength = 0;
-        let teamRounds = Object.values(fullTeamResults[teamNumber]) as any[];
+        let teamRounds = Object.values(fullTeamResults[teamNumber]);
         teamSummary.pastOpponents = teamRounds.map(roundResult => roundResult.opponent);
         teamSummary.combinedStrength = teamSummary.pastOpponents
             .map(opponent => teamSummaryResults[opponent].ballotsWon)
@@ -140,10 +144,10 @@ const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<s
 // TODO: Figure out the typings on all of these random structures
 function TABULATETEAMBALLOTS(ballotsRange: Cell[][], startRound: number, endRound: number) {
     const context = new Context();
-    let fullTeamResults = {};
+    let fullTeamResults: TeamResultsContainer = {};
     const firstRound = startRound ?? Number.NEGATIVE_INFINITY;
     const lastRound = endRound ?? Number.POSITIVE_INFINITY;
-    ballotsRange.forEach((ballot, i) => {
+    ballotsRange.forEach((ballot) => {
         const ballotRound = ballot[TeamResultsIndex.Round];
         if (ballotRound === undefined ||
             ballotRound === '' ||
@@ -160,7 +164,7 @@ function TABULATETEAMBALLOTS(ballotsRange: Cell[][], startRound: number, endRoun
         let totalPointDifferential = 0;
         let timesPlaintiff = 0;
         let timesDefense = 0;
-        Object.values(teamResults as any).forEach((roundResults) => {
+        Object.values(teamResults).forEach((roundResults) => {
             const {ballotsWon, pointDifferential, wasPlaintiff} = tabulateRound(roundResults);
             totalBallotsWon += ballotsWon;
             totalPointDifferential += pointDifferential;
