@@ -30,17 +30,9 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
 function PairTeamsWithMetadata(): SpreadsheetOutput {
     const pairingMetadata: PairingMetadata = [];
     PairTeams(pairingMetadata);
-    const output: string[][] = [];
-    pairingMetadata.forEach(({swapMade, conflictResolved, pairingSnapshot}, i) => {
-        if (!swapMade || !conflictResolved) {
-            output.push(["Initial pairings, before conflict resolution:", ""]);
-        } else {
-            output.push([`Swapping teams ${swapMade[0]} and ${swapMade[1]} to resolve ` +
-            `impermissible matchup ${conflictResolved[0]} v. ${conflictResolved[1]}:`, ""])
-        }
-        output.push(...pairingSnapshot);
-        output.push(["", ""]);
-    });
+    const output: string[][] = pairingMetadata
+        .map((swapMetadata) => formatSwapMetadata(swapMetadata))
+        .reduce((acc, formattedSwapMetadata) => [...acc, ...formattedSwapMetadata]);
     output.push(["All conflicts resolved, above pairings are final.", ""]);
     return output;
 }
@@ -201,6 +193,23 @@ const serializedSwap = (swap: Swap): string => {
 
 const deepCopyPairings = (pairings: Pairing[]): Pairing[] => {
     return pairings.map(pairing => [...pairing]);
+}
+
+const formatSwapMetadata = (swapMetadata: SwapMetadata): [string, string][] => {
+    const {swapMade, conflictResolved, pairingSnapshot} = swapMetadata;
+    const headerText = conflictResolved == undefined ?
+        "Initial pairings, before conflict resolution:" :
+        `Swapping teams ${swapMade![0]} and ${swapMade![1]} to resolve impermissible matchup ${conflictResolved[0]} v. ${conflictResolved[1]}:`;
+    return [
+        [headerText, ""],
+        ...pairingSnapshot.map((pairing) => {
+            return [
+                swapMade?.includes(pairing[0]) ? `>> ${pairing[0]}` : pairing[0],
+                swapMade?.includes(pairing[1]) ? `>> ${pairing[1]}` : pairing[1],
+            ] as Pairing;
+        }),
+        ["", ""]
+    ];
 }
 
 const positionForRank = (rank: number): [x: number, y: number] => {
