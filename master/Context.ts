@@ -73,7 +73,7 @@ class Context implements IContext {
         const teamInfoValues = teamInfoRange.getValues();
         const teamRow = teamInfoValues.find((teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber);
         if (!teamRow) return false;
-        teamRow[2] = ballotFolderLink;
+        teamRow[4] = ballotFolderLink;
         teamInfoRange.setValues(teamInfoValues);
         return true;
     }
