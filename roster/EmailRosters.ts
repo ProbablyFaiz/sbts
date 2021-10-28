@@ -28,7 +28,7 @@ const rosterFolderEmail = (teamName: string, ballotFolderLink: string, email: st
 
 <p>In preparation for Mocktopia VI (November 20-21), all individual teams must complete a roster.</p>
 
-<p>Below, you'll find the link to a folder containing your personal, school specific Google Sheets rosters where you can provide the required information for your team. Only your team and the UC Santa Barbara Tournament Staff will have access to thesee rosters.</p>
+<p>Below, you'll find the link to a folder containing your personal, school specific Google Sheets rosters where you can provide the required information for your team. Only your team and the UC Santa Barbara Tournament Staff will have access to these rosters.</p>
 
 <p>Using these rosters, your program must provide the names, emails, and phone numbers of all team competitors and coaches attending Mocktopia VI.</p>
 
