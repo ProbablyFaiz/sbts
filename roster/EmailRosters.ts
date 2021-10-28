@@ -5,12 +5,14 @@ enum RosterInfoIndex {
     Email = 1,
     NumberOfTeams = 2,
     RosterFolder = 3,
+    IndividualRosterStart = 4,
 }
 
 function EmailRosters() {
     const sheet = SpreadsheetApp.getActiveSpreadsheet();
     const rosterInfoRange = sheet.getRangeByName("RosterInfo");
     rosterInfoRange.getValues().forEach((row) => {
+        console.log(`Emailing roster folder to ${row[RosterInfoIndex.TeamName]}`);
         const emailToSend = rosterFolderEmail(row[RosterInfoIndex.TeamName], row[RosterInfoIndex.RosterFolder], row[RosterInfoIndex.Email])
         MailApp.sendEmail(emailToSend);
     })
@@ -22,7 +24,7 @@ const rosterFolderEmail = (teamName: string, ballotFolderLink: string, email: st
         subject: `Mocktopia VI Roster (Due November 5)`,
         to: email,
         replyTo: "mocktopiaucsb@gmail.com",
-        htmlBody: `<p>Hello ${teamName},</p>
+        htmlBody: `<p>Hello ${teamName} Mock Trial,</p>
 
 <p>In preparation for Mocktopia VI (November 20-21), all individual teams must complete a roster.</p>
 
@@ -44,9 +46,9 @@ const rosterFolderEmail = (teamName: string, ballotFolderLink: string, email: st
 <li>We will be hosting our Opening Ceremony on Friday, November 19th from 5:00pm - 5:30pm (Pacific Time). The Opening Ceremony is open to all, but only <b>one representative from each team is required to attend.</b> Pairings for Round 1 will be determined at the Opening Ceremony via a challenge system.</li>
 </ol>
 
-Please reach out with any questions.
+<p>Please reach out with any questions.</p>
 
-All the best,
-Natalie Swetlin`
+<p>All the best,<br>
+Natalie Swetlin</p>`
     };
 }
