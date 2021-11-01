@@ -35,3 +35,23 @@ function getFileByName(parentFolder: Folder, name: string): GoogleFile | undefin
 function getIdFromUrl(url: string): string {
     return url.match(/[-\w]{25,}/)?.toString() ?? "";
 }
+
+const cacheKeys = ["1", "2", "3"]
+
+function rateLimit(functionName: string) {
+    const possibleKeys = cacheKeys.map(k => `${functionName}-${k}`);
+    const cache = CacheService.getScriptCache();
+    const currKeys = Object.keys(cache.getAll(possibleKeys));
+    const freeExecSlot = availableKey(possibleKeys, currKeys);
+    if (!freeExecSlot) {
+        Logger.log("Detected more than 4 executions in the past 10 seconds, aborting...");
+        return true;
+    }
+    Logger.log(`Adding ${freeExecSlot} to cache...`);
+    cache.put(freeExecSlot, '', 10);
+    return false;
+}
+
+function availableKey(possibleCacheKeys: string[], cacheKeys: string[]) {
+    return possibleCacheKeys.find(key => !cacheKeys.includes(key));
+}

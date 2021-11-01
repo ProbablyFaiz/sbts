@@ -2,8 +2,6 @@ const BALLOT_STATUS_NOT_READY = "Ballot Status: Not ready to submit.";
 const BALLOT_STATUS_READY = "Ballot Status: Ready to submit.";
 
 function UpdateBallotLocks() {
-  const scriptLock = LockService.getScriptLock();
-  scriptLock.waitLock(30000);
   const orchestratorSheet = SpreadsheetApp.getActiveSpreadsheet();
   const ballotInfo = compactRange(orchestratorSheet.getRangeByName("BallotInfoRange").getValues());
   let numUpdated = 0;
@@ -24,7 +22,6 @@ function UpdateBallotLocks() {
     }
   }
   Logger.log(`Updated ${numUpdated} ballots.`);
-  scriptLock.releaseLock();
 }
 
 function updateBallot(ballotObject) {
