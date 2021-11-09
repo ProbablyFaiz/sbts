@@ -43,6 +43,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     masterSheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
 
     createTemplatesFolder(setupContext);
+    SpreadsheetApp.flush();
 
     for (let round of setupContext.roundNames) {
         const roundFolderName = `Round ${round}`;
