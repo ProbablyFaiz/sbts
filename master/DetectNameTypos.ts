@@ -35,6 +35,9 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
         });
     });
     potentialDuplicateResults.sort((a, b) => parseFloat(b[4]) - parseFloat(a[4]));
+    if (potentialDuplicateResults.length === 0) {
+        return [["No potential duplicate rankings found."]]
+    }
     return potentialDuplicateResults;
 }
 
