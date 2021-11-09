@@ -1,5 +1,13 @@
 interface IAutocompleteContext {
+    ballotData: IBallotRecord[];
     captainsFormData: ICaptainsFormRecord[];
+}
+
+interface IBallotRecord {
+    ballotLink: string;
+    status: string;
+    submitted: boolean;
+    locked: boolean;
 }
 
 interface ICaptainsFormRecord {
@@ -11,8 +19,16 @@ interface ICaptainsFormRecord {
 }
 
 enum OrchestratorRange {
+    BallotInfo = "BallotInfoRange",
     AutocompleteEngineLink = "AutocompleteLinkRange",
     CaptainsFormData = "CaptainsFormData"
+}
+
+enum BallotRowIndex {
+    Link = 0,
+    Status = 1,
+    Submitted = 2,
+    Locked = 3,
 }
 
 enum CaptainsFormRowIndex {
@@ -26,6 +42,18 @@ enum CaptainsFormRowIndex {
 }
 
 class OrchestratorContext implements IAutocompleteContext {
+    get ballotData(): IBallotRecord[] {
+        return compactRange(this.getRangeValues(OrchestratorRange.BallotInfo)!)
+            .map(row => {
+                return {
+                    ballotLink: row[BallotRowIndex.Link],
+                    status: row[BallotRowIndex.Status],
+                    submitted: row[BallotRowIndex.Submitted] === "true",
+                    locked: row[BallotRowIndex.Locked] === "true",
+                }
+            });
+    }
+
     get captainsFormData(): ICaptainsFormRecord[] {
         return compactRange(this.getRangeValues(OrchestratorRange.CaptainsFormData)!)
             .map(row => {
