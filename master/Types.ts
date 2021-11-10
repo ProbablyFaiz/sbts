@@ -24,7 +24,7 @@ enum MasterRange {
     TournamentName = "TournamentNameRange",
     TournamentEmail = "TournamentEmailRange",
     TeamResults = "TeamResultsRange",
-    Courtrooms = "CourtroomsRange",
+    CourtroomInfo = "CourtroomInfoRange",
 }
 
 enum CaptainsFormRange {
@@ -50,4 +50,10 @@ interface TeamInfo {
     byeBust: boolean;
     ballotFolderLink: string;
     emails: string;
+}
+
+interface CourtroomInfo {
+    name: string;
+    bailiffEmails: string[];
+    roundFolderLinks: string[];
 }

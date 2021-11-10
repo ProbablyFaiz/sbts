@@ -91,3 +91,23 @@ function OnEmailBallotFolderLinksClick() {
 
     }
 }
+
+function OnShareFoldersWithBailiffs() {
+    const ui = SpreadsheetApp.getUi();
+    const result = ui.alert(
+        'Please confirm',
+        'Are you sure you want to share trial folders with bailiffs? This will send email notifications.',
+        ui.ButtonSet.YES_NO);
+    // Process the user's response.
+    if (result == ui.Button.YES) {
+        SheetLogger.log('Sharing trial folders with bailiffs...');
+        ShareTrialFolders();
+        const htmlOutput = HtmlService
+            .createHtmlOutput('<p>Successfully emailed ballot folder links.</p>')
+            .setWidth(250)
+            .setHeight(100);
+        ui.showModelessDialog(htmlOutput, 'Success!');
+    } else {
+
+    }
+}

@@ -9,7 +9,7 @@ interface IContext {
     teamBallotFolder: (teamNumber: string) => Folder | undefined;
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
     tournamentEmail: string;
-    courtroomNames: string[];
+    courtroomRecords: CourtroomInfo[];
     roundsCompleted: number;
 
     teamResults: Record<string, TeamSummary>;
@@ -95,9 +95,15 @@ class Context implements IContext {
     }
 
     @memoize
-    get courtroomNames(): string[] {
-        // TODO
-        return ["TODO"];
+    get courtroomRecords(): CourtroomInfo[] {
+        return compactRange(this.getRangeValues(MasterRange.CourtroomInfo) ?? [])
+            .map((row) => {
+                return {
+                    name: row[0],
+                    bailiffEmails: row[1].split(","),
+                    roundFolderLinks: row[2].split(","),
+                }
+            });
     }
 
     @memoize
