@@ -35,12 +35,12 @@ function SetupTabulationFolder(tabFolderLink: string) {
     }
     const exportFolder = getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
-    const masterSheet: MasterSpreadsheet = sheetForFile(masterSheetFile);
-    masterSheet.getRangeByName(MasterRange.OrchestratorLink).setValue(orchestratorFile.getUrl());
-    masterSheet.getRangeByName(MasterRange.ParentFolderLink).setValue(tabFolder.getUrl());
-    masterSheet.getRangeByName(MasterRange.ExportFolderLink).setValue(exportFolder.getUrl());
-    masterSheet.getRangeByName(MasterRange.TournamentName).setValue(setupContext.tournamentName);
-    masterSheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
+    setupContext.masterSpreadsheet = sheetForFile(masterSheetFile);
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.OrchestratorLink).setValue(orchestratorFile.getUrl());
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.ParentFolderLink).setValue(tabFolder.getUrl());
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.ExportFolderLink).setValue(exportFolder.getUrl());
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.TournamentName).setValue(setupContext.tournamentName);
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
 
     createTemplatesFolder(setupContext);
     SpreadsheetApp.flush();
@@ -101,7 +101,7 @@ function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, t
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
-    captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
+    // captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
 
     return captainsForm;
 }

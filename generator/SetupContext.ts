@@ -83,7 +83,7 @@ class SetupContext implements ISetupContext {
     writeCourtroomsToMaster() {
         const courtroomsRange = this.masterSpreadsheet.getRangeByName(MasterRange.CourtroomInfo);
         const output = this.courtroomRecords.map(record =>
-            [record.name, record.bailiffEmails.join(","), record.roundFolderLinks.join(".")]
+            [record.name, record.bailiffEmails.join(","), record.roundFolderLinks.join(",")]
         )
         // TODO: Refactor padding code into separate helper
         const paddingLength = courtroomsRange.getNumRows() - output.length;
