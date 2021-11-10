@@ -33,4 +33,4 @@ function getIdFromUrl(url: string) {
     return url.match(/[-\w]{25,}/);
 }
 
-const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+const range = (start, stop, step): number[] => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));

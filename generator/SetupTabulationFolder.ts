@@ -55,6 +55,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
         roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
         setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
+    setupContext.writeCourtroomsToMaster();
     SheetLogger.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
 }
 
@@ -81,7 +82,9 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
     const trialPrefix = `R${round} ${courtroomInfo.name}`
     SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
     const trialFolder = roundFolder.createFolder(trialFolderName);
-    trialFolder.addEditors(courtroomInfo.bailiffEmails);
+    // Disabled because we're moving sharing with bailiffs to a separate stage.
+    // trialFolder.addEditors(courtroomInfo.bailiffEmails);
+    setupContext.saveCourtroomFolderLink(courtroomInfo.name, trialFolder.getUrl());
 
     const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];

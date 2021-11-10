@@ -20,6 +20,12 @@ interface ICourtroomInfo {
     bailiffEmails: string[];
 }
 
+interface GeneratedCourtroomRecord {
+    name: string;
+    bailiffEmails: string[];
+    roundFolderLinks: string[];
+}
+
 interface ISetupContext {
     isValid: boolean;
 
@@ -41,6 +47,9 @@ interface ISetupContext {
     courtroomsInfo: ICourtroomInfo[];
     roundNames: string[];
     ballotsPerTrial: number;
+
+    saveCourtroomFolderLink(name: string, trialFolderLink: string): void;
+    writeCourtroomsToMaster(): void;
 }
 
 class SetupContext implements ISetupContext {
@@ -51,10 +60,37 @@ class SetupContext implements ISetupContext {
 
     private generatorSpreadsheet: Spreadsheet;
     private tabFolderLink: string;
+    private courtroomRecords: GeneratedCourtroomRecord[];
 
     constructor(tabFolderLink: string) {
         this.tabFolderLink = tabFolderLink;
         this.generatorSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+        this.courtroomRecords = this.courtroomsInfo.map(info => {
+            return {
+                name: info.name,
+                bailiffEmails: info.bailiffEmails,
+                roundFolderLinks: [],
+            }
+        });
+    }
+
+    saveCourtroomFolderLink(name: string, trialFolderLink: string) {
+        // This is O(n) but I don't care because it's easy and n is ~12.
+        const courtroomRecord = this.courtroomRecords.find(courtroom => courtroom.name === name);
+        courtroomRecord.roundFolderLinks.push(trialFolderLink);
+    }
+
+    writeCourtroomsToMaster() {
+        const courtroomsRange = this.masterSpreadsheet.getRangeByName(MasterRange.CourtroomInfo);
+        const output = this.courtroomRecords.map(record =>
+            [record.name, record.bailiffEmails.join(","), record.roundFolderLinks.join(".")]
+        )
+        // TODO: Refactor padding code into separate helper
+        const paddingLength = courtroomsRange.getNumRows() - output.length;
+        for (let i = 0; i < paddingLength; i++) {
+            output.push(["", "", ""]);
+        }
+        courtroomsRange.setValues(output);
     }
 
     get isValid(): boolean {
@@ -119,7 +155,7 @@ class SetupContext implements ISetupContext {
 
     @memoize
     get roundNames(): string[] {
-        return range(1, this.numRounds, 1);
+        return range(1, this.numRounds, 1).map(n => n.toString());
     }
 
     @memoize
