@@ -18,7 +18,7 @@ function UpdateBallotLocks() {
         numUpdated++;
       }
       catch (error) {
-        Logger.log(`Error on line ${i + 2}.`)
+        Logger.log(`Error on line ${i + 2}: ${error}`)
       }
     }
   }
