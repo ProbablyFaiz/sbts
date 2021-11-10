@@ -1,9 +1,9 @@
-function setBallotLock(ballotSheet, enableBallotLock) {
+function setBallotLock(ballotSheet, enableBallotLock, context: OrchestratorContext) {
   const currentSheet = ballotSheet.getSheetByName("Scores");
   if (enableBallotLock === true) {
     const protection = currentSheet.protect();
     protection.setDescription("Ballot Completion Lock")
-    removeNonWhitelistedEditors(protection);
+    removeNonWhitelistedEditors(protection, context.bailiffEmails);
     return "Locked";
   }
   else {
@@ -15,8 +15,7 @@ function setBallotLock(ballotSheet, enableBallotLock) {
   }
 }
 
-function removeNonWhitelistedEditors(protection) {
-  const bailiffEmails = [];
+function removeNonWhitelistedEditors(protection, bailiffEmails: Set<string>) {
   const usersWhitelist = ["mocktopiaucsb@gmail.com", "mocktopia@ucsbmocktrial.org", ...bailiffEmails];
   protection.getEditors().forEach(e => {
     const userEmail = e.getEmail()

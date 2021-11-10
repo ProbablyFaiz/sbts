@@ -21,6 +21,7 @@ interface ICaptainsFormRecord {
 enum OrchestratorRange {
     BallotInfo = "BallotInfoRange",
     AutocompleteEngineLink = "AutocompleteLinkRange",
+    MasterSpreadsheetLink = "MasterSpreadsheetLinkRange",
     CaptainsFormData = "CaptainsFormData"
 }
 
@@ -68,6 +69,11 @@ class OrchestratorContext implements IAutocompleteContext {
     }
 
     @memoize
+    get bailiffEmails(): Set<string> {
+        return new Set<string>(this.masterSpreadsheet.getRangeByName("AllBailiffEmailsRange").getValue().split(","));
+    }
+
+    @memoize
     get orchestratorSpreadsheet(): Spreadsheet {
         return SpreadsheetApp.getActiveSpreadsheet();
     }
@@ -75,6 +81,11 @@ class OrchestratorContext implements IAutocompleteContext {
     @memoize
     get autocompleteSpreadsheet(): Spreadsheet {
         return sheetForFile(DriveApp.getFileById(getIdFromUrl(this.getRangeValue(OrchestratorRange.AutocompleteEngineLink))));
+    }
+
+    @memoize
+    get masterSpreadsheet(): Spreadsheet {
+        return sheetForFile(DriveApp.getFileById(getIdFromUrl(this.getRangeValue(OrchestratorRange.MasterSpreadsheetLink))));
     }
 
     private getRangeValue(rangeName: OrchestratorRange): string | undefined {
