@@ -9,7 +9,7 @@ const IndividualResultsIndices = {
     TYPE: 5,
     RANK_VALUE: 6,
     COURTROOM: 9,
-    OUTPUT_RANK_VALUE: 2,
+    OUTPUT_RANK_VALUE: 4,
 }
 
 const normalizeValue = (total: number, factor: number): number => {
