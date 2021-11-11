@@ -4,10 +4,10 @@
 function SetupTabulationFolder(tabFolderLink: string) {
     const setupContext = new SetupContext(tabFolderLink);
 
-    if (!setupContext.isValid) {
-        SheetLogger.log("Tab folder is not empty. Aborting tabulation folder setup.");
-        return;
-    }
+    // if (!setupContext.isValid) {
+    //     SheetLogger.log("Tab folder is not empty. Aborting tabulation folder setup.");
+    //     return;
+    // }
     const tabFolder = setupContext.tabFolder;
 
     let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
@@ -22,8 +22,8 @@ function SetupTabulationFolder(tabFolderLink: string) {
     } else {
         autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(AUTOCOMPLETE_SPREADSHEET_NAME, tabFolder);
         autocompleteEngineFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        setupContext.autocompleteEngine = autocompleteEngineFile;
     }
+    setupContext.autocompleteEngine = autocompleteEngineFile;
     let orchestratorFile = getFileByName(tabFolder, ORCHESTRATOR_SPREADSHEET_NAME);
     if (orchestratorFile) {
         SheetLogger.log("Orchestrator file found, not creating a new one...");
@@ -52,6 +52,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
             return;
         }
         const roundFolder = tabFolder.createFolder(roundFolderName);
+        // DO NOT REMOVE THE BELOW LINE! IT BREAKS BALLOT PROTECTION COMPLETELY. ALSO DO NOT USE THIS EMAIL AS A BAILIFF!!!
         roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
         setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
@@ -101,8 +102,7 @@ function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, t
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
-    // captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
-
+    captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
     return captainsForm;
 }
 
