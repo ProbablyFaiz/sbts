@@ -22,18 +22,16 @@ enum ConflictType {
 }
 
 // TODO: Implement the courtroom stuff that'll let this work
-/*
 function PairTeamsWithCourtrooms(): SpreadsheetOutput {
     const context = new Context();
-    if (Object.entries(context.teamResults).length % 2) {
-        return "Error: Pairing is not supported with an odd number of teams.";
-    }
-    let pairings = (roundsCompleted(context) % 2 ? pairTeamsEvenRound : pairTeamsOddRound)(context)
+    const pairings = PairTeams();
     if (typeof pairings === "string") return pairings;
-    pairings.sort(_ => Math.random() - 0.5); // Shuffle the pairings to avoid leaking standings information
-    // pairings.map(pairing => [...pairing, cont])
+    const courtrooms = context.courtroomRecords.map(rec => rec.name);
+    pairings.sort(() => Math.random() - 0.5);
+    // If it's round 3, flip a coin to determine side
+    if (context.roundsCompleted % 2 === 0 && Math.random() < 0.5) pairings.forEach(pair => pair.reverse());
+    return courtrooms.map((room, i) => [room, ...pairings[i]]);
 }
-*/
 
 function PairTeamsWithMetadata(): SpreadsheetOutput {
     const pairingMetadata: PairingMetadata = [];
@@ -41,11 +39,10 @@ function PairTeamsWithMetadata(): SpreadsheetOutput {
     const output: string[][] = pairingMetadata
         .map((swapMetadata) => formatSwapMetadata(swapMetadata))
         .reduce((acc, formattedSwapMetadata) => [...acc, ...formattedSwapMetadata]);
-    output.push(["All conflicts resolved, above pairings are final.", ""]);
-    return output;
+    return [...output, ["All conflicts resolved, above pairings are final.", ""]];
 }
 
-function PairTeams(pairingMetadata?: PairingMetadata): SpreadsheetOutput {
+function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     const context = new Context();
     if (Object.entries(context.teamResults).length % 2) {
         return "Error: Pairing is not supported with an odd number of teams.";
