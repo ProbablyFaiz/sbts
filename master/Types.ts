@@ -57,3 +57,12 @@ interface CourtroomInfo {
     bailiffEmails: string[];
     roundFolderLinks: string[];
 }
+
+interface BallotInfo {
+    link: string;
+    info: string;
+    captainsFormLink: string;
+    judgeName: string;
+    locked: boolean;
+    validated: boolean;
+}

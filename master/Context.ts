@@ -10,6 +10,7 @@ interface IContext {
     setTeamBallotFolderLink: (teamNumber: string, ballotFolderLink: string) => boolean;
     tournamentEmail: string;
     courtroomRecords: CourtroomInfo[];
+    ballotRecords: BallotInfo[];
     roundsCompleted: number;
 
     teamResults: Record<string, TeamSummary>;
@@ -104,6 +105,22 @@ class Context implements IContext {
                     roundFolderLinks: row[2].split(","),
                 }
             });
+    }
+
+    @memoize
+    get ballotRecords(): BallotInfo[] {
+        return (this.getRangeValues(MasterRange.BallotLinks) ?? [])
+            .filter(row => row.some(cell => !['', null, undefined, 'false'].includes(cell)))
+            .map((row) => {
+                return {
+                    link: row[0],
+                    info: row[1],
+                    captainsFormLink: row[2],
+                    judgeName: row[4],
+                    locked: row[5] === "true",
+                    validated: row[6] === "true",
+                }
+            })
     }
 
     @memoize

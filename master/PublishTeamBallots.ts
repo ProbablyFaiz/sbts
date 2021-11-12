@@ -12,17 +12,17 @@ function PublishTeamBallots() {
 }
 
 function exportBallots(context: IContext) {
-  for (let ballot of context.ballotFiles) {
-    const ballotSheet = sheetForFile(ballot) as BallotSpreadsheet;
-    const submittedRange = ballotSheet.getRangeByName(BallotRange.Submitted);
-    if (!submittedRange || !submittedRange.getValue()) {
-      SheetLogger.log(`${ballotSheet.getName()} not submitted, skipping...`)
+  for (let ballot of context.ballotRecords) {
+    if (!ballot.locked || !ballot.validated) {
+      SheetLogger.log(`${ballot.info} (${ballot.judgeName}) not submitted or not validated, skipping...`)
       continue;
     }
-    const plaintiffTeam = ballotSheet.getRangeByName(BallotRange.PlaintiffTeam).getValue();
-    const defenseTeam = ballotSheet.getRangeByName(BallotRange.DefenseTeam).getValue();
-    const round = ballotSheet.getRangeByName(BallotRange.Round).getValue();
-    const judgeName = ballotSheet.getRangeByName(BallotRange.JudgeName).getValue();
+    const ballotFile = DriveApp.getFileById(getIdFromUrl(ballot.link));
+    const ballotSheet = sheetForFile(ballotFile) as BallotSpreadsheet;
+    const plaintiffTeam = ballotSheet.getRangeByName(BallotRange.PlaintiffTeam)!.getValue();
+    const defenseTeam = ballotSheet.getRangeByName(BallotRange.DefenseTeam)!.getValue();
+    const round = ballotSheet.getRangeByName(BallotRange.Round)!.getValue();
+    const judgeName = ballotSheet.getRangeByName(BallotRange.JudgeName)!.getValue();
     const pdfName = `R${round} - ${plaintiffTeam} v. ${defenseTeam} (Judge ${judgeName}).pdf`;
 
     let existingBallot;
@@ -32,7 +32,7 @@ function exportBallots(context: IContext) {
       const teamRoundFolder = getChildFolder(teamFolder, `Round ${round} `); // The trailing space is important so we don't get a snafu where one round number is a prefix/suffix of another.
       let pdfBallot = getFileByName(teamRoundFolder, pdfName);
       if (!pdfBallot) {
-        pdfBallot = existingBallot || ballot.getAs("application/pdf");
+        pdfBallot = existingBallot || ballotFile.getAs("application/pdf");
         pdfBallot.setName(pdfName);
         existingBallot = pdfBallot; // We can save half of the exports by saving the ballot blob for the second go-round.
         teamRoundFolder.createFile(pdfBallot);
