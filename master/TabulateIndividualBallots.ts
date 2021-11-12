@@ -1,5 +1,7 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
+type TeamRoundJudgesMap = Map<string, Set<string>>
+
 const IndividualResultsIndices = {
     ROUND: 0,
     JUDGE_NAME: 1,
@@ -20,13 +22,15 @@ const compareIndividualResults = (first: number[], second: number[]): number => 
     return second[IndividualResultsIndices.OUTPUT_RANK_VALUE] - first[IndividualResultsIndices.OUTPUT_RANK_VALUE];
 }
 
-const createIndividualResultsOutput = (context: IContext, competitorMap) => {
+const createIndividualResultsOutput = (context: IContext, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
     const resultsArr: Cell[][] = [];
     competitorMap.forEach((competitorObject, competitorKey) => {
         const competitorInfo = JSON.parse(competitorKey);
         let totalRankValue = 0;
-        Object.values(competitorObject).forEach((roundRanks: any[]) => {
-            const normalizingFactor = NUM_BALLOTS / roundRanks.length;
+        Object.entries(competitorObject).forEach(([roundNum, roundRanks]: [string, any[]]) => {
+            const teamRoundKey = { team: competitorInfo["team"].toString(), round: roundNum.toString() };
+            const numJudges = teamRoundJudgesMap.get(JSON.stringify(teamRoundKey))!.size;
+            const normalizingFactor = NUM_BALLOTS / numJudges;
             const roundRankValue = roundRanks.reduce((accumulator, rankInfo) => accumulator + rankInfo.rankValue, 0);
             totalRankValue += normalizeValue(roundRankValue, normalizingFactor);
         });
@@ -43,7 +47,7 @@ const createIndividualResultsOutput = (context: IContext, competitorMap) => {
     return resultsArr;
 }
 
-const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, firstRound, lastRound, competitorMap) => {
+const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, firstRound, lastRound, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
     const roundNumber = ballot[IndividualResultsIndices.ROUND];
     if (ballot[IndividualResultsIndices.TYPE] !== rankingType ||
         ballot[IndividualResultsIndices.TEAM_NUMBER] === "" ||
@@ -72,6 +76,16 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
         rankValue: ballot[IndividualResultsIndices.RANK_VALUE],
         judgeName: ballot[IndividualResultsIndices.JUDGE_NAME]
     });
+
+    const teamRoundKey = {
+        team: ballot[IndividualResultsIndices.TEAM_NUMBER].toString(),
+        round: roundNumber.toString(),
+    }
+    if (!teamRoundJudgesMap.has(JSON.stringify(teamRoundKey))) {
+        teamRoundJudgesMap.set(JSON.stringify(teamRoundKey), new Set<string>());
+    }
+    const currJudgeSet = teamRoundJudgesMap.get(JSON.stringify(teamRoundKey));
+    currJudgeSet!.add(ballot[IndividualResultsIndices.JUDGE_NAME])
 }
 
 function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound: number, endRound: number) {
@@ -79,6 +93,7 @@ function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound: number
     const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
     const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
     const competitorMap = new Map();
-    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap));
-    return createIndividualResultsOutput(context, competitorMap);
+    const teamRoundJudgesMap: TeamRoundJudgesMap = new Map();
+    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap, teamRoundJudgesMap));
+    return createIndividualResultsOutput(context, competitorMap, teamRoundJudgesMap);
 }
