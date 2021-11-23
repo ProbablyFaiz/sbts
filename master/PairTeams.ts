@@ -85,8 +85,9 @@ const pairTeamsOddRound = (context: IContext, pairingMetadata?: PairingMetadata)
             } else { // Closest ranked neighbor is below and above, respectively
                 possibleSwapIndexPairs = [[i + 1, 0], [i - 1, 1]];
             }
+            // Filter indices outside of pairing bounds
+            possibleSwapIndexPairs = possibleSwapIndexPairs.filter(([x, y]) => x >= 0 && x < pairings.length);
             const swapToMake: Swap | undefined = possibleSwapIndexPairs
-                .filter(([x, y]) => x >= 0 && x < pairings.length) // Filter indices outside of pairing bounds
                 .map(([x, y]) => [pairings[i][y], pairings[x][y]] as Swap)
                 .filter(swap => !swaps.has(serializedSwap(swap))) // Exclude previously made swaps
                 .filter(swap => !pairingConflicts(postSwapPairing(pairings[i])(swap)))
@@ -147,9 +148,10 @@ const pairTeamsEvenRound = (context: IContext, pairingMetadata?: PairingMetadata
             if (!conflictType) return;
             let swapDistance = 1;
             while (conflictFunction(pairings[i]) && swapDistance < pairings.length) {
-                const possibleSwapIndices = [i - swapDistance, i + swapDistance];
+                let possibleSwapIndices = [i - swapDistance, i + swapDistance];
+                // Filter indices outside of pairings bounds
+                possibleSwapIndices = possibleSwapIndices.filter(swapIndex => swapIndex >= 0 && swapIndex < pairings.length);
                 const swapToMake: Swap | undefined = possibleSwapIndices
-                    .filter(swapIndex => swapIndex >= 0 && swapIndex < pairings.length) // Filter indices outside of pairings bounds
                     .map(swapIndex => [team1, pairings[swapIndex][0]] as Swap) // Create possible swaps (always swap plaintiff, for consistency)
                     .filter(swap => !swaps.has(serializedSwap(swap))) // Exclude previously made swaps
                     .filter(swap => !conflictFunction(postSwapPairing(pairings[i])(swap)))
