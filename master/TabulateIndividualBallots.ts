@@ -1,4 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
+// This and TabulateTeamBallots were written when I was a very bad programmer.
+// I still can't touch this code because it makes no sense.
+// There are so many side effects. It is perhaps the greatest advertisement for
+// functional programming ever created
 
 type TeamRoundJudgesMap = Map<string, Set<string>>
 

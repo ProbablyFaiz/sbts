@@ -1,10 +1,6 @@
 const FAILOVER_MAP = {
     "PAttorneys": "FailoverPAttorneys",
     "DAttorneys": "FailoverDAttorneys",
-    "PWitnesses": "FailoverPWitnesses",
-    "DWitnesses": "FailoverDWitnesses",
-    "PWitnessNames": "FailoverPWitnessNames",
-    "DWitnessNames": "FailoverDWitnessNames",
 }
 
 function RefreshFailoverNames() {

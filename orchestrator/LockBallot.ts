@@ -16,7 +16,7 @@ function setBallotLock(ballotSheet, enableBallotLock, context: OrchestratorConte
 }
 
 function removeNonWhitelistedEditors(protection, bailiffEmails: Set<string>) {
-  const usersWhitelist = ["mocktopiaucsb@gmail.com", "mocktopia@ucsbmocktrial.org", ...bailiffEmails];
+  const usersWhitelist = ["tab@ucsbmootcourt.org", ...bailiffEmails];
   protection.getEditors().forEach(e => {
     const userEmail = e.getEmail()
     if (!usersWhitelist.includes(userEmail)) {

@@ -98,7 +98,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
 }
 
 function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: string | number, courtroomInfo: ICourtroomInfo) {
-    const captainsForm = setupContext.captainsFormTemplate.makeCopy(`${trialPrefix} - Captains' Meeting Form`, trialFolder);
+    const captainsForm = setupContext.captainsFormTemplate.makeCopy(`${trialPrefix} - Competitor Info Form`, trialFolder);
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
