@@ -37,9 +37,9 @@ enum CaptainsFormRowIndex {
     PTeamNum = 1,
     DTeamNum = 2,
     PNamesStart = 3,
-    PNamesEnd = 13,
-    DNamesStart = 14,
-    DNamesEnd = 24,
+    PNamesEnd = 4,
+    DNamesStart = 5,
+    DNamesEnd = 6,
 }
 
 class OrchestratorContext implements IAutocompleteContext {
