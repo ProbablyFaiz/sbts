@@ -18,6 +18,8 @@ const IndividualResultsIndices = {
     OUTPUT_RANK_VALUE: 4,
 }
 
+const INDIVIDUAL_BALLOT_NORMALIZING_FACTOR = 1;
+
 const normalizeValue = (total: number, factor: number): number => {
     return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
 }
@@ -34,7 +36,7 @@ const createIndividualResultsOutput = (context: IContext, competitorMap, teamRou
         Object.entries(competitorObject).forEach(([roundNum, roundRanks]: [string, any[]]) => {
             const teamRoundKey = { team: competitorInfo["team"].toString(), round: roundNum.toString() };
             const numJudges = teamRoundJudgesMap.get(JSON.stringify(teamRoundKey))!.size;
-            const normalizingFactor = NUM_BALLOTS / numJudges;
+            const normalizingFactor = INDIVIDUAL_BALLOT_NORMALIZING_FACTOR / numJudges;
             const roundRankValue = roundRanks.reduce((accumulator, rankInfo) => accumulator + rankInfo.rankValue, 0);
             totalRankValue += normalizeValue(roundRankValue, normalizingFactor);
         });
@@ -42,7 +44,7 @@ const createIndividualResultsOutput = (context: IContext, competitorMap, teamRou
             competitorInfo["team"],
             context.teamInfo[competitorInfo["team"]].teamName,
             competitorInfo["name"],
-            competitorInfo["side"],
+            // competitorInfo["side"],
             totalRankValue,
         ];
         resultsArr.push(individualResult);
@@ -64,7 +66,8 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
     const competitorKey = {
         team: ballot[IndividualResultsIndices.TEAM_NUMBER],
         name: ballot[IndividualResultsIndices.COMPETITOR_NAME].trim(),
-        side: ballot[IndividualResultsIndices.SIDE]
+        // Disabling this because side is irrelevant in moot court rankings
+        // side: ballot[IndividualResultsIndices.SIDE]
     };
     let competitorObject;
     if (competitorMap.has(JSON.stringify(competitorKey))) {

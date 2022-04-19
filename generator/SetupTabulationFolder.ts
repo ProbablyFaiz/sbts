@@ -45,7 +45,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     createTemplatesFolder(setupContext);
     SpreadsheetApp.flush();
 
-    for (let round of setupContext.roundNames) {
+    for (let round of setupContext.roundsInfo) {
         const roundFolderName = `Round ${round}`;
         if (tabFolder.getFoldersByName(roundFolderName).hasNext()) {
             logDuplicate();
@@ -53,10 +53,13 @@ function SetupTabulationFolder(tabFolderLink: string) {
         }
         const roundFolder = tabFolder.createFolder(roundFolderName);
         // DO NOT REMOVE THE BELOW LINE! IT BREAKS BALLOT PROTECTION COMPLETELY. ALSO DO NOT USE THIS EMAIL AS A BAILIFF!!!
-        roundFolder.addEditor("faiz.surani@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
-        setupContext.courtroomsInfo.forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
+        roundFolder.addEditor("faiz@ucsb.edu"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
+        setupContext.courtroomsInfo
+            .slice(0, round.numCourtrooms)
+            .forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
     }
     setupContext.writeCourtroomsToMaster();
+    // TODO: Fix this log message to show the correct number of ballots.
     SheetLogger.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
 }
 
@@ -78,9 +81,9 @@ function createTemplatesFolder(setupContext: ISetupContext) {
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
 }
 
-function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: string, courtroomInfo: ICourtroomInfo) {
-    const trialFolderName = `R${round} - ${courtroomInfo.name}`;
-    const trialPrefix = `R${round} ${courtroomInfo.name}`
+function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: RoundInfo, courtroomInfo: ICourtroomInfo) {
+    const trialFolderName = `R${round.name} - ${courtroomInfo.name}`;
+    const trialPrefix = `R${round.name} ${courtroomInfo.name}`
     SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
     const trialFolder = roundFolder.createFolder(trialFolderName);
     // Disabled because we're moving sharing with bailiffs to a separate stage.
@@ -89,7 +92,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
 
     const trialCaptainsForm = prepareCaptainsForm(setupContext, trialFolder, trialPrefix, round, courtroomInfo);
     const trialBallots = [];
-    for (let i = 1; i <= setupContext.ballotsPerTrial; i++) {
+    for (let i = 1; i <= round.numBallots; i++) {
         const createdBallot = setupContext.ballotTemplate.makeCopy(`${trialPrefix} - Judge ${i} Ballot`, trialFolder);
         createdBallot.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
         trialBallots.push(createdBallot);
@@ -97,10 +100,10 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
     linkTrialSheets(trialCaptainsForm, trialBallots);
 }
 
-function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: string | number, courtroomInfo: ICourtroomInfo) {
+function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: RoundInfo, courtroomInfo: ICourtroomInfo) {
     const captainsForm = setupContext.captainsFormTemplate.makeCopy(`${trialPrefix} - Competitor Info Form`, trialFolder);
     const captainsFormSheet = sheetForFile(captainsForm);
-    captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round);
+    captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round.name);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Courtroom).setValue(courtroomInfo.name);
     captainsFormSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
     return captainsForm;

@@ -8,6 +8,7 @@ enum GeneratorRange {
     TournamentName = 'TournamentNameRange',
     FirstPartyName = 'FirstPartyNameRange',
     CourtroomNames = 'CourtroomsInfoRange',
+    RoundsInfo = 'RoundsInfoRange',
     BallotsPerTrial = 'BallotsPerTrialRange',
     NumberOfCourtrooms = 'NumberOfCourtroomsRange',
     NumberOfRounds = 'NumberOfRoundsRange',
@@ -18,6 +19,12 @@ enum GeneratorRange {
 interface ICourtroomInfo {
     name: string;
     bailiffEmails: string[];
+}
+
+interface RoundInfo {
+    name: string;
+    numBallots: number;
+    numCourtrooms: number;
 }
 
 interface GeneratedCourtroomRecord {
@@ -156,6 +163,17 @@ class SetupContext implements ISetupContext {
     @memoize
     get roundNames(): string[] {
         return range(1, this.numRounds, 1).map(n => n.toString());
+    }
+
+    @memoize
+    get roundsInfo(): RoundInfo[] {
+        return compactRange(this.getRangeValues(GeneratorRange.RoundsInfo)).map(roundCells => {
+            return {
+                name: roundCells[0],
+                numCourtrooms: parseInt(roundCells[1]),
+                numBallots: parseInt(roundCells[2]),
+            };
+        });
     }
 
     @memoize
