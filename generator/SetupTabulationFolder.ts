@@ -46,7 +46,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     SpreadsheetApp.flush();
 
     for (let round of setupContext.roundsInfo) {
-        const roundFolderName = `Round ${round}`;
+        const roundFolderName = `Round ${round.name}`;
         if (tabFolder.getFoldersByName(roundFolderName).hasNext()) {
             logDuplicate();
             return;
@@ -60,7 +60,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
     }
     setupContext.writeCourtroomsToMaster();
     // TODO: Fix this log message to show the correct number of ballots.
-    SheetLogger.log(`Created ${setupContext.roundNames.length * setupContext.courtroomsInfo.length * setupContext.ballotsPerTrial} ballots for ${setupContext.roundNames.length} round(s).`);
+    SheetLogger.log(`Created ballots for ${setupContext.roundsInfo.length} round(s).`);
 }
 
 function createTemplatesFolder(setupContext: ISetupContext) {
@@ -79,6 +79,8 @@ function createTemplatesFolder(setupContext: ISetupContext) {
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.FirstPartyName).setValue(setupContext.firstPartyName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
+    // TODO: Set possible courtrooms and rounds in the captains' form template here as well.
+    // To make this less painful, we'll need to create some generalized code for padding out large ranges with blanks.
 }
 
 function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: RoundInfo, courtroomInfo: ICourtroomInfo) {

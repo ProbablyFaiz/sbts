@@ -53,13 +53,12 @@ const createIndividualResultsOutput = (context: IContext, competitorMap, teamRou
     return resultsArr;
 }
 
-const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, firstRound, lastRound, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
+const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, rounds, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
     const roundNumber = ballot[IndividualResultsIndices.ROUND];
     if (ballot[IndividualResultsIndices.TYPE] !== rankingType ||
         ballot[IndividualResultsIndices.TEAM_NUMBER] === "" ||
         ballot[IndividualResultsIndices.COMPETITOR_NAME].trim() === "" ||
-        roundNumber < firstRound ||
-        roundNumber > lastRound
+        !(rounds.includes(roundNumber))
     ) {
         return;
     }
@@ -95,12 +94,10 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
     currJudgeSet!.add(ballot[IndividualResultsIndices.JUDGE_NAME])
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, startRound: number, endRound: number) {
+function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, rounds: any[]) {
     const context = new Context();
-    const firstRound = startRound ? startRound : Number.MIN_SAFE_INTEGER;
-    const lastRound = endRound ? endRound : Number.MAX_SAFE_INTEGER;
     const competitorMap = new Map();
     const teamRoundJudgesMap: TeamRoundJudgesMap = new Map();
-    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, firstRound, lastRound, competitorMap, teamRoundJudgesMap));
+    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, rounds, competitorMap, teamRoundJudgesMap));
     return createIndividualResultsOutput(context, competitorMap, teamRoundJudgesMap);
 }

@@ -131,7 +131,6 @@ class Context implements IContext {
     @memoize
     get ballotFiles(): GoogleFile[] {
         const ballots: GoogleFile[] = [];
-        // TODO: Make this use the list of ballots in the master spreadsheet instead of this search
         const roundFolders = this.tabFolder.searchFolders('title contains "Round"');
         while (roundFolders.hasNext()) {
             const roundFolder = roundFolders.next();

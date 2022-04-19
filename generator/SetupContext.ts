@@ -9,7 +9,6 @@ enum GeneratorRange {
     FirstPartyName = 'FirstPartyNameRange',
     CourtroomNames = 'CourtroomsInfoRange',
     RoundsInfo = 'RoundsInfoRange',
-    BallotsPerTrial = 'BallotsPerTrialRange',
     NumberOfCourtrooms = 'NumberOfCourtroomsRange',
     NumberOfRounds = 'NumberOfRoundsRange',
     TournamentContactEmail = "TournamentContactEmailRange",
@@ -52,8 +51,6 @@ interface ISetupContext {
     tournamentContactEmail: string;
     firstPartyName: string;
     courtroomsInfo: ICourtroomInfo[];
-    roundNames: string[];
-    ballotsPerTrial: number;
 
     saveCourtroomFolderLink(name: string, trialFolderLink: string): void;
     writeCourtroomsToMaster(): void;
@@ -161,11 +158,6 @@ class SetupContext implements ISetupContext {
     }
 
     @memoize
-    get roundNames(): string[] {
-        return range(1, this.numRounds, 1).map(n => n.toString());
-    }
-
-    @memoize
     get roundsInfo(): RoundInfo[] {
         return compactRange(this.getRangeValues(GeneratorRange.RoundsInfo)).map(roundCells => {
             return {
@@ -173,12 +165,7 @@ class SetupContext implements ISetupContext {
                 numCourtrooms: parseInt(roundCells[1]),
                 numBallots: parseInt(roundCells[2]),
             };
-        });
-    }
-
-    @memoize
-    get ballotsPerTrial(): number {
-        return parseInt(this.getRangeValue(GeneratorRange.BallotsPerTrial));
+        }).slice(0, this.numRounds);
     }
 
     @memoize
