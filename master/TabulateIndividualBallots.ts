@@ -15,7 +15,7 @@ const IndividualResultsIndices = {
     TYPE: 5,
     RANK_VALUE: 6,
     COURTROOM: 9,
-    OUTPUT_RANK_VALUE: 4,
+    OUTPUT_RANK_VALUE: 3,
 }
 
 const INDIVIDUAL_BALLOT_NORMALIZING_FACTOR = 1;
@@ -94,7 +94,8 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
     currJudgeSet!.add(ballot[IndividualResultsIndices.JUDGE_NAME])
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, rounds: any[]) {
+function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, rounds: any[][]) {
+    rounds = rounds[0];
     const context = new Context();
     const competitorMap = new Map();
     const teamRoundJudgesMap: TeamRoundJudgesMap = new Map();

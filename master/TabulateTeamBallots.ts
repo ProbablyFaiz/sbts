@@ -142,14 +142,15 @@ const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<s
 }
 
 // TODO: Figure out the typings on all of these random structures
-function TABULATETEAMBALLOTS(ballotsRange: Cell[][], rounds: any[]) {
+function TABULATETEAMBALLOTS(ballotsRange: Cell[][], rounds: (string | number)[][]) {
+    let flattenedRounds = rounds[0];
     const context = new Context();
     let fullTeamResults: TeamResultsContainer = {};
     ballotsRange.forEach((ballot) => {
         const ballotRound = ballot[TeamResultsIndex.Round];
         if (ballotRound === undefined ||
             ballotRound === '' ||
-            !(rounds.includes(ballotRound))) {  // Skip first row, blank rows, and rounds past limit
+            !(flattenedRounds.includes(ballotRound))) {  // Skip first row, blank rows, and rounds past limit
             return;
         }
         tabulateBallot(ballot, fullTeamResults)
