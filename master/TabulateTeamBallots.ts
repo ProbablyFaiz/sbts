@@ -120,13 +120,6 @@ const compareTeamResults = (first: TeamSummary, second: TeamSummary): number => 
 }
 
 const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<string, TeamSummary>, fullTeamResults: TeamResultsContainer) => {
-    Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
-        let teamRounds = Object.values(fullTeamResults[teamNumber]);
-        teamSummary.pastOpponents = teamRounds.map(roundResult => roundResult.opponent);
-        teamSummary.combinedStrength = teamSummary.pastOpponents
-            .map(opponent => teamSummaryResults[opponent].ballotsWon)
-            .reduce((cs, ballotsWon) => cs + ballotsWon);
-    });
     return Object.entries(teamSummaryResults)
         .sort(([_, aSummary], [__, bSummary]) => compareTeamResults(aSummary, bSummary))
         .map(([teamNumber, teamSummary]) => [
@@ -141,7 +134,21 @@ const createTeamResultsOutput = (context: IContext, teamSummaryResults: Record<s
         ]);
 }
 
-// TODO: Figure out the typings on all of these random structures
+const normalizeByeRounds = (teamSummaryResults: Record<string, TeamSummary>) => {
+    const maxRoundsCompeted = Object.values(teamSummaryResults)
+        .reduce(
+            (max, teamSummary) =>
+                Math.max(max, teamSummary.timesPlaintiff + teamSummary.timesDefense),
+            0
+        );
+    Object.values(teamSummaryResults).forEach((teamSummary) => {
+        const normalizingFactor = maxRoundsCompeted / (teamSummary.timesPlaintiff + teamSummary.timesDefense);
+        teamSummary.ballotsWon = normalizeTotal(teamSummary.ballotsWon, normalizingFactor);
+        teamSummary.pointDifferential = normalizeTotal(teamSummary.pointDifferential, normalizingFactor);
+        teamSummary.combinedStrength = normalizeTotal(teamSummary.combinedStrength!, normalizingFactor);
+    });
+}
+
 function TABULATETEAMBALLOTS(ballotsRange: Cell[][], rounds: (string | number)[][]) {
     let flattenedRounds = rounds[0];
     const context = new Context();
@@ -180,5 +187,13 @@ function TABULATETEAMBALLOTS(ballotsRange: Cell[][], rounds: (string | number)[]
             byeBust: context.teamInfo[teamNumber].byeBust,
         }
     });
+    Object.entries(teamSummaryResults).forEach(([teamNumber, teamSummary]) => {
+        let teamRounds = Object.values(fullTeamResults[teamNumber]);
+        teamSummary.pastOpponents = teamRounds.map(roundResult => roundResult.opponent);
+        teamSummary.combinedStrength = teamSummary.pastOpponents
+            .map(opponent => teamSummaryResults[opponent].ballotsWon)
+            .reduce((cs, ballotsWon) => cs + ballotsWon);
+    });
+    normalizeByeRounds(teamSummaryResults);
     return createTeamResultsOutput(context, teamSummaryResults, fullTeamResults);
 }
