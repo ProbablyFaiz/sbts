@@ -10,13 +10,14 @@ function EmailBallotFolderLinks() {
                 return;
             }
             SheetLogger.log(`Emailing ballot folder link for team ${teamNumber}...`);
-            MailApp.sendEmail(ballotFolderEmail(context, teamNumber, teamInfo));
+            const fullEmail = ballotFolderEmail(context, teamNumber, teamInfo);
+            GmailApp.sendEmail(fullEmail.to!, fullEmail.subject!, fullEmail.body!, {name: fullEmail.name});
         })
 }
 
 const ballotFolderEmail = (context: Context, teamNumber: string, teamInfo: TeamInfo): Email => {
     return {
-        name: context.tournamentName,
+        name: `${context.tournamentName} Tournament`,
         subject: `Team ${teamNumber} Ballot Folder`,
         to: teamInfo.emails,
         replyTo: context.tournamentEmail,
