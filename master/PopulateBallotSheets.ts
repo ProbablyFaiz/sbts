@@ -5,7 +5,7 @@ function PopulateTeamBallots() {
 }
 
 function PopulateIndividualBallots() {
- populateBallots(MasterRange.IndividualBallots, BallotRange.IndividualResults, 8);
+ populateBallots(MasterRange.IndividualBallots, BallotRange.IndividualResults, 4);
 }
 
 function populateBallots(outputRangeName: string, resultsRangeName: string, rowsPerBallot: number) {
