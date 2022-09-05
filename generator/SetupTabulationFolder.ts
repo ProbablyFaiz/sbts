@@ -79,11 +79,11 @@ function createTemplatesFolder(setupContext: ISetupContext) {
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.FirstPartyName).setValue(setupContext.firstPartyName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
-    // TODO: Set possible courtrooms and rounds in the captains' form template here as well.
-    // To make this less painful, we'll need to create some generalized code for padding out large ranges with blanks.
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.CourtroomsCommaSep).setValue(setupContext.courtroomsInfo.map(info => info.name).join(","));
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.RoundsCommaSep).setValue(setupContext.roundsInfo.map(info => info.name).join(","));
 }
 
-function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: RoundInfo, courtroomInfo: ICourtroomInfo) {
+function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, round: IRoundInfo, courtroomInfo: ICourtroomInfo) {
     const trialFolderName = `R${round.name} - ${courtroomInfo.name}`;
     const trialPrefix = `R${round.name} ${courtroomInfo.name}`
     SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
@@ -102,7 +102,7 @@ function createTrialFolder(setupContext: ISetupContext, roundFolder: Folder, rou
     linkTrialSheets(trialCaptainsForm, trialBallots);
 }
 
-function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: RoundInfo, courtroomInfo: ICourtroomInfo) {
+function prepareCaptainsForm(setupContext: ISetupContext, trialFolder: Folder, trialPrefix: string, round: IRoundInfo, courtroomInfo: ICourtroomInfo) {
     const captainsForm = setupContext.captainsFormTemplate.makeCopy(`${trialPrefix} - Competitor Info Form`, trialFolder);
     const captainsFormSheet = sheetForFile(captainsForm);
     captainsFormSheet.getRangeByName(CaptainsFormRange.Round).setValue(round.name);

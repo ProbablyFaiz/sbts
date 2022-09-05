@@ -20,7 +20,7 @@ interface ICourtroomInfo {
     bailiffEmails: string[];
 }
 
-interface RoundInfo {
+interface IRoundInfo {
     name: string;
     numBallots: number;
     numCourtrooms: number;
@@ -51,6 +51,7 @@ interface ISetupContext {
     tournamentContactEmail: string;
     firstPartyName: string;
     courtroomsInfo: ICourtroomInfo[];
+    roundsInfo: IRoundInfo[];
 
     saveCourtroomFolderLink(name: string, trialFolderLink: string): void;
     writeCourtroomsToMaster(): void;
@@ -158,7 +159,7 @@ class SetupContext implements ISetupContext {
     }
 
     @memoize
-    get roundsInfo(): RoundInfo[] {
+    get roundsInfo(): IRoundInfo[] {
         return compactRange(this.getRangeValues(GeneratorRange.RoundsInfo)).map(roundCells => {
             return {
                 name: roundCells[0],
