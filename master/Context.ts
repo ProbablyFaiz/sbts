@@ -145,6 +145,8 @@ class Context implements IContext {
                 }
             }
         }
+        // Sorting ballots by date created should be sufficient to ensure that they're in the correct order
+        ballots.sort((a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime());
         return ballots;
     }
 

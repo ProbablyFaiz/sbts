@@ -8,10 +8,10 @@ function PopulateIndividualBallots() {
  populateBallots(MasterRange.IndividualBallots, BallotRange.IndividualResults, 8);
 }
 
-function populateBallots(outputRangeName, resultsRangeName, rowsPerBallot) {
+function populateBallots(outputRangeName: string, resultsRangeName: string, rowsPerBallot: number) {
   const masterSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const ballotLinksRange = masterSheet.getRangeByName(MasterRange.BallotLinks);
-  const outputRange = masterSheet.getRangeByName(outputRangeName);
+  const ballotLinksRange = masterSheet.getRangeByName(MasterRange.BallotLinks)!;
+  const outputRange = masterSheet.getRangeByName(outputRangeName)!;
   const ballotLinks = getValidatedBallotLinks(ballotLinksRange);
   const outputCells = [];
   const emptyRow = ["", "", "", "", "", "", "", "", ""];
@@ -24,15 +24,15 @@ function populateBallots(outputRangeName, resultsRangeName, rowsPerBallot) {
   outputRange.setValues(outputCells);
 }
 
-function getResultImportFormula(link, resultsRange) {
+function getResultImportFormula(link: string, resultsRange: string) {
   return `=IMPORTRANGE("${link}", "${resultsRange}")`
 }
 
-function getCaptainsFormUrlImportFormula(link) {
+function getCaptainsFormUrlImportFormula(link: string) {
   return `=IMPORTRANGE("${link}","${BallotRange.CaptainsFormUrl}")`
 }
 
-function getValidatedBallotLinks(ballotLinksRange) {
+function getValidatedBallotLinks(ballotLinksRange: Range) {
   const submittedIndex = 5; const validatedIndex = 6;
   return ballotLinksRange.getValues().filter(linkInfo => linkInfo[submittedIndex] && linkInfo[validatedIndex]).map(linkInfo => linkInfo[0]);
 }

@@ -5,6 +5,8 @@
 // The script is smart enough to see existing ballot PDFs and not recreate or overwrite them.
 
 import Folder = GoogleAppsScript.Drive.Folder;
+import File = GoogleAppsScript.Drive.File;
+import Blob = GoogleAppsScript.Base.Blob;
 
 function PublishTeamBallots() {
   const context = new Context();
@@ -28,9 +30,9 @@ function exportBallots(context: IContext) {
     let existingBallot;
     for (let team of [plaintiffTeam, defenseTeam]) {
       if (team === "") continue;
-      const teamFolder = context.teamBallotFolder(team)
+      const teamFolder = context.teamBallotFolder(team)!
       const teamRoundFolder = getChildFolder(teamFolder, `Round ${round} `); // The trailing space is important so we don't get a snafu where one round number is a prefix/suffix of another.
-      let pdfBallot = getFileByName(teamRoundFolder, pdfName);
+      let pdfBallot: File | Blob | undefined = getFileByName(teamRoundFolder, pdfName);
       if (!pdfBallot) {
         pdfBallot = existingBallot || ballotFile.getAs("application/pdf");
         pdfBallot.setName(pdfName);
