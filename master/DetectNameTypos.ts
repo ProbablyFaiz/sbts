@@ -1,19 +1,17 @@
 enum RankingRangeIndex {
     TeamNumber = 0,
     CompetitorName = 2,
-    Side = 3,
 }
 
-interface TeamSideKey {
+interface TeamKey {
     team: string;
-    side: string;
 }
 
 function DetectNameTypos(rankingRange: string[][]): string[][] {
     const groupedNames = groupRankings(compactRange(rankingRange));
     const potentialDuplicateResults: string[][] = [];
     groupedNames.forEach((nameSet, groupKey) => {
-        const groupKeyObject: TeamSideKey = JSON.parse(groupKey);
+        const groupKeyObject: TeamKey = JSON.parse(groupKey);
         const existingMatchSet: Set<string> = new Set();
         nameSet.values().forEach(name => {
             const nameSearchResults = nameSet.get(name);
@@ -24,7 +22,6 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
                     .forEach(potentialDuplicate => {
                         potentialDuplicateResults.push([
                             groupKeyObject.team,
-                            groupKeyObject.side,
                             name,
                             potentialDuplicate[1],
                             potentialDuplicate[0].toFixed(3), // strength of match
@@ -44,9 +41,8 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
 const groupRankings = (rankingRange: string[][]): Map<string, FuzzySet> => {
     const teamSideGroups: Map<string, FuzzySet> = new Map();
     rankingRange.forEach(rankRow => {
-        const groupKey: TeamSideKey = {
+        const groupKey: TeamKey = {
             team: rankRow[RankingRangeIndex.TeamNumber],
-            side: rankRow[RankingRangeIndex.Side],
         }
         if (!teamSideGroups.has(JSON.stringify(groupKey))) {
             teamSideGroups.set(JSON.stringify(groupKey), FuzzySet());
