@@ -13,18 +13,19 @@ enum BallotRange {
     IndividualResults = "IndividualResults",
     TournamentName = "TournamentNameRange",
     FirstPartyName = "FirstPartyNameRange",
+    SecondPartyName = "SecondPartyNameRange",
 }
 
 enum MasterRange {
     BallotLinks = "BallotLinksRange",
-    TeamBallots = "TeamBallotsRange",
-    IndividualBallots = "IndividualBallotsRange",
     OrchestratorLink = "OrchestratorLinkRange",
     ParentFolderLink = "ParentFolderLinkRange",
     ExportFolderLink = "ExportFolderLinkRange",
     TournamentName = "TournamentNameRange",
     TournamentEmail = "TournamentEmailRange",
-    CourtroomInfo = "CourtroomInfoRange"
+    CourtroomInfo = "CourtroomInfoRange",
+    FirstPartyName = "FirstPartyNameRange",
+    SecondPartyName = "SecondPartyNameRange",
 }
 
 enum CaptainsFormRange {
@@ -32,6 +33,7 @@ enum CaptainsFormRange {
     Courtroom = "CourtroomLetter",
     TournamentName = "TournamentNameRange",
     FirstPartyName = "FirstPartyNameRange",
+    SecondPartyName = "SecondPartyNameRange",
     AutocompleteEngineLink = "AutocompleteEngineLink",
     CourtroomsCommaSep = "CourtroomsCommaSep",
     RoundsCommaSep = "RoundsCommaSep",

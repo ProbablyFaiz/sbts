@@ -12,6 +12,8 @@ interface IContext {
     courtroomRecords: CourtroomInfo[];
     ballotRecords: BallotInfo[];
     roundsCompleted: number;
+    firstPartyName: string;
+    secondPartyName: string;
 
     teamResults: Record<string, TeamSummary>;
 }
@@ -149,6 +151,16 @@ class Context implements IContext {
     @memoize
     get ballotSpreadsheets(): BallotSpreadsheet[] {
         return this.ballotFiles.map(file => sheetForFile(file));
+    }
+    
+    @memoize
+    get firstPartyName(): string {
+        return this.getRangeValue(MasterRange.FirstPartyName) ?? "";
+    }
+    
+    @memoize
+    get secondPartyName(): string {
+        return this.getRangeValue(MasterRange.SecondPartyName) ?? "";
     }
 
     private getRangeValue(rangeName: MasterRange): string | undefined {

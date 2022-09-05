@@ -41,6 +41,8 @@ function SetupTabulationFolder(tabFolderLink: string) {
     setupContext.masterSpreadsheet.getRangeByName(MasterRange.ExportFolderLink).setValue(exportFolder.getUrl());
     setupContext.masterSpreadsheet.getRangeByName(MasterRange.TournamentName).setValue(setupContext.tournamentName);
     setupContext.masterSpreadsheet.getRangeByName(MasterRange.TournamentEmail).setValue(setupContext.tournamentContactEmail);
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.FirstPartyName).setValue(setupContext.firstPartyName);
+    setupContext.masterSpreadsheet.getRangeByName(MasterRange.SecondPartyName).setValue(setupContext.secondPartyName);
 
     createTemplatesFolder(setupContext);
     SpreadsheetApp.flush();
@@ -53,7 +55,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
         }
         const roundFolder = tabFolder.createFolder(roundFolderName);
         // DO NOT REMOVE THE BELOW LINE! IT BREAKS BALLOT PROTECTION COMPLETELY. ALSO DO NOT USE THIS EMAIL AS A BAILIFF!!!
-        roundFolder.addEditor("faiz@ucsb.edu"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
+        roundFolder.addEditor("damiansheehy.mc@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
         setupContext.courtroomsInfo
             .slice(0, round.numCourtrooms)
             .forEach(info => createTrialFolder(setupContext, roundFolder, round, info));
@@ -72,12 +74,14 @@ function createTemplatesFolder(setupContext: ISetupContext) {
     const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
     ballotTemplateSheet.getRangeByName(BallotRange.TournamentName).setValue(setupContext.tournamentName);
     ballotTemplateSheet.getRangeByName(BallotRange.FirstPartyName).setValue(setupContext.firstPartyName);
+    ballotTemplateSheet.getRangeByName(BallotRange.SecondPartyName).setValue(setupContext.secondPartyName);
 
     SheetLogger.log("Creating Captains' Form template...");
     setupContext.captainsFormTemplate = setupContext.captainsFormBaseTemplate.makeCopy("Captains' Form Template", templateFolder);
     const captainsFormTemplateSheet = sheetForFile(setupContext.captainsFormTemplate);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.TournamentName).setValue(setupContext.tournamentName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.FirstPartyName).setValue(setupContext.firstPartyName);
+    captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.SecondPartyName).setValue(setupContext.secondPartyName);
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.AutocompleteEngineLink).setValue(setupContext.autocompleteEngine.getUrl());
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.CourtroomsCommaSep).setValue(setupContext.courtroomsInfo.map(info => info.name).join(","));
     captainsFormTemplateSheet.getRangeByName(CaptainsFormRange.RoundsCommaSep).setValue(setupContext.roundsInfo.map(info => info.name).join(","));

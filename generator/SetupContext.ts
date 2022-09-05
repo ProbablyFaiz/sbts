@@ -7,6 +7,7 @@ enum GeneratorRange {
     AutocompleteTemplate = 'AutocompleteTemplateRange',
     TournamentName = 'TournamentNameRange',
     FirstPartyName = 'FirstPartyNameRange',
+    SecondPartyName = 'SecondPartyNameRange',
     CourtroomNames = 'CourtroomsInfoRange',
     RoundsInfo = 'RoundsInfoRange',
     NumberOfCourtrooms = 'NumberOfCourtroomsRange',
@@ -50,6 +51,7 @@ interface ISetupContext {
     tournamentName: string;
     tournamentContactEmail: string;
     firstPartyName: string;
+    secondPartyName: string;
     courtroomsInfo: ICourtroomInfo[];
     roundsInfo: IRoundInfo[];
 
@@ -146,6 +148,10 @@ class SetupContext implements ISetupContext {
     @memoize
     get firstPartyName(): string {
         return this.getRangeValue(GeneratorRange.FirstPartyName);
+    }
+    
+    get secondPartyName(): string {
+        return this.getRangeValue(GeneratorRange.SecondPartyName);
     }
 
     @memoize

@@ -79,6 +79,8 @@ const tabulateBallot = (ballot: Cell[], resultsContainer: TeamResultsContainer) 
 }
 
 const tabulateRound = (roundResult: RoundResult) => {
+    const context = new Context();
+    
     const normalizingFactor = NUM_BALLOTS / roundResult.ballots.length;
     let ballotsWon = 0;
     let pointDifferential = 0;
@@ -88,7 +90,7 @@ const tabulateRound = (roundResult: RoundResult) => {
     });
     ballotsWon = normalizeTotal(ballotsWon, normalizingFactor);
     pointDifferential = normalizeTotal(pointDifferential, normalizingFactor);
-    const wasPlaintiff = roundResult.side !== 'Defense';
+    const wasPlaintiff = roundResult.side !== context.secondPartyName;
     return {
         ballotsWon,
         pointDifferential,
