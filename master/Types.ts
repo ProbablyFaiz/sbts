@@ -78,3 +78,23 @@ interface BallotResult {
     pd: number;
     won: number;
 }
+
+interface TeamSummary {
+    teamNumber?: string;
+    teamName?: string;
+    byeBust?: boolean;
+
+    ballotsWon: number;
+    pointDifferential: number;
+    combinedStrength?: number;
+    pastOpponents?: string[];
+    timesPlaintiff: number;
+    timesDefense: number;
+}
+
+interface RoundResult {
+    ballotsWon: number;
+    pointDifferential: number;
+    side: string;
+    opponentTeamNumber: string;
+}

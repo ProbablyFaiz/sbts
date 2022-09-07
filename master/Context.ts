@@ -19,6 +19,7 @@ interface IContext {
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
+const PAST_OPPONENTS_SEPARATOR = ", ";
 
 class Context implements IContext {
     @memoize

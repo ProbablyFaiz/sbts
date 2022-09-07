@@ -1,31 +1,9 @@
-interface TeamSummary {
-    teamNumber?: string;
-    teamName?: string;
-    byeBust?: boolean;
-    
-    ballotsWon: number;
-    pointDifferential: number;
-    combinedStrength?: number;
-    pastOpponents?: string[];
-    timesPlaintiff: number;
-    timesDefense: number;
-}
-
-interface RoundResult {
-    ballotsWon: number;
-    pointDifferential: number;
-    side: string;
-    opponentTeamNumber: string;
-}
-
-const PAST_OPPONENTS_SEPARATOR = ", ";
-
 function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number): RoundResult {
     const normFactor = ballotsPerMatch / ballotResults.length;
     // We're guaranteed to have at least one ballot result, so the below line is safe
     const side = ballotResults[0].side;
     const opponentTeamNumber = ballotResults[0].opponentTeamNumber;
-    
+
     // Sum up the ballots won and point differential, adjusting for the number of ballots per match
     return ballotResults.reduce((acc, ballotResult) => {
         acc.ballotsWon += ballotResult.won * normFactor;
@@ -100,22 +78,24 @@ function getAllTeamResults(rounds: string[], ballotsPerMatch: number): Record<st
     return teamResults as Record<string, Required<TeamSummary>>;
 }
 
+function compareTeamSummaries(a: TeamSummary, b: TeamSummary) {
+    // Sort order: byeBust, ballotsWon, combinedStrength, pointDifferential
+    if (a.byeBust !== b.byeBust) {
+        // A byeBust team is always last
+        return a.byeBust ? 1 : -1;
+    }
+    if (a.ballotsWon !== b.ballotsWon) {
+        return b.ballotsWon - a.ballotsWon;
+    }
+    if (a.combinedStrength !== b.combinedStrength) {
+        return b.combinedStrength! - a.combinedStrength!;
+    }
+    return b.pointDifferential - a.pointDifferential;
+}
+
 function getTeamResultsOutput(teamResults: Record<string, Required<TeamSummary>>) {
     const results = Object.values(teamResults);
-    results.sort((a, b) => {
-        // Sort order: byeBust, ballotsWon, combinedStrength, pointDifferential
-        if (a.byeBust !== b.byeBust) {
-            // A byeBust team is always last
-            return a.byeBust ? 1 : -1;
-        }
-        if (a.ballotsWon !== b.ballotsWon) {
-            return b.ballotsWon - a.ballotsWon;
-        }
-        if (a.combinedStrength !== b.combinedStrength) {
-            return b.combinedStrength - a.combinedStrength;
-        }
-        return b.pointDifferential - a.pointDifferential;
-    });
+    results.sort(compareTeamSummaries);
     return results.map((teamResult, i) => [
         i + 1,
         teamResult.teamNumber,
