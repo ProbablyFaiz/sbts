@@ -1,8 +1,8 @@
 function displayRoundMatchResults(round: string) {
     const roundResults = getAllTeamResults([round], undefined);
     const seenTeams = new Set();
-    const outputCells = [`Round ${round} Summary`];
-    for (const teamNumber of Object.keys(roundResults).sort()) {
+    const outputCells = [`${round} Round Summary`];
+    for (const teamNumber of Object.keys(roundResults)) {
         const teamResult = roundResults[teamNumber];
         if (seenTeams.has(teamNumber)) {
             continue;
@@ -20,15 +20,15 @@ function displayRoundMatchResults(round: string) {
             outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon})`);
         }
         else {
-            const outcome = compareTeamSummaries(teamResult, opponentResult);
-            if (outcome > 0) {
-                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${teamResult.pointDifferential}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${opponentResult.pointDifferential})`);
+            const teamMargin = teamResult.pointDifferential;
+            if (teamMargin > 0) {
+                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
             }
-            else if (outcome < 0) {
-                outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${opponentResult.pointDifferential}) defeats Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${teamResult.pointDifferential})`);
+            else if (teamMargin < 0) {
+                outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)}) defeats Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)})`);
             }
             else {
-                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${teamResult.pointDifferential}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${opponentResult.pointDifferential})`);
+                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
             }
         }
     }
@@ -43,6 +43,6 @@ function DisplayMatchResults(roundRange: any) {
     
     // Get the results for each round
     return rounds.reduce((outputCells, round) => {
-        return outputCells.concat(displayRoundMatchResults(round));
+        return outputCells.concat(displayRoundMatchResults(round), [""]);
     }, [] as string[]);
 }

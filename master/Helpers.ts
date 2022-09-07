@@ -23,6 +23,10 @@ function flattenRange(roundRange: (string | string[] | string[][])): string[] {
     return roundRange as string[];
 }
 
+function formatPd(pd: number): string {
+    return pd > 0 ? `+${pd}` : `${pd}`;
+}
+
 function sheetForFile(file: GoogleFile): Spreadsheet {
     return SpreadsheetApp.openById(file.getId())
 }
