@@ -10,6 +10,19 @@ function compactRange(rangeArr: string[][]): string[][] {
     return rangeArr.filter(row => row.some(cell => !['', null, undefined].includes(cell)));
 }
 
+function flattenRange(roundRange: (string | string[] | string[][])): string[] {
+    // Flatten a round range into a list of rounds
+    if (typeof roundRange === "string") {
+        return [roundRange];
+    }
+    if (Array.isArray(roundRange[0])) {
+        return (roundRange as string[][]).reduce((acc, row) => {
+            return acc.concat(row);
+        }, [] as string[]);
+    }
+    return roundRange as string[];
+}
+
 function sheetForFile(file: GoogleFile): Spreadsheet {
     return SpreadsheetApp.openById(file.getId())
 }

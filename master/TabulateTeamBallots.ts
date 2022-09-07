@@ -1,5 +1,6 @@
-function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number): RoundResult {
-    const normFactor = ballotsPerMatch / ballotResults.length;
+function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number | undefined): RoundResult {
+    // If ballotsPerMatch is undefined, we don't do any normalization
+    const normFactor = ballotsPerMatch != undefined ? ballotsPerMatch / ballotResults.length : 1;
     // We're guaranteed to have at least one ballot result, so the below line is safe
     const side = ballotResults[0].side;
     const opponentTeamNumber = ballotResults[0].opponentTeamNumber;
@@ -12,17 +13,14 @@ function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number):
     }, {ballotsWon: 0, pointDifferential: 0, side, opponentTeamNumber} as RoundResult);
 }
 
-function getTeamResult(teamBallots: Record<string, BallotResult[]>, ballotsPerMatch: number, context: IContext): TeamSummary {
+function getTeamResult(teamBallots: Record<string, BallotResult[]>, ballotsPerMatch: number | undefined, context: IContext): TeamSummary {
     const teamResult = Object.values(teamBallots).reduce((acc, roundBallots) => {
         const roundResult = getRoundResult(roundBallots, ballotsPerMatch);
         acc.ballotsWon += roundResult.ballotsWon;
         acc.pointDifferential += roundResult.pointDifferential;
 
-        if (acc.pastOpponents === undefined) {
-            acc.pastOpponents = [];
-        }
         // We intentionally allow duplicate opponents here in case a team faces the same opponent multiple times
-        acc.pastOpponents.push(roundResult.opponentTeamNumber);
+        acc.pastOpponents!.push(roundResult.opponentTeamNumber);
 
         if (roundResult.side === context.firstPartyName) {
             acc.timesPlaintiff++;
@@ -31,7 +29,7 @@ function getTeamResult(teamBallots: Record<string, BallotResult[]>, ballotsPerMa
         }
 
         return acc;
-    }, {ballotsWon: 0, pointDifferential: 0, timesPlaintiff: 0, timesDefense: 0} as TeamSummary);
+    }, {ballotsWon: 0, pointDifferential: 0, timesPlaintiff: 0, timesDefense: 0, pastOpponents: []} as TeamSummary);
     return teamResult;
 }
 
@@ -55,13 +53,26 @@ function getCombinedStrength(teamNumber: string, teamResults: Record<string, Tea
     }, 0);
 }
 
-function getAllTeamResults(rounds: string[], ballotsPerMatch: number): Record<string, Required<TeamSummary>> {
+function getMaxNumBallots(groupedResults: Record<string, Record<string, BallotResult[]>>) {
+    return Object.values(groupedResults).reduce((max, teamBallots) => {
+        return Math.max(max, Object.values(teamBallots).reduce((max, roundBallots) => {
+            return Math.max(max, roundBallots.length);
+        }, 1));
+    }, 1);
+}
+
+function getAllTeamResults(rounds: string[], ballotsPerMatch: number | undefined): Record<string, Required<TeamSummary>> {
     const roundSet = new Set(rounds);
     const context = new Context();
     // Filter out ballots that are not in the allowed rounds
     const ballotResults = context.ballotResults.filter((br) => roundSet.has(br.round));
     // Group ballotResults by teamNumber, and within that by round
     const groupedResults = getGroupedResults(ballotResults);
+    // Disabling the below line for now because we want to instead just not normalize when
+    // ballotsPerMatch is undefined
+    // If ballotsPerMatch is undefined, set it to the maximum number of ballots per match we find
+    // ballotsPerMatch = ballotsPerMatch ?? getMaxNumBallots(groupedResults);
+
 
     const teamResults = Object.entries(groupedResults).reduce((acc, [teamNumber, teamBallots]) => {
         const teamResult = getTeamResult(teamBallots, ballotsPerMatch, context);
@@ -78,9 +89,10 @@ function getAllTeamResults(rounds: string[], ballotsPerMatch: number): Record<st
     return teamResults as Record<string, Required<TeamSummary>>;
 }
 
-function compareTeamSummaries(a: TeamSummary, b: TeamSummary) {
+function compareTeamSummaries(a: TeamSummary, b: TeamSummary, considerByeBust: boolean = false) {
+    // A positive return value means a is better than b, and vice versa for a negative return value
     // Sort order: byeBust, ballotsWon, combinedStrength, pointDifferential
-    if (a.byeBust !== b.byeBust) {
+    if (considerByeBust && a.byeBust !== b.byeBust) {
         // A byeBust team is always last
         return a.byeBust ? 1 : -1;
     }
@@ -95,7 +107,7 @@ function compareTeamSummaries(a: TeamSummary, b: TeamSummary) {
 
 function getTeamResultsOutput(teamResults: Record<string, Required<TeamSummary>>) {
     const results = Object.values(teamResults);
-    results.sort(compareTeamSummaries);
+    results.sort((a, b) => compareTeamSummaries(a, b, true));
     return results.map((teamResult, i) => [
         i + 1,
         teamResult.teamNumber,
@@ -109,21 +121,9 @@ function getTeamResultsOutput(teamResults: Record<string, Required<TeamSummary>>
     ]);
 }
 
-function flattenRoundRange(roundRange: (string | string[] | string[][])): string[] {
-    // Flatten a round range into a list of rounds
-    if (typeof roundRange === "string") {
-        return [roundRange];
-    }
-    if (Array.isArray(roundRange[0])) {
-        return (roundRange as string[][]).reduce((acc, row) => {
-            return acc.concat(row);
-        }, [] as string[]);
-    }
-    return roundRange as string[];
-}
 
 function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
-    const rounds = flattenRoundRange(roundRange);
+    const rounds = flattenRange(roundRange);
     const teamResults = getAllTeamResults(rounds, ballotsPerMatch);
     return getTeamResultsOutput(teamResults);
 }
