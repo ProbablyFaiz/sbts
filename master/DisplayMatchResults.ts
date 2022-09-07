@@ -22,13 +22,13 @@ function displayRoundMatchResults(round: string) {
         else {
             const teamMargin = teamResult.pointDifferential;
             if (teamMargin > 0) {
-                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
+                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
             }
             else if (teamMargin < 0) {
-                outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)}) defeats Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)})`);
+                outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)})`);
             }
             else {
-                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
+                outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}, PD ${formatPd(teamResult.pointDifferential)}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}, PD ${formatPd(opponentResult.pointDifferential)})`);
             }
         }
     }

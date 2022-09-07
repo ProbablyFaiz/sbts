@@ -125,5 +125,6 @@ function getTeamResultsOutput(teamResults: Record<string, Required<TeamSummary>>
 function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
     const rounds = flattenRange(roundRange);
     const teamResults = getAllTeamResults(rounds, ballotsPerMatch);
-    return getTeamResultsOutput(teamResults);
+    const output = getTeamResultsOutput(teamResults);
+    return output.length > 0 ? output : [["No results to display"]];
 }
