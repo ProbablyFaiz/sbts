@@ -94,7 +94,7 @@ const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType,
     currJudgeSet!.add(ballot[IndividualResultsIndices.JUDGE_NAME])
 }
 
-function TABULATEINDIVIDUALBALLOTS(ballotsRange, rankingType, rounds: any[][]) {
+function TabulateIndividualBallots(ballotsRange, rankingType, rounds: any[][]) {
     rounds = rounds[0];
     const context = new Context();
     const competitorMap = new Map();

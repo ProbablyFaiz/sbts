@@ -1,4 +1,3 @@
-
 interface IContext {
     tabFolder: Folder;
     masterSpreadsheet: MasterSpreadsheet;
@@ -11,6 +10,7 @@ interface IContext {
     tournamentEmail: string;
     courtroomRecords: CourtroomInfo[];
     ballotRecords: BallotInfo[];
+    ballotResults: BallotResult[];
     roundsCompleted: number;
     firstPartyName: string;
     secondPartyName: string;
@@ -40,17 +40,33 @@ class Context implements IContext {
     get teamResults(): Record<string, TeamSummary> {
         const teamResultMapping: Record<string, TeamSummary> = {};
         compactRange(this.getRangeValues(MasterRange.TeamResults) ?? []).forEach(row => {
-            teamResultMapping[row[TeamResultsOutputIndex.TeamNumber]] = {
-                ballotsWon: parseFloat(row[TeamResultsOutputIndex.BallotsWon]),
-                combinedStrength: parseFloat(row[TeamResultsOutputIndex.CS]),
-                pointDifferential: parseFloat(row[TeamResultsOutputIndex.PD]),
-                timesPlaintiff: parseInt(row[TeamResultsOutputIndex.TimesPlaintiff]),
-                timesDefense: parseInt(row[TeamResultsOutputIndex.TimesDefense]),
-                pastOpponents: row[TeamResultsOutputIndex.PastOpponents].split(PAST_OPPONENTS_SEPARATOR),
-                byeBust: this.teamInfo[row[TeamResultsOutputIndex.TeamNumber]].byeBust, // Hacky, but we need it
+            teamResultMapping[row[1]] = {
+                ballotsWon: parseFloat(row[3]),
+                combinedStrength: parseFloat(row[4]),
+                pointDifferential: parseFloat(row[5]),
+                timesPlaintiff: parseInt(row[6]),
+                timesDefense: parseInt(row[7]),
+                pastOpponents: row[8].split(PAST_OPPONENTS_SEPARATOR),
+                byeBust: this.teamInfo[row[1]].byeBust,
             };
         });
         return teamResultMapping;
+    }
+
+    @memoize
+    get ballotResults(): BallotResult[] {
+        return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? [])
+            .map((row) => {
+                return {
+                    round: row[0],
+                    judgeName: row[1],
+                    teamNumber: row[2],
+                    opponentTeamNumber: row[3],
+                    side: row[4],
+                    pd: parseFloat(row[5]),
+                    won: parseFloat(row[6]),
+                }
+            })
     }
 
     @memoize
@@ -154,12 +170,12 @@ class Context implements IContext {
     get ballotSpreadsheets(): BallotSpreadsheet[] {
         return this.ballotFiles.map(file => sheetForFile(file));
     }
-    
+
     @memoize
     get firstPartyName(): string {
         return this.getRangeValue(MasterRange.FirstPartyName) ?? "";
     }
-    
+
     @memoize
     get secondPartyName(): string {
         return this.getRangeValue(MasterRange.SecondPartyName) ?? "";

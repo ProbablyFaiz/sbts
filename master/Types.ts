@@ -68,3 +68,13 @@ interface BallotInfo {
     locked: boolean;
     validated: boolean;
 }
+
+interface BallotResult {
+    round: string;
+    judgeName: string;
+    teamNumber: string;
+    opponentTeamNumber: string;
+    side: string;
+    pd: number;
+    won: number;
+}
