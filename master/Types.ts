@@ -69,7 +69,7 @@ interface BallotInfo {
     validated: boolean;
 }
 
-interface BallotResult {
+interface TeamBallotResult {
     round: string;
     judgeName: string;
     teamNumber: string;
@@ -77,6 +77,15 @@ interface BallotResult {
     side: string;
     pd: number;
     won: number;
+}
+
+interface IndividualBallotResult {
+    round: string;
+    judgeName: string;
+    teamNumber: string;
+    competitorName: string;
+    side: string;
+    score: number;
 }
 
 interface TeamSummary {
@@ -90,6 +99,13 @@ interface TeamSummary {
     pastOpponents?: string[];
     timesPlaintiff: number;
     timesDefense: number;
+}
+
+interface IndividualSummary {
+    teamNumber: string;
+    competitorName: string;
+    score: number;
+    judgeScores?: number[];
 }
 
 interface RoundResult {

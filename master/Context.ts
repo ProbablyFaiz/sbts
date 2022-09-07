@@ -10,7 +10,8 @@ interface IContext {
     tournamentEmail: string;
     courtroomRecords: CourtroomInfo[];
     ballotRecords: BallotInfo[];
-    ballotResults: BallotResult[];
+    teamBallotResults: TeamBallotResult[];
+    individualBallotResults: IndividualBallotResult[];
     roundsCompleted: number;
     firstPartyName: string;
     secondPartyName: string;
@@ -55,7 +56,7 @@ class Context implements IContext {
     }
 
     @memoize
-    get ballotResults(): BallotResult[] {
+    get teamBallotResults(): TeamBallotResult[] {
         return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? [])
             .map((row) => {
                 return {
@@ -69,6 +70,22 @@ class Context implements IContext {
                 }
             })
     }
+    
+    @memoize
+    get individualBallotResults(): IndividualBallotResult[] {
+        return compactRange(this.getRangeValues(MasterRange.IndividualBallots) ?? [])
+            .map((row) => {
+                return {
+                    round: row[0],
+                    judgeName: row[1],
+                    teamNumber: row[2],
+                    competitorName: row[3],
+                    side: row[4],
+                    score: parseFloat(row[6]),
+                }
+            })
+    }
+                    
 
     @memoize
     get roundsCompleted(): number {

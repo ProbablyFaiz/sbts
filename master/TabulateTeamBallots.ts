@@ -1,4 +1,4 @@
-function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number | undefined): RoundResult {
+function getRoundResult(ballotResults: TeamBallotResult[], ballotsPerMatch: number | undefined): RoundResult {
     // If ballotsPerMatch is undefined, we don't do any normalization
     const normFactor = ballotsPerMatch != undefined ? ballotsPerMatch / ballotResults.length : 1;
     // We're guaranteed to have at least one ballot result, so the below line is safe
@@ -13,7 +13,7 @@ function getRoundResult(ballotResults: BallotResult[], ballotsPerMatch: number |
     }, {ballotsWon: 0, pointDifferential: 0, side, opponentTeamNumber} as RoundResult);
 }
 
-function getTeamResult(teamBallots: Record<string, BallotResult[]>, ballotsPerMatch: number | undefined, context: IContext): TeamSummary {
+function getTeamResult(teamBallots: Record<string, TeamBallotResult[]>, ballotsPerMatch: number | undefined, context: IContext): TeamSummary {
     const teamResult = Object.values(teamBallots).reduce((acc, roundBallots) => {
         const roundResult = getRoundResult(roundBallots, ballotsPerMatch);
         acc.ballotsWon += roundResult.ballotsWon;
@@ -33,7 +33,7 @@ function getTeamResult(teamBallots: Record<string, BallotResult[]>, ballotsPerMa
     return teamResult;
 }
 
-function getGroupedResults(ballotResults: BallotResult[]) {
+function getGroupedResults(ballotResults: TeamBallotResult[]) {
     return ballotResults.reduce((acc, br) => {
         if (!(br.teamNumber in acc)) {
             acc[br.teamNumber] = {};
@@ -43,7 +43,7 @@ function getGroupedResults(ballotResults: BallotResult[]) {
         }
         acc[br.teamNumber][br.round].push(br);
         return acc;
-    }, {} as Record<string, Record<string, BallotResult[]>>);
+    }, {} as Record<string, Record<string, TeamBallotResult[]>>);
 }
 
 function getCombinedStrength(teamNumber: string, teamResults: Record<string, TeamSummary>) {
@@ -53,7 +53,7 @@ function getCombinedStrength(teamNumber: string, teamResults: Record<string, Tea
     }, 0);
 }
 
-function getMaxNumBallots(groupedResults: Record<string, Record<string, BallotResult[]>>) {
+function getMaxNumBallots(groupedResults: Record<string, Record<string, TeamBallotResult[]>>) {
     return Object.values(groupedResults).reduce((max, teamBallots) => {
         return Math.max(max, Object.values(teamBallots).reduce((max, roundBallots) => {
             return Math.max(max, roundBallots.length);
@@ -65,7 +65,7 @@ function getAllTeamResults(rounds: string[], ballotsPerMatch: number | undefined
     const roundSet = new Set(rounds);
     const context = new Context();
     // Filter out ballots that are not in the allowed rounds
-    const ballotResults = context.ballotResults.filter((br) => roundSet.has(br.round));
+    const ballotResults = context.teamBallotResults.filter((br) => roundSet.has(br.round));
     // Group ballotResults by teamNumber, and within that by round
     const groupedResults = getGroupedResults(ballotResults);
     // Disabling the below line for now because we want to instead just not normalize when
