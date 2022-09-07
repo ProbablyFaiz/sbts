@@ -1,104 +1,78 @@
-// Copyright (c) 2020 Faiz Surani. All rights reserved.
-// This and TabulateTeamBallots were written when I was a very bad programmer.
-// I still can't touch this code because it makes no sense.
-// There are so many side effects. It is perhaps the greatest advertisement for
-// functional programming ever created
-
-type TeamRoundJudgesMap = Map<string, Set<string>>
-
-const IndividualResultsIndices = {
-    ROUND: 0,
-    JUDGE_NAME: 1,
-    TEAM_NUMBER: 2,
-    COMPETITOR_NAME: 3,
-    SIDE: 4,
-    TYPE: 5,
-    RANK_VALUE: 6,
-    COURTROOM: 9,
-    OUTPUT_RANK_VALUE: 3,
+const getCompetitorKey = (teamNumber: string, competitor: string) => JSON.stringify([teamNumber, competitor]);
+const parseCompetitorKey = (competitorKey: string) => {
+    const [teamNumber, competitorName] = JSON.parse(competitorKey);
+    return {teamNumber, competitorName};
 }
 
-const INDIVIDUAL_BALLOT_NORMALIZING_FACTOR = 1;
-
-const normalizeValue = (total: number, factor: number): number => {
-    return Math.round(((total * factor) + Number.EPSILON) * 100) / 100
+const getGroupedIndividualResults = (individualBallots: IndividualBallotResult[]) => {
+    // Group by competitor key and within that group, group by round
+    const groupedIndividualBallots = individualBallots.reduce((acc, ballot) => {
+        const competitorKey = getCompetitorKey(ballot.teamNumber, ballot.competitorName);
+        if (!(competitorKey in acc)) {
+            acc[competitorKey] = {};
+        }
+        if (!(ballot.round in acc[competitorKey])) {
+            acc[competitorKey][ballot.round] = [];
+        }
+        acc[competitorKey][ballot.round].push(ballot);
+        return acc;
+    }
+    , {} as Record<string, Record<string, IndividualBallotResult[]>>);
+    return groupedIndividualBallots;
 }
 
-const compareIndividualResults = (first: number[], second: number[]): number => {
-    return second[IndividualResultsIndices.OUTPUT_RANK_VALUE] - first[IndividualResultsIndices.OUTPUT_RANK_VALUE];
+const getCompetitorResult = (roundBallots: Record<string, IndividualBallotResult[]>) => {
+    // Get the average score for each round
+    const competitorResult = Object.values(roundBallots).map((singleRoundBallots) =>  {
+        const roundScoreSum = singleRoundBallots.reduce((acc, ballot) => acc + ballot.score, 0);
+        return roundScoreSum / singleRoundBallots.length;
+    }).reduce((acc, score) => {
+        acc.totalScore += score;
+        acc.numRounds++;
+        return acc;
+    }, {totalScore: 0, numRounds: 0} as {totalScore: number, numRounds: number});
+    return competitorResult;
 }
 
-const createIndividualResultsOutput = (context: IContext, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
-    const resultsArr: Cell[][] = [];
-    competitorMap.forEach((competitorObject, competitorKey) => {
-        const competitorInfo = JSON.parse(competitorKey);
-        let totalRankValue = 0;
-        Object.entries(competitorObject).forEach(([roundNum, roundRanks]: [string, any[]]) => {
-            const teamRoundKey = { team: competitorInfo["team"].toString(), round: roundNum.toString() };
-            const numJudges = teamRoundJudgesMap.get(JSON.stringify(teamRoundKey))!.size;
-            const normalizingFactor = INDIVIDUAL_BALLOT_NORMALIZING_FACTOR / numJudges;
-            const roundRankValue = roundRanks.reduce((accumulator, rankInfo) => accumulator + rankInfo.rankValue, 0);
-            totalRankValue += normalizeValue(roundRankValue, normalizingFactor);
-        });
-        const individualResult = [
-            competitorInfo["team"],
-            context.teamInfo[competitorInfo["team"]].teamName,
-            competitorInfo["name"],
-            // competitorInfo["side"],
-            totalRankValue,
-        ];
-        resultsArr.push(individualResult);
-    });
-    resultsArr.sort(compareIndividualResults);
-    return resultsArr;
-}
-
-const tabulateIndividualBallot = (context: IContext, ballot, index, rankingType, rounds, competitorMap, teamRoundJudgesMap: TeamRoundJudgesMap) => {
-    const roundNumber = ballot[IndividualResultsIndices.ROUND];
-    if (ballot[IndividualResultsIndices.TYPE] !== rankingType ||
-        ballot[IndividualResultsIndices.TEAM_NUMBER] === "" ||
-        ballot[IndividualResultsIndices.COMPETITOR_NAME].trim() === "" ||
-        !(rounds.includes(roundNumber))
-    ) {
-        return;
-    }
-    const competitorKey = {
-        team: ballot[IndividualResultsIndices.TEAM_NUMBER],
-        name: ballot[IndividualResultsIndices.COMPETITOR_NAME].trim(),
-        // Disabling this because side is irrelevant in moot court rankings
-        // side: ballot[IndividualResultsIndices.SIDE]
-    };
-    let competitorObject;
-    if (competitorMap.has(JSON.stringify(competitorKey))) {
-        competitorObject = competitorMap.get(JSON.stringify(competitorKey));
-    } else {
-        competitorObject = {};
-        competitorMap.set(JSON.stringify(competitorKey), competitorObject);
-    }
-    if (!(roundNumber in competitorObject)) {
-        competitorObject[roundNumber] = [];
-    }
-    competitorObject[roundNumber].push({
-        rankValue: ballot[IndividualResultsIndices.RANK_VALUE],
-        judgeName: ballot[IndividualResultsIndices.JUDGE_NAME]
-    });
-
-    const teamRoundKey = {
-        team: ballot[IndividualResultsIndices.TEAM_NUMBER].toString(),
-        round: roundNumber.toString(),
-    }
-    if (!teamRoundJudgesMap.has(JSON.stringify(teamRoundKey))) {
-        teamRoundJudgesMap.set(JSON.stringify(teamRoundKey), new Set<string>());
-    }
-    const currJudgeSet = teamRoundJudgesMap.get(JSON.stringify(teamRoundKey));
-    currJudgeSet!.add(ballot[IndividualResultsIndices.JUDGE_NAME])
-}
-
-function TabulateIndividualBallots(ballotsRange, rankingType, rounds: any[][]) {
-    rounds = rounds[0];
+const getAllIndividualResults = (rounds: string[]): Record<string, IndividualSummary> => {
     const context = new Context();
-    const competitorMap = new Map();
-    const teamRoundJudgesMap: TeamRoundJudgesMap = new Map();
-    ballotsRange.forEach((ballot: Cell[], index: number) => tabulateIndividualBallot(context, ballot, index, rankingType, rounds, competitorMap, teamRoundJudgesMap));
-    return createIndividualResultsOutput(context, competitorMap, teamRoundJudgesMap);
+    const roundSet = new Set(rounds);
+    const individualBallots = context.individualBallotResults
+        .filter(ballot => roundSet.has(ballot.round));
+
+    const groupedIndividualBallots = getGroupedIndividualResults(individualBallots);     
+    
+    const individualResults = Object.entries(groupedIndividualBallots).reduce((acc, [competitorKey, roundBallots]) => {
+        const competitorResult = getCompetitorResult(roundBallots);
+        const {teamNumber, competitorName} = parseCompetitorKey(competitorKey);
+        const individualSummary = {
+            teamNumber,
+            teamName: context.teamInfo[teamNumber].teamName,
+            competitorName,
+            score: competitorResult.totalScore / competitorResult.numRounds,
+        };
+        acc[competitorKey] = individualSummary;
+        return acc;
+    }
+    , {} as Record<string, IndividualSummary>);
+    return individualResults;
+}
+
+const getIndividualResultsOutput = (individualResults: Record<string, IndividualSummary>) => {
+    return Object.values(individualResults)
+        .sort((a, b) => b.score - a.score)
+        .map((result, i) => [
+        i + 1,
+        result.teamNumber,
+        result.teamName,
+        result.competitorName,
+        result.score,
+    ]);
+}
+
+function TabulateIndividualBallots(roundRange: any) {
+    const rounds = flattenRange(roundRange);
+    const individualResults = getAllIndividualResults(rounds);
+    const output = getIndividualResultsOutput(individualResults);
+    return output.length > 0 ? output : [["No results to display"]];
 }

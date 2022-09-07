@@ -103,6 +103,7 @@ interface TeamSummary {
 
 interface IndividualSummary {
     teamNumber: string;
+    teamName?: string;
     competitorName: string;
     score: number;
     judgeScores?: number[];
