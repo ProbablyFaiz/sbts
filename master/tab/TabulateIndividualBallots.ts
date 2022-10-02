@@ -70,7 +70,7 @@ const getAllIndividualResults = (
       const { teamNumber, competitorName } = parseCompetitorKey(competitorKey);
       const individualSummary = {
         teamNumber,
-        teamName: context.teamInfo[teamNumber].teamName,
+        teamName: context.teamInfo[teamNumber]?.teamName,
         competitorName,
         score: competitorResult.totalScore / competitorResult.numRounds,
       };

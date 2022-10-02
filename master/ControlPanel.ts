@@ -33,7 +33,7 @@ function OnSetupMasterSpreadsheetClick() {
   // Process the user's response.
   if (result == ui.Button.YES) {
     if (ScriptApp.getProjectTriggers().length > 0) {
-      ui.alert("Detected existing setup configuration, aborting...");
+      ui.alert("Detected existing setup configuration, aborting. Delete the existing triggers and try again.");
     } else {
       SheetLogger.log("Adding ballot links...");
       PopulateBallotLinks();

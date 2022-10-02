@@ -158,8 +158,9 @@ function compareTeamSummaries(
 function getTeamResultsOutput(
   teamResults: Record<string, Required<TeamSummary>>
 ) {
-  const results = Object.values(teamResults);
-  results.sort((a, b) => compareTeamSummaries(a, b, true));
+  const results = Object.values(teamResults).sort((a, b) =>
+    compareTeamSummaries(a, b, true)
+  );
   return results.reduce(
     (acc, teamResult, i) => [
       ...acc,
