@@ -4,6 +4,6 @@
     "target": "ES6",
     "lib": ["esnext"],
     "strictNullChecks": true,
-    "noImplicitAny": true,
+    "noImplicitAny": true
   }
 }

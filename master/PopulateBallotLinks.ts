@@ -4,18 +4,15 @@
 // Do not run this script thereafter, as it may result in unexpected behavior including but not limited to overwriting existing data in the master sheet.
 
 function PopulateBallotLinks() {
-    const context = new Context();
-    const ballots = context.ballotFiles;
-    const masterSheet = context.masterSpreadsheet;
-    if (ballots.length === 0) return;
-    const startRow = 2;
-    const endRow = startRow + ballots.length - 1;
-    const outputCells = ballots.map((b) => [
-        b.getUrl(),
-        b.getName(),
-    ]);
-    const rangeStr = `Ballot Links!A${startRow}:B${endRow}`;
+  const context = new Context();
+  const ballots = context.ballotFiles;
+  const masterSheet = context.masterSpreadsheet;
+  if (ballots.length === 0) return;
+  const startRow = 2;
+  const endRow = startRow + ballots.length - 1;
+  const outputCells = ballots.map((b) => [b.getUrl(), b.getName()]);
+  const rangeStr = `Ballot Links!A${startRow}:B${endRow}`;
 
-    const linksRange = masterSheet.getRange(rangeStr);
-    linksRange.setValues(outputCells);
+  const linksRange = masterSheet.getRange(rangeStr);
+  linksRange.setValues(outputCells);
 }
