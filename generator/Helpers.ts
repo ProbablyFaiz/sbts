@@ -15,27 +15,25 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId());
 }
 
-function getOrCreateChildFolder(
-  parentFolder: Folder,
-  childName: string
-): Folder {
-  const childFolderIterator = parentFolder.searchFolders(
-    `title contains "${childName}"`
-  );
-  if (childFolderIterator.hasNext()) {
-    return childFolderIterator.next();
-  }
-  return parentFolder.createFolder(childName);
-}
-
 function getChildFolder(parentFolder: Folder, childName: string): Folder | undefined {
   const childFolderIterator = parentFolder.searchFolders(
-    `title contains "${childName}"`
+    `title = "${childName}"`
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
   }
   return undefined;
+}
+
+function getOrCreateChildFolder(
+    parentFolder: Folder,
+    childName: string
+): Folder {
+  const childFolder = getChildFolder(parentFolder, childName);
+  if (childFolder) {
+    return childFolder;
+  }
+  return parentFolder.createFolder(childName);
 }
 
 function getFileByName(

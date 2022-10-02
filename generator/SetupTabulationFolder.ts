@@ -248,6 +248,7 @@ function createTrialFolder(
     trialBallots.push(createdBallot);
   }
   linkTrialSheets(trialCaptainsForm, trialBallots);
+  SpreadsheetApp.flush();
 }
 
 function prepareCaptainsForm(
