@@ -10,11 +10,13 @@ function SetupTabulationFolder(tabFolderLink: string) {
   const tabFolder = setupContext.tabFolder;
 
   let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
+  let createdMasterSheet = false;
   if (masterSheetFile) {
     SheetLogger.log(
       "Existing master spreadsheet found, not creating a new one..."
     );
   } else {
+    createdMasterSheet = true;
     masterSheetFile = setupContext.masterSheetTemplate.makeCopy(
       MASTER_SPREADSHEET_NAME,
       tabFolder
@@ -61,6 +63,50 @@ function SetupTabulationFolder(tabFolderLink: string) {
   const exportFolder = getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
   setupContext.masterSpreadsheet = sheetForFile(masterSheetFile);
+  if (createdMasterSheet) {
+    populateMasterSpreadsheet(
+      setupContext,
+      orchestratorFile,
+      tabFolder,
+      exportFolder
+    );
+  }
+
+  createTemplatesFolder(setupContext);
+  SpreadsheetApp.flush();
+
+  for (let round of setupContext.roundsInfo) {
+    const roundFolderName = `Round ${round.name}`;
+    let roundFolder = getChildFolder(tabFolder, roundFolderName);
+    if (roundFolder == undefined) {
+      roundFolder = tabFolder.createFolder(roundFolderName);
+      // DO NOT REMOVE THE BELOW LINE!
+      // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
+      roundFolder.addEditor("damiansheehy.mc@gmail.com");
+    } else {
+      SheetLogger.log(
+        `Round ${round.name} folder already exists, not creating a new one...`
+      );
+    }
+    setupContext.courtroomsInfo
+      // This is the per-round limiter, not the global one.
+      .slice(0, round.numCourtrooms)
+      .forEach((info) =>
+        createTrialFolder(setupContext, roundFolder, round, info)
+      );
+  }
+  setupContext.writeCourtroomsToMaster();
+  SheetLogger.log(
+    `Created ballots for ${setupContext.roundsInfo.length} round(s).`
+  );
+}
+
+function populateMasterSpreadsheet(
+  setupContext: SetupContext,
+  orchestratorFile: GoogleAppsScript.Drive.File,
+  tabFolder: GoogleAppsScript.Drive.Folder,
+  exportFolder: GoogleAppsScript.Drive.Folder
+) {
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.OrchestratorLink)
     .setValue(orchestratorFile.getUrl());
@@ -82,39 +128,37 @@ function SetupTabulationFolder(tabFolderLink: string) {
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.SecondPartyName)
     .setValue(setupContext.secondPartyName);
-
-  createTemplatesFolder(setupContext);
-  SpreadsheetApp.flush();
-
-  for (let round of setupContext.roundsInfo) {
-    const roundFolderName = `Round ${round.name}`;
-    if (tabFolder.getFoldersByName(roundFolderName).hasNext()) {
-      logDuplicate();
-      return;
-    }
-    const roundFolder = tabFolder.createFolder(roundFolderName);
-    // DO NOT REMOVE THE BELOW LINE! IT BREAKS BALLOT PROTECTION COMPLETELY. ALSO DO NOT USE THIS EMAIL AS A BAILIFF!!!
-    roundFolder.addEditor("damiansheehy.mc@gmail.com"); // Because if all editors of a spreadsheet are whitelisted, protection doesn't work at all.
-    setupContext.courtroomsInfo
-      .slice(0, round.numCourtrooms)
-      .forEach((info) =>
-        createTrialFolder(setupContext, roundFolder, round, info)
-      );
-  }
-  setupContext.writeCourtroomsToMaster();
-  // TODO: Fix this log message to show the correct number of ballots.
-  SheetLogger.log(
-    `Created ballots for ${setupContext.roundsInfo.length} round(s).`
-  );
 }
 
 function createTemplatesFolder(setupContext: ISetupContext) {
+  // Check if "Templates" folder exists in setupContext.tabFolder
+  const templateFolderName = "Templates";
+  const ballotTemplateName = "Ballot Template";
+  const captainsFormTemplateName = "Captains' Form Template";
+  let templateFolder = getChildFolder(
+    setupContext.tabFolder,
+    templateFolderName
+  );
+  if (templateFolder) {
+    SheetLogger.log(
+      "Templates folder already exists, not creating a new one..."
+    );
+    setupContext.ballotTemplate = getFileByName(
+      templateFolder,
+      ballotTemplateName
+    );
+    setupContext.captainsFormTemplate = getFileByName(
+      templateFolder,
+      captainsFormTemplateName
+    );
+    return;
+  }
   SheetLogger.log("Creating templates folder in tab directory...");
-  const templateFolder = setupContext.tabFolder.createFolder("Templates");
+  templateFolder = setupContext.tabFolder.createFolder(templateFolderName);
 
   SheetLogger.log("Creating ballot template...");
   setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
-    "Ballot Template",
+    ballotTemplateName,
     templateFolder
   );
   const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
@@ -131,7 +175,7 @@ function createTemplatesFolder(setupContext: ISetupContext) {
   SheetLogger.log("Creating Captains' Form template...");
   setupContext.captainsFormTemplate =
     setupContext.captainsFormBaseTemplate.makeCopy(
-      "Captains' Form Template",
+      captainsFormTemplateName,
       templateFolder
     );
   const captainsFormTemplateSheet = sheetForFile(
@@ -166,9 +210,19 @@ function createTrialFolder(
   const trialFolderName = `R${round.name} - ${courtroomInfo.name}`;
   const trialPrefix = `R${round.name} ${courtroomInfo.name}`;
   SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
-  const trialFolder = roundFolder.createFolder(trialFolderName);
-  // Disabled because we're moving sharing with bailiffs to a separate stage.
-  // trialFolder.addEditors(courtroomInfo.bailiffEmails);
+  let trialFolder = getChildFolder(roundFolder, trialFolderName);
+  if (trialFolder) {
+    SheetLogger.log(
+      `${trialPrefix} folder already exists, not creating a new one...`
+    );
+    setupContext.saveCourtroomFolderLink(
+      courtroomInfo.name,
+      trialFolder.getUrl()
+    );
+    // Enforce idempotency only at the trial level, not the ballot/captains form level.
+    return;
+  }
+  trialFolder = roundFolder.createFolder(trialFolderName);
   setupContext.saveCourtroomFolderLink(
     courtroomInfo.name,
     trialFolder.getUrl()
@@ -231,13 +285,4 @@ function linkTrialSheets(captainsForm: GoogleFile, ballots: GoogleFile[]) {
     const urlRange = ballotSheet.getRangeByName(BallotRange.CaptainsFormUrl);
     urlRange.setValue(captainsFormUrl);
   }
-}
-
-function logDuplicate() {
-  SheetLogger.log(
-    "Terminating tabulation folder setup because I found something I tried to create already existed. This probably means you accidentally ran the script again."
-  );
-  SheetLogger.log(
-    "If you want to completely regenerate the folder, first delete all the existing stuff (being aware of the fact you'll lose any data you have in the existing files), then run this script again."
-  );
 }

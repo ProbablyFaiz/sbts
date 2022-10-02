@@ -28,6 +28,16 @@ function getOrCreateChildFolder(
   return parentFolder.createFolder(childName);
 }
 
+function getChildFolder(parentFolder: Folder, childName: string): Folder | undefined {
+  const childFolderIterator = parentFolder.searchFolders(
+    `title contains "${childName}"`
+  );
+  if (childFolderIterator.hasNext()) {
+    return childFolderIterator.next();
+  }
+  return undefined;
+}
+
 function getFileByName(
   parentFolder: Folder,
   name: string
