@@ -14,10 +14,10 @@ function displayRoundMatchResults(round: string) {
 
         // Add a string of the form Team X (2-1) defeats Team Y (1-2)
         if (teamResult.ballotsWon > opponentResult.ballotsWon) {
-            outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon})`);
+            outputCells.push(`Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon})`);
         }
         else if (teamResult.ballotsWon < opponentResult.ballotsWon) {
-            outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}-${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}-${opponentResult.ballotsWon})`);
+            outputCells.push(`Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon})`);
         }
         else {
             const teamMargin = teamResult.pointDifferential;

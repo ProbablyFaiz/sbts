@@ -108,17 +108,20 @@ function compareTeamSummaries(a: TeamSummary, b: TeamSummary, considerByeBust: b
 function getTeamResultsOutput(teamResults: Record<string, Required<TeamSummary>>) {
     const results = Object.values(teamResults);
     results.sort((a, b) => compareTeamSummaries(a, b, true));
-    return results.map((teamResult, i) => [
-        i + 1,
-        teamResult.teamNumber,
-        teamResult.teamName,
-        teamResult.ballotsWon,
-        teamResult.combinedStrength,
-        teamResult.pointDifferential,
-        teamResult.timesPlaintiff,
-        teamResult.timesDefense,
-        teamResult.pastOpponents.join(PAST_OPPONENTS_SEPARATOR)
-    ]);
+    return results.reduce((acc, teamResult, i) => [
+        ...acc,
+        [
+            // Rank is i + 1 if the team is not tied with the previous team, and the previous rank otherwise
+            i === 0 || compareTeamSummaries(teamResult, results[i - 1]) !== 0 ? i + 1 : acc[i - 1][0],
+            teamResult.teamNumber,
+            teamResult.teamName,
+            teamResult.ballotsWon,
+            teamResult.combinedStrength,
+            Math.round(teamResult.pointDifferential * 100) / 100,
+            teamResult.timesPlaintiff,
+            teamResult.timesDefense,
+            teamResult.pastOpponents.join(PAST_OPPONENTS_SEPARATOR)
+        ]], []);
 }
 
 

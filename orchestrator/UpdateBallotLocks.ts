@@ -36,7 +36,7 @@ function updateBallot(ballotObject, context: OrchestratorContext) {
   } else {
     fixCommentBoxHeights(ballotSheet);
     setBallotLock(ballotSheet, ballotObject.submitCheckbox, context);
-    submittedRange.setValue(ballotObject.submitCheckbox);
+    submittedRange.setValue(!!ballotObject.submitCheckbox);
     failedSubmissionRange.setValue(false);
   }
 }
