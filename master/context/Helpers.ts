@@ -35,7 +35,7 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
 
 function getChildFolder(parentFolder: Folder, childName: string): Folder {
   const childFolderIterator = parentFolder.searchFolders(
-    `title contains "${childName}"`
+    `title = "${childName}"`
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();

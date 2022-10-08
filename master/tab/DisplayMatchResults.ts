@@ -29,7 +29,7 @@ function displayRoundMatchResults(round: string) {
             opponentResult.ballotsWon
           }, PD ${formatPd(
             teamResult.pointDifferential
-          )}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${
+          )}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
           }, PD ${formatPd(opponentResult.pointDifferential)})`
         );
@@ -39,7 +39,7 @@ function displayRoundMatchResults(round: string) {
             teamResult.ballotsWon
           }, PD ${formatPd(
             opponentResult.pointDifferential
-          )}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${
+          )}) ties Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
           }, PD ${formatPd(teamResult.pointDifferential)})`
         );

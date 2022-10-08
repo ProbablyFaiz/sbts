@@ -34,12 +34,14 @@ enum BallotRowIndex {
 
 enum CaptainsFormRowIndex {
   Link = 0,
-  PTeamNum = 1,
-  DTeamNum = 2,
-  PNamesStart = 3,
-  PNamesEnd = 4,
-  DNamesStart = 5,
-  DNamesEnd = 6,
+  Round = 1,
+  Courtroom = 2,
+  PTeamNum = 3,
+  DTeamNum = 4,
+  PNamesStart = 5,
+  PNamesEnd = 6,
+  DNamesStart = 7,
+  DNamesEnd = 8,
 }
 
 class OrchestratorContext implements IAutocompleteContext {
