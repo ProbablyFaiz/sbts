@@ -183,9 +183,40 @@ function getTeamResultsOutput(
   );
 }
 
-function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
+function adjustForByeRound(
+  teamResults: Record<string, Required<TeamSummary>>
+): Record<string, Required<TeamSummary>> {
+  // Adjust for bye rounds by adjusting totals of teams with fewer than the maximum number of opponents
+  const maxOpponents = Math.max(
+    ...Object.values(teamResults).map(
+      (teamResult) => teamResult.pastOpponents.length
+    )
+  );
+  return Object.entries(teamResults).reduce((acc, [teamNumber, teamResult]) => {
+    const newResult = { ...teamResult };
+    if (teamResult.pastOpponents.length < maxOpponents) {
+      // Multiply the totals by the factor of the number of opponents
+      const adjustmentFactor = maxOpponents / teamResult.pastOpponents.length;
+      newResult.ballotsWon *= adjustmentFactor;
+      newResult.combinedStrength *= adjustmentFactor;
+      newResult.pointDifferential *= adjustmentFactor;
+      newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+    }
+    acc[teamNumber] = newResult;
+    return acc;
+  }, {} as Record<string, Required<TeamSummary>>);
+}
+
+function TabulateTeamBallots(
+  roundRange: any,
+  ballotsPerMatch: number,
+  byeAdjustment: boolean
+) {
   const rounds = flattenRange(roundRange);
-  const teamResults = getAllTeamResults(rounds, ballotsPerMatch);
+  let teamResults = getAllTeamResults(rounds, ballotsPerMatch);
+  if (byeAdjustment) {
+    teamResults = adjustForByeRound(teamResults);
+  }
   const output = getTeamResultsOutput(teamResults);
   return output.length > 0 ? output : [["No results to display"]];
 }

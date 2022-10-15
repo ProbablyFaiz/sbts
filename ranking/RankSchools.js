@@ -134,7 +134,7 @@ function writeResults(schoolResults) {
   const resultSheet = ss.getSheetByName(RESULTS_SHEET);
   const resultRows = Object.entries(schoolResults)
     // .filter(([schoolName, _]) => schoolName !== "HYBRID")
-    .sort((a, b) => b[1].overallScore - a[1].overallScore)
+    .sort(([_, a], [__, b]) => b.overallScore - a.overallScore)
     .map(([schoolName, schoolResult]) => [
       schoolName,
       schoolResult.ballotsWon,
