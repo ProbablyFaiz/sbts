@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "experimentalDecorators": true,
+    "types": ["gas-types-detailed"],
+    "jsx": "react",
+    "esModuleInterop": true,
+    "lib": ["es2020", "dom"],
     "target": "ES6",
-    "lib": ["esnext"],
-    "strictNullChecks": true,
-    "noImplicitAny": true
+    "experimentalDecorators": true,
+    "moduleResolution": "Node16"
   }
 }
