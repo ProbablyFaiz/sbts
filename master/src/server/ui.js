@@ -1,6 +1,6 @@
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
-    .createMenu('My Sample React Project') // edit me!
+    .createMenu('Ballot Entry')
     .addItem('Sheet Editor (Bootstrap)', 'openDialogBootstrap')
     .addItem('About me', 'openAboutSidebar');
 
