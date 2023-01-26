@@ -1,4 +1,4 @@
-import { MasterRange } from "../Types";
+import { MasterRange } from "../../Types";
 
 class SheetLogger {
   static log(data: any) {

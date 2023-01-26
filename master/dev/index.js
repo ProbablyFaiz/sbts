@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { serverFunctions } from '../src/client/utils/serverFunctions.ts';
+import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
+import { serverFunctions } from "../src/client/utils/serverFunctions.ts";
 
 const { FILENAME, PORT } = process.env;
 
@@ -11,21 +11,21 @@ const DevServer = () => {
       const request = event.data;
       const { type, functionName, id, args } = request;
 
-      if (type !== 'REQUEST') return;
+      if (type !== "REQUEST") return;
 
       serverFunctions[functionName](...args)
         .then((response) => {
           iframe.current.contentWindow.postMessage(
-            { type: 'RESPONSE', id, status: 'SUCCESS', response },
+            { type: "RESPONSE", id, status: "SUCCESS", response },
             `https://localhost:${PORT}`
           );
         })
         .catch((err) => {
           iframe.current.contentWindow.postMessage(
             {
-              type: 'RESPONSE',
+              type: "RESPONSE",
               id,
-              status: 'ERROR',
+              status: "ERROR",
               response: err,
             },
             `https://localhost:${PORT}`
@@ -33,23 +33,23 @@ const DevServer = () => {
         });
     };
 
-    window.addEventListener('message', handleRequest, false);
+    window.addEventListener("message", handleRequest, false);
   }, []);
 
   return (
     <div
       // we want our dev environment to fill the dialog window
       style={{
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
       }}
     >
       <iframe
         style={{
-          width: '100%',
-          height: '100%',
-          border: '0',
-          position: 'absolute',
+          width: "100%",
+          height: "100%",
+          border: "0",
+          position: "absolute",
         }}
         ref={iframe}
         src={`https://localhost:${PORT}/${FILENAME}-impl.html`}
@@ -58,4 +58,4 @@ const DevServer = () => {
   );
 };
 
-ReactDOM.render(<DevServer />, document.getElementById('index'));
+ReactDOM.render(<DevServer />, document.getElementById("index"));

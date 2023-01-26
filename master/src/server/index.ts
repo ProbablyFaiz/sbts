@@ -1,20 +1,26 @@
-import {
-  onOpen,
-  openDialogBootstrap,
-  openAboutSidebar,
-} from './ui';
+import { onOpen, openDialogBootstrap, openAboutSidebar } from "./ui";
 
-import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
+import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from "./sheets";
 import {
   OnCreateTeamBallotFolderClick,
   OnEmailBallotFolderLinksClick,
   OnPublishBallotsClick,
   OnSetupMasterSpreadsheetClick,
-} from './ControlPanel';
-import DetectNameTypos from './tab/DetectNameTypos';
-import { TabulateIndividualBallots } from './tab/TabulateIndividualBallots';
-import { TabulateTeamBallots } from './tab/TabulateTeamBallots';
-import DisplayMatchResults from './tab/DisplayMatchResults';
+} from "./ControlPanel";
+import DetectNameTypos from "./tab/DetectNameTypos";
+import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
+import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
+import DisplayMatchResults from "./tab/DisplayMatchResults";
+import { SSContext } from "./context/Context";
+
+const getCourtrooms = () => {
+  const context = new SSContext();
+  return context.courtroomRecords;
+};
+const getTeams = () => {
+  const context = new SSContext();
+  return Object.values(context.teamInfo);
+};
 
 // Public functions must be exported as named exports
 export {
@@ -33,9 +39,12 @@ export {
   TabulateIndividualBallots,
   TabulateTeamBallots,
   DisplayMatchResults,
+  getCourtrooms,
+  getTeams,
 };
 
-// Also add these to global
+// The webpack functionality for adding these to the global scope is not working
+// so we have to add them manually
 // @ts-ignore
 global.onOpen = onOpen;
 // @ts-ignore
@@ -66,3 +75,7 @@ global.TabulateIndividualBallots = TabulateIndividualBallots;
 global.TabulateTeamBallots = TabulateTeamBallots;
 // @ts-ignore
 global.DisplayMatchResults = DisplayMatchResults;
+// @ts-ignore
+global.getCourtrooms = getCourtrooms;
+// @ts-ignore
+global.getTeams = getTeams;

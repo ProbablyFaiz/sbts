@@ -9,15 +9,20 @@ import {
   Cell,
   MasterSpreadsheet,
   BallotSpreadsheet,
-} from '../Types';
-import { memoize } from './CacheHelper';
-import { compactRange, getIdFromUrl, GoogleFile, sheetForFile } from './Helpers';
+} from "../../Types";
+import { memoize } from "./CacheHelper";
+import {
+  compactRange,
+  getIdFromUrl,
+  GoogleFile,
+  sheetForFile,
+} from "./Helpers";
 
 interface IContext {
   teamInfo: Record<string, TeamInfo>;
   setTeamBallotFolderLink: (
     teamNumber: string,
-    ballotFolderLink: string,
+    ballotFolderLink: string
   ) => boolean;
   tournamentEmail: string;
   courtroomRecords: CourtroomInfo[];
@@ -31,8 +36,8 @@ interface IContext {
   teamResults: Record<string, TeamSummary>;
 }
 
-const BYE_BUST_SCHOOL_NAME = 'Bye Bust';
-const PAST_OPPONENTS_SEPARATOR = ', ';
+const BYE_BUST_SCHOOL_NAME = "Bye Bust";
+const PAST_OPPONENTS_SEPARATOR = ", ";
 
 class SSContext implements IContext {
   @memoize
@@ -41,13 +46,14 @@ class SSContext implements IContext {
     compactRange(this.getRangeValues(MasterRange.TeamInfo) ?? []).forEach(
       (row) => {
         teamInfoMapping[row[0]] = {
+          teamNumber: row[0],
           teamName: row[1],
           schoolName: row[2],
           byeBust: row[2] === BYE_BUST_SCHOOL_NAME, // For now, we'll just use a special school name
           emails: row[3],
           ballotFolderLink: row[4],
         };
-      },
+      }
     );
     return teamInfoMapping;
   }
@@ -66,7 +72,7 @@ class SSContext implements IContext {
           pastOpponents: row[8].split(PAST_OPPONENTS_SEPARATOR),
           byeBust: this.teamInfo[row[1]].byeBust,
         };
-      },
+      }
     );
     return teamResultMapping;
   }
@@ -84,14 +90,14 @@ class SSContext implements IContext {
           pd: parseFloat(row[5]),
           won: parseFloat(row[6]),
         };
-      },
+      }
     );
   }
 
   @memoize
   get individualBallotResults(): IndividualBallotResult[] {
     return compactRange(
-      this.getRangeValues(MasterRange.IndividualBallots) ?? [],
+      this.getRangeValues(MasterRange.IndividualBallots) ?? []
     ).map((row) => {
       return {
         round: row[0],
@@ -112,26 +118,26 @@ class SSContext implements IContext {
 
   @memoize
   get tournamentName(): string {
-    return this.getRangeValue(MasterRange.TournamentName) ?? '';
+    return this.getRangeValue(MasterRange.TournamentName) ?? "";
   }
 
   @memoize
   get tournamentEmail(): string {
-    return this.getRangeValue(MasterRange.TournamentEmail) ?? '';
+    return this.getRangeValue(MasterRange.TournamentEmail) ?? "";
   }
 
   // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.
   setTeamBallotFolderLink(
     teamNumber: string,
-    ballotFolderLink: string,
+    ballotFolderLink: string
   ): boolean {
     const teamInfoRange = this.masterSpreadsheet.getRangeByName(
-      MasterRange.TeamInfo,
+      MasterRange.TeamInfo
     );
     if (!teamInfoRange) return false;
     const teamInfoValues = teamInfoRange.getValues();
     const teamRow = teamInfoValues.find(
-      (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber,
+      (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber
     );
     if (!teamRow) return false;
     teamRow[4] = ballotFolderLink;
@@ -139,7 +145,9 @@ class SSContext implements IContext {
     return true;
   }
 
-  teamBallotFolder(teamNumber: string): GoogleAppsScript.Drive.Folder | undefined {
+  teamBallotFolder(
+    teamNumber: string
+  ): GoogleAppsScript.Drive.Folder | undefined {
     const folderLink = this.teamInfo[teamNumber]?.ballotFolderLink;
     if (!folderLink) return undefined;
     return DriveApp.getFolderById(getIdFromUrl(folderLink));
@@ -151,8 +159,8 @@ class SSContext implements IContext {
       getIdFromUrl(
         this.masterSpreadsheet
           .getRangeByName(MasterRange.ExportFolderLink)
-          ?.getValue(),
-      ),
+          ?.getValue()
+      )
     );
   }
 
@@ -162,20 +170,20 @@ class SSContext implements IContext {
       getIdFromUrl(
         this.masterSpreadsheet
           .getRangeByName(MasterRange.ParentFolderLink)
-          ?.getValue(),
-      ),
+          ?.getValue()
+      )
     );
   }
 
   @memoize
   get courtroomRecords(): CourtroomInfo[] {
     return compactRange(
-      this.getRangeValues(MasterRange.CourtroomInfo) ?? [],
+      this.getRangeValues(MasterRange.CourtroomInfo) ?? []
     ).map((row) => {
       return {
         name: row[0],
-        bailiffEmails: row[1].split(','),
-        roundFolderLinks: row[2].split(','),
+        bailiffEmails: row[1].split(","),
+        roundFolderLinks: row[2].split(","),
       };
     });
   }
@@ -184,7 +192,7 @@ class SSContext implements IContext {
   get ballotRecords(): BallotInfo[] {
     return (this.getRangeValues(MasterRange.BallotLinks) ?? [])
       .filter((row) =>
-        row.some((cell) => !['', null, undefined, 'false'].includes(cell)),
+        row.some((cell) => !["", null, undefined, "false"].includes(cell))
       )
       .map((row) => {
         return {
@@ -192,8 +200,8 @@ class SSContext implements IContext {
           info: row[1],
           captainsFormLink: row[2],
           judgeName: row[4],
-          locked: row[5] === 'true',
-          validated: row[6] === 'true',
+          locked: row[5] === "true",
+          validated: row[6] === "true",
         };
       });
   }
@@ -222,7 +230,7 @@ class SSContext implements IContext {
     }
     // Sorting ballots by date created should be sufficient to ensure that they're in the correct order
     ballots.sort(
-      (a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime(),
+      (a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime()
     );
     return ballots;
   }
@@ -234,12 +242,12 @@ class SSContext implements IContext {
 
   @memoize
   get firstPartyName(): string {
-    return this.getRangeValue(MasterRange.FirstPartyName) ?? '';
+    return this.getRangeValue(MasterRange.FirstPartyName) ?? "";
   }
 
   @memoize
   get secondPartyName(): string {
-    return this.getRangeValue(MasterRange.SecondPartyName) ?? '';
+    return this.getRangeValue(MasterRange.SecondPartyName) ?? "";
   }
 
   private getRangeValue(rangeName: MasterRange): string | undefined {

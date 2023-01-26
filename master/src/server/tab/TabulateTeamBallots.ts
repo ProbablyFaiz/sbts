@@ -1,6 +1,10 @@
-import { IContext, PAST_OPPONENTS_SEPARATOR, SSContext } from "../context/Context";
+import {
+  IContext,
+  PAST_OPPONENTS_SEPARATOR,
+  SSContext,
+} from "../context/Context";
 import { flattenRange } from "../context/Helpers";
-import { RoundResult, TeamBallotResult, TeamSummary } from "../Types";
+import { RoundResult, TeamBallotResult, TeamSummary } from "../../Types";
 
 function getRoundResult(
   ballotResults: TeamBallotResult[],
@@ -32,7 +36,7 @@ function getRoundResult(
 function getTeamResult(
   teamBallots: Record<string, TeamBallotResult[]>,
   ballotsPerMatch: number | undefined,
-  firstPartyName: string,
+  firstPartyName: string
 ): TeamSummary {
   const teamResult = Object.values(teamBallots).reduce(
     (acc, roundBallots) => {
@@ -120,7 +124,11 @@ function getAllTeamResults(
 
   const teamResults = Object.entries(groupedResults).reduce(
     (acc, [teamNumber, teamBallots]) => {
-      const teamResult = getTeamResult(teamBallots, ballotsPerMatch, context.firstPartyName);
+      const teamResult = getTeamResult(
+        teamBallots,
+        ballotsPerMatch,
+        context.firstPartyName
+      );
       teamResult.teamNumber = teamNumber;
       teamResult.teamName = context.teamInfo[teamNumber]?.teamName ?? "Unknown";
       teamResult.byeBust = context.teamInfo[teamNumber]?.byeBust ?? false;

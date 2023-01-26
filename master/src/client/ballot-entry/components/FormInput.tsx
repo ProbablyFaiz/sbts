@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { Form, Button, Col, Row } from 'react-bootstrap';
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { Form, Button, Col, Row } from "react-bootstrap";
 
 interface FormInputProps {
   submitNewSheet: (sheetName: string) => {
@@ -10,7 +10,7 @@ interface FormInputProps {
 }
 
 const FormInput = ({ submitNewSheet }: FormInputProps) => {
-  const [newSheetName, setNewSheetName] = useState('');
+  const [newSheetName, setNewSheetName] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
     setNewSheetName(event.target.value);
@@ -19,7 +19,7 @@ const FormInput = ({ submitNewSheet }: FormInputProps) => {
     event.preventDefault();
     if (newSheetName.length === 0) return;
     submitNewSheet(newSheetName);
-    setNewSheetName('');
+    setNewSheetName("");
   };
 
   return (

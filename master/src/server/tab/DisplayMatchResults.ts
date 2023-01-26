@@ -1,6 +1,6 @@
-import { SSContext } from '../context/Context';
-import { flattenRange, formatPd } from '../context/Helpers';
-import { getAllTeamResults } from './TabulateTeamBallots';
+import { SSContext } from "../context/Context";
+import { flattenRange, formatPd } from "../context/Helpers";
+import { getAllTeamResults } from "./TabulateTeamBallots";
 
 function displayRoundMatchResults(round: string) {
   const roundResults = getAllTeamResults([round], undefined, new SSContext());
@@ -19,11 +19,11 @@ function displayRoundMatchResults(round: string) {
     // Add a string of the form Team X (2-1) defeats Team Y (1-2)
     if (teamResult.ballotsWon > opponentResult.ballotsWon) {
       outputCells.push(
-        `Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon})`,
+        `Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon})`
       );
     } else if (teamResult.ballotsWon < opponentResult.ballotsWon) {
       outputCells.push(
-        `Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon})`,
+        `Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon})`
       );
     } else {
       const teamMargin = teamResult.pointDifferential;
@@ -32,30 +32,30 @@ function displayRoundMatchResults(round: string) {
           `Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
           }, PD ${formatPd(
-            teamResult.pointDifferential,
+            teamResult.pointDifferential
           )}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
-          }, PD ${formatPd(opponentResult.pointDifferential)})`,
+          }, PD ${formatPd(opponentResult.pointDifferential)})`
         );
       } else if (teamMargin < 0) {
         outputCells.push(
           `Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
           }, PD ${formatPd(
-            opponentResult.pointDifferential,
+            opponentResult.pointDifferential
           )}) ties Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
-          }, PD ${formatPd(teamResult.pointDifferential)})`,
+          }, PD ${formatPd(teamResult.pointDifferential)})`
         );
       } else {
         outputCells.push(
           `Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
           }, PD ${formatPd(
-            teamResult.pointDifferential,
+            teamResult.pointDifferential
           )}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
-          }, PD ${formatPd(opponentResult.pointDifferential)})`,
+          }, PD ${formatPd(opponentResult.pointDifferential)})`
         );
       }
     }
@@ -69,7 +69,7 @@ function DisplayMatchResults(roundRange: any) {
 
   // Get the results for each round
   return rounds.reduce((outputCells, round) => {
-    return outputCells.concat(displayRoundMatchResults(round), ['']);
+    return outputCells.concat(displayRoundMatchResults(round), [""]);
   }, [] as string[]);
 }
 

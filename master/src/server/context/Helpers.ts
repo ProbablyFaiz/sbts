@@ -7,13 +7,13 @@ const NUM_BALLOTS = 2;
 
 function compactRange(rangeArr: string[][]): string[][] {
   return rangeArr.filter((row) =>
-    row.some((cell) => !['', null, undefined].includes(cell)),
+    row.some((cell) => !["", null, undefined].includes(cell))
   );
 }
 
 function flattenRange(roundRange: string | string[] | string[][]): string[] {
   // Flatten a round range into a list of rounds
-  if (typeof roundRange === 'string') {
+  if (typeof roundRange === "string") {
     return [roundRange];
   }
   if (Array.isArray(roundRange[0])) {
@@ -32,9 +32,12 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId());
 }
 
-function getChildFolder(parentFolder: GoogleAppsScript.Drive.Folder, childName: string): GoogleAppsScript.Drive.Folder {
+function getChildFolder(
+  parentFolder: GoogleAppsScript.Drive.Folder,
+  childName: string
+): GoogleAppsScript.Drive.Folder {
   const childFolderIterator = parentFolder.searchFolders(
-    `title = "${childName}"`,
+    `title = "${childName}"`
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -44,7 +47,7 @@ function getChildFolder(parentFolder: GoogleAppsScript.Drive.Folder, childName: 
 
 function getFileByName(
   parentFolder: GoogleAppsScript.Drive.Folder,
-  name: string,
+  name: string
 ): GoogleFile | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
@@ -54,7 +57,7 @@ function getFileByName(
 }
 
 function getIdFromUrl(url: string): string {
-  return url.match(/[-\w]{25,}/)?.toString() ?? '';
+  return url.match(/[-\w]{25,}/)?.toString() ?? "";
 }
 
 export {

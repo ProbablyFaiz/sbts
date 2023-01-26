@@ -1,8 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-import { BallotRange } from "../Types";
+import { BallotRange } from "../../Types";
 
-import { MasterRange } from "../Types";
+import { MasterRange } from "../../Types";
 
 function PopulateTeamBallots() {
   populateBallots(MasterRange.TeamBallots, BallotRange.TeamResults, 2);
@@ -58,7 +58,9 @@ function getCaptainsFormUrlImportFormula(link: string) {
   return `=IMPORTRANGE("${link}","${BallotRange.CaptainsFormUrl}")`;
 }
 
-function getValidatedBallotLinks(ballotLinksRange: GoogleAppsScript.Spreadsheet.Range) {
+function getValidatedBallotLinks(
+  ballotLinksRange: GoogleAppsScript.Spreadsheet.Range
+) {
   const submittedIndex = 5;
   const validatedIndex = 6;
   const doNotCountIndex = 7;

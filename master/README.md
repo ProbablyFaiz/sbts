@@ -247,7 +247,7 @@ This project now supports typescript!
 
 To use, simply use a typescript extension in either the client code (.ts/.tsx) or the server code (.ts), and your typescript file will compile to the proper format.
 
-For client-side code, see [FormInput.tsx in the Bootstrap demo](./src/client/dialog-demo-bootstrap/components/FormInput.tsx) for an example file. Note that it is okay to have a mix of javascript and typescript, as seen in the Bootstrap demo.
+For client-side code, see [FormInput.tsx in the Bootstrap demo](src/client/ballot-entry/components/FormInput.tsx) for an example file. Note that it is okay to have a mix of javascript and typescript, as seen in the Bootstrap demo.
 
 To use typescript in server code, just change the file extension to .ts. The server-side code already utilizes type definitions for Google Apps Script APIs.
 
@@ -270,10 +270,10 @@ Important: Since Google Apps Scripts projects don't let you easily reference ext
 By default this project supports global CSS stylesheets. Make sure to import your stylesheet in your entrypoint file [index.js](./src/client/dialog-demo/index.js):
 
 ```javascript
-import './styles.css';
+import "./styles.css";
 ```
 
-Many external component libraries require a css stylesheet in order to work properly. You can import stylesheets in the HTML template, [as shown here with the Bootstrap stylesheet](./src/client/dialog-demo-bootstrap/index.html).
+Many external component libraries require a css stylesheet in order to work properly. You can import stylesheets in the HTML template, [as shown here with the Bootstrap stylesheet](src/client/ballot-entry/index.html).
 
 The webpack.config.js file can also be modified to support scss and other style libraries.
 
@@ -290,19 +290,19 @@ This project uses the [gas-client](https://github.com/enuchi/gas-client) package
 ```js
 // Google's documentation wants you to do this. Boo.
 google.script.run
-  .withSuccessHandler(response => doSomething(response))
-  .withFailureHandler(err => handleError(err))
+  .withSuccessHandler((response) => doSomething(response))
+  .withFailureHandler((err) => handleError(err))
   .addSheet(sheetTitle);
 
 // Poof! With a little magic we can now do this:
-import Server from 'gas-client';
+import Server from "gas-client";
 const { serverFunctions } = new Server();
 
 // We now have access to all our server functions, which return promises!
 serverFunctions
   .addSheet(sheetTitle)
-  .then(response => doSomething(response))
-  .catch(err => handleError(err));
+  .then((response) => doSomething(response))
+  .catch((err) => handleError(err));
 
 // Or we can equally use async/await style:
 async () => {
@@ -321,7 +321,7 @@ In development, `gas-client` will interact with [the custom Webpack Dev Server p
 
 This project includes support for autocompletion and complete type definitions for Google Apps Script methods.
 
-![autocomplete support](https://i.imgur.com/E7FLeTX.gif 'autocomplete')
+![autocomplete support](https://i.imgur.com/E7FLeTX.gif "autocomplete")
 
 All available methods from the Google Apps Script API are shown with full definitions and links to the official documentation, plus information on argument, return type and sample code.
 
