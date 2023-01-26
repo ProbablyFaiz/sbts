@@ -1,5 +1,5 @@
 function ShareTrialFolders() {
-  const context = new Context();
+  const context = new SSContext();
   context.courtroomRecords.forEach((courtroom) => {
     courtroom.roundFolderLinks.forEach((link) => {
       const folder = DriveApp.getFolderById(getIdFromUrl(link));

@@ -9,7 +9,7 @@ import File = GoogleAppsScript.Drive.File;
 import Blob = GoogleAppsScript.Base.Blob;
 
 function PublishTeamBallots() {
-  const context = new Context();
+  const context = new SSContext();
   exportBallots(context);
 }
 

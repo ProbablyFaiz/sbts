@@ -1,7 +1,7 @@
 type Email = GoogleAppsScript.Mail.MailAdvancedParameters;
 
 function EmailBallotFolderLinks() {
-  const context = new Context();
+  const context = new SSContext();
   const teamInfoMap = context.teamInfo;
   Object.entries(teamInfoMap).forEach(([teamNumber, teamInfo]) => {
     if (!teamInfo.emails.length) {
@@ -17,7 +17,7 @@ function EmailBallotFolderLinks() {
 }
 
 const ballotFolderEmail = (
-  context: Context,
+  context: IContext,
   teamNumber: string,
   teamInfo: TeamInfo
 ): Email => {

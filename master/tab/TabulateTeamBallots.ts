@@ -28,7 +28,7 @@ function getRoundResult(
 function getTeamResult(
   teamBallots: Record<string, TeamBallotResult[]>,
   ballotsPerMatch: number | undefined,
-  context: IContext
+  firstPartyName: string,
 ): TeamSummary {
   const teamResult = Object.values(teamBallots).reduce(
     (acc, roundBallots) => {
@@ -39,7 +39,7 @@ function getTeamResult(
       // We intentionally allow duplicate opponents here in case a team faces the same opponent multiple times
       acc.pastOpponents!.push(roundResult.opponentTeamNumber);
 
-      if (roundResult.side === context.firstPartyName) {
+      if (roundResult.side === firstPartyName) {
         acc.timesPlaintiff++;
       } else {
         acc.timesDefense++;
@@ -99,10 +99,10 @@ function getMaxNumBallots(
 
 function getAllTeamResults(
   rounds: string[],
-  ballotsPerMatch: number | undefined
+  ballotsPerMatch: number | undefined,
+  context: IContext
 ): Record<string, Required<TeamSummary>> {
   const roundSet = new Set(rounds);
-  const context = new Context();
   // Filter out ballots that are not in the allowed rounds
   const ballotResults = context.teamBallotResults.filter((br) =>
     roundSet.has(br.round)
@@ -116,7 +116,7 @@ function getAllTeamResults(
 
   const teamResults = Object.entries(groupedResults).reduce(
     (acc, [teamNumber, teamBallots]) => {
-      const teamResult = getTeamResult(teamBallots, ballotsPerMatch, context);
+      const teamResult = getTeamResult(teamBallots, ballotsPerMatch, context.firstPartyName);
       teamResult.teamNumber = teamNumber;
       teamResult.teamName = context.teamInfo[teamNumber]?.teamName ?? "Unknown";
       teamResult.byeBust = context.teamInfo[teamNumber]?.byeBust ?? false;
@@ -213,7 +213,7 @@ function TabulateTeamBallots(
   byeAdjustment: boolean
 ) {
   const rounds = flattenRange(roundRange);
-  let teamResults = getAllTeamResults(rounds, ballotsPerMatch);
+  let teamResults = getAllTeamResults(rounds, ballotsPerMatch, new SSContext());
   if (byeAdjustment) {
     teamResults = adjustForByeRound(teamResults);
   }

@@ -1,11 +1,5 @@
 interface IContext {
-  tabFolder: Folder;
-  masterSpreadsheet: MasterSpreadsheet;
-  ballotFiles: GoogleFile[];
-  ballotSpreadsheets: BallotSpreadsheet[];
   teamInfo: Record<string, TeamInfo>;
-  exportFolder: Folder;
-  teamBallotFolder: (teamNumber: string) => Folder | undefined;
   setTeamBallotFolderLink: (
     teamNumber: string,
     ballotFolderLink: string
@@ -18,14 +12,14 @@ interface IContext {
   roundsCompleted: number;
   firstPartyName: string;
   secondPartyName: string;
-
+  tournamentName: string;
   teamResults: Record<string, TeamSummary>;
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
 const PAST_OPPONENTS_SEPARATOR = ", ";
 
-class Context implements IContext {
+class SSContext implements IContext {
   @memoize
   get teamInfo(): Record<string, TeamInfo> {
     const teamInfoMapping: Record<string, TeamInfo> = {};

@@ -1,5 +1,5 @@
 function CreateTeamBallotFolders() {
-  const context = new Context();
+  const context = new SSContext();
   let teamInfoMap = context.teamInfo;
   let foldersCreated = 0;
   Object.entries(teamInfoMap).forEach(([teamNumber, teamInfo]) => {

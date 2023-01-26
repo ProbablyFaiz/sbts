@@ -53,9 +53,9 @@ const getCompetitorResult = (
 };
 
 const getAllIndividualResults = (
-  rounds: string[]
+  rounds: string[],
+  context: IContext
 ): Record<string, IndividualSummary> => {
-  const context = new Context();
   const roundSet = new Set(rounds);
   const individualBallots = context.individualBallotResults.filter((ballot) =>
     roundSet.has(ballot.round)
@@ -109,7 +109,7 @@ const getIndividualResultsOutput = (
 
 function TabulateIndividualBallots(roundRange: any) {
   const rounds = flattenRange(roundRange);
-  const individualResults = getAllIndividualResults(rounds);
+  const individualResults = getAllIndividualResults(rounds, new SSContext());
   const output = getIndividualResultsOutput(individualResults);
   return output.length > 0 ? output : [["No results to display"]];
 }

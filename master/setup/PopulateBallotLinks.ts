@@ -4,7 +4,7 @@
 // Do not run this script thereafter, as it may result in unexpected behavior including but not limited to overwriting existing data in the master sheet.
 
 function PopulateBallotLinks() {
-  const context = new Context();
+  const context = new SSContext();
   const ballots = context.ballotFiles;
   const masterSheet = context.masterSpreadsheet;
   if (ballots.length === 0) return;

@@ -4,7 +4,7 @@
 // Be sure to also run SetupTriggers in the newly created orchestrator (and again, not the template's).
 
 function SetupTriggers() {
-  const context = new Context();
+  const context = new SSContext();
   const masterSheet = context.masterSpreadsheet;
   ScriptApp.newTrigger("PopulateTeamBallots")
     .forSpreadsheet(masterSheet)
