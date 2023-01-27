@@ -14,6 +14,8 @@ enum GeneratorRange {
   NumberOfRounds = "NumberOfRoundsRange",
   TournamentContactEmail = "TournamentContactEmailRange",
   GenerationLog = "GenerationLogRange",
+  GenerateVirtualBallots = "GenerateVirtualBallotsRange",
+  GenerateCompetitorForms = "GenerateCompetitorFormsRange",
 }
 
 interface ICourtroomInfo {
@@ -50,6 +52,8 @@ interface ISetupContext {
 
   tournamentName: string;
   tournamentContactEmail: string;
+  generateVirtualBallots: boolean;
+  generateCompetitorForms: boolean;
   firstPartyName: string;
   secondPartyName: string;
   courtroomsInfo: ICourtroomInfo[];
@@ -167,6 +171,16 @@ class SetupContext implements ISetupContext {
   @memoize
   get tournamentContactEmail(): string {
     return this.getRangeValue(GeneratorRange.TournamentContactEmail);
+  }
+  
+  @memoize
+  get generateVirtualBallots(): boolean {
+    return this.getRangeValue(GeneratorRange.GenerateVirtualBallots) === "TRUE";
+  }
+  
+  @memoize
+  get generateCompetitorForms(): boolean {
+    return this.getRangeValue(GeneratorRange.GenerateCompetitorForms) === "TRUE";
   }
 
   @memoize

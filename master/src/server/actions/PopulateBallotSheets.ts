@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-import { BallotRange } from "../../Types";
+import { BallotRange, CaptainsFormRange } from "../../Types";
 
 import { MasterRange } from "../../Types";
 
@@ -36,8 +36,8 @@ function populateBallots(
       "",
       "",
       "",
+      getCourtroomImportFormula(link),
       link,
-      getCaptainsFormUrlImportFormula(link),
     ]);
     for (let i = 0; i < rowsPerBallot - 1; i++) {
       outputCells.push(emptyRow);
@@ -54,8 +54,8 @@ function getResultImportFormula(link: string, resultsRange: string) {
   return `=IMPORTRANGE("${link}", "${resultsRange}")`;
 }
 
-function getCaptainsFormUrlImportFormula(link: string) {
-  return `=IMPORTRANGE("${link}","${BallotRange.CaptainsFormUrl}")`;
+function getCourtroomImportFormula(link: string) {
+  return `=IMPORTRANGE(IMPORTRANGE("${link}","${BallotRange.CaptainsFormUrl}"), "${CaptainsFormRange.Courtroom}")`;
 }
 
 function getValidatedBallotLinks(

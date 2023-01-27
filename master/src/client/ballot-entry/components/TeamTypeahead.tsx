@@ -23,9 +23,15 @@ const TeamTypeahead = ({
   return (
     <>
       <Typeahead
+        selected={selectedTeam ? [selectedTeam] : []}
+        isValid={!!selectedTeam}
         options={options}
         labelKey={(team) => (team as TeamInfo).teamNumber}
         onInputChange={setQuery}
+        onChange={(teams) => {
+          if (teams.length > 0) {
+            setQuery((teams[0] as TeamInfo).teamNumber);
+        }}}
         renderMenuItemChildren={(team) => (
           <>
             <Highlighter search={query}>

@@ -2,7 +2,7 @@ export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
     .createMenu("Tab System")
     .addItem("Ballot Entry", "openDialogBootstrap")
-    .addItem("About me", "openAboutSidebar");
+    // .addItem("About me", "openAboutSidebar");
 
   menu.addToUi();
 };

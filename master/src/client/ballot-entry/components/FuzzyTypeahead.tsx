@@ -13,7 +13,7 @@ interface FuzzyTypeaheadProps<T> {
   [key: string]: any;
 }
 
-const FuzzyTypeahead = <T extends object>({
+const FuzzyTypeahead = <T extends {}>({
   query,
   setQuery,
   options,
@@ -34,11 +34,19 @@ const FuzzyTypeahead = <T extends object>({
   const results = options.filter((option) =>
     fuzzyResults.has(labelKey(option))
   );
+  const match = results.find((option) => labelKey(option) === query);
 
   return (
     <Typeahead
+      selected={match ? [match] : []}
+      isValid={!!match}
       onInputChange={(query) => {
         setQuery(query);
+      }}
+      onChange={(options) => {
+        if (options.length > 0) {
+          setQuery(labelKey(options[0] as T));
+        }
       }}
       labelKey={labelKey}
       filterBy={() => true}

@@ -4,32 +4,25 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 
 // This is a wrapper for google.script.run that lets us use promises.
 import { serverFunctions } from "../../utils/serverFunctions";
-import { CourtroomInfo, TeamInfo, CompetitorInfo } from "../../../Types";
+import {
+  CourtroomInfo,
+  TeamInfo,
+  BallotState,
+  TeamState,
+  RequiredBallotState,
+} from "../../../Types";
 import FuzzyTypeahead from "./FuzzyTypeahead";
 import TeamTypeahead from "./TeamTypeahead";
 import MathTypeahead from "./MathTypeahead";
 
-type TeamState = {
-  teamNumber: string;
-  issue1Name: string;
-  issue1ScoreExpr: string;
-  issue2Name: string;
-  issue2ScoreExpr: string;
-};
-
-interface BallotState {
-  courtroom: string;
-  round: string;
-  judgeName: string;
-  petitioner: TeamState;
-  respondent: TeamState;
-}
+const mathjs = require("mathjs");
 
 const BallotEntry = () => {
   const [ballot, setBallot] = useState<BallotState>({
     courtroom: "",
     round: "",
     judgeName: "",
+    ballotPdf: null,
     petitioner: {
       teamNumber: "",
       issue1Name: "",
@@ -49,10 +42,17 @@ const BallotEntry = () => {
     []
   );
   const [possibleTeams, setPossibleTeams] = useState<TeamInfo[]>([]);
+  const [possibleRoundNames, setPossibleRoundNames] = useState<string[]>([]);
+  const [possibleJudgeNames, setPossibleJudgeNames] = useState<string[]>([]);
 
-  const setBallotField = (field: keyof BallotState) => (value: string) => {
-    setBallot({ ...ballot, [field]: value });
+  const setBallotField = (field: keyof BallotState) => (value: any) => {
+    const newBallot = { ...ballot, [field]: value };
+    // if (field === "courtroom") {
+    //   newBallot.petitioner.teamNumber = "12";
+    // }
+    setBallot(newBallot);
   };
+
   const setTeamField =
     (team: "petitioner" | "respondent") =>
     (field: keyof TeamState) =>
@@ -69,7 +69,58 @@ const BallotEntry = () => {
   useEffect(() => {
     serverFunctions.getCourtrooms().then(setPossibleCourtrooms);
     serverFunctions.getTeams().then(setPossibleTeams);
+    serverFunctions.getRoundNames().then(setPossibleRoundNames);
+    serverFunctions.getJudgeNames().then(setPossibleJudgeNames);
   }, []);
+
+  const submitBallot = () => {
+    try {
+      const ballotToSubmit: RequiredBallotState = {
+        ...ballot,
+        petitioner: {
+          ...ballot.petitioner,
+          issue1Score: mathjs.evaluate(ballot.petitioner.issue1ScoreExpr),
+          issue2Score: mathjs.evaluate(ballot.petitioner.issue2ScoreExpr),
+        },
+        respondent: {
+          ...ballot.respondent,
+          issue1Score: mathjs.evaluate(ballot.respondent.issue1ScoreExpr),
+          issue2Score: mathjs.evaluate(ballot.respondent.issue2ScoreExpr),
+        },
+      };
+      serverFunctions.submitBallot(ballotToSubmit).then((response) => {
+        // TODO: Indicate success to user
+        console.log(response);
+      });
+    } catch (e) {
+      // TODO: Indicate error to user
+      console.error(e);
+    }
+  };
+  
+  const handleSubmit = () => {
+    // Check that all fields are filled out
+    if (
+      ballot.courtroom === "" ||
+      ballot.round === "" ||
+      ballot.judgeName === "" ||
+      ballot.petitioner.teamNumber === "" ||
+      ballot.petitioner.issue1Name === "" ||
+      ballot.petitioner.issue1ScoreExpr === "" ||
+      ballot.petitioner.issue2Name === "" ||
+      ballot.petitioner.issue2ScoreExpr === "" ||
+      ballot.respondent.teamNumber === "" ||
+      ballot.respondent.issue1Name === "" ||
+      ballot.respondent.issue1ScoreExpr === "" ||
+      ballot.respondent.issue2Name === "" ||
+      ballot.respondent.issue2ScoreExpr === ""
+    ) {
+      console.error("Not all fields are filled out");
+      // TODO: Show this to the user
+      return;
+    }
+    submitBallot();
+  };
 
   return (
     <div>
@@ -94,16 +145,25 @@ const BallotEntry = () => {
             </Col>
             <Col>
               <Form.Label>Round</Form.Label>
-              <Form.Control type="text" placeholder="Enter the round..." />
+              <FuzzyTypeahead
+                id="round-typeahead"
+                query={ballot.round}
+                setQuery={setBallotField("round")}
+                options={possibleRoundNames}
+                placeholder="Enter the round..."
+              />
             </Col>
           </Row>
           <Row className="pt-2">
             <Col>
               <Form.Label>Judge Name</Form.Label>
-              <Typeahead
-                options={["Bob", "John", "Jane", "Sally", "Joe"]}
-                minLength={2}
+              <FuzzyTypeahead
+                id="judge-name-typeahead"
+                query={ballot.judgeName}
+                setQuery={setBallotField("judgeName")}
+                options={possibleJudgeNames}
                 placeholder="Enter the judge's name..."
+                minLength={2}
               />
             </Col>
           </Row>
@@ -124,6 +184,7 @@ const BallotEntry = () => {
             <Col>
               <Form.Label>Petitioner Issue 1 Name:</Form.Label>
               <Typeahead
+                id="petitioner-issue-1-name-typeahead"
                 options={["Bob", "John", "Jane", "Sally", "Joe"]}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -142,6 +203,7 @@ const BallotEntry = () => {
             <Col>
               <Form.Label>Petitioner Issue 2 Name:</Form.Label>
               <Typeahead
+                id="petitioner-issue-2-name-typeahead"
                 options={["Bob", "John", "Jane", "Sally", "Joe"]}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -173,6 +235,7 @@ const BallotEntry = () => {
             <Col>
               <Form.Label>Respondent Issue 1 Name:</Form.Label>
               <Typeahead
+                id="respondent-issue-1-name-typeahead"
                 options={["Bob", "John", "Jane", "Sally", "Joe"]}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -191,6 +254,7 @@ const BallotEntry = () => {
             <Col>
               <Form.Label>Respondent Issue 2 Name:</Form.Label>
               <Typeahead
+                id="respondent-issue-2-name-typeahead"
                 options={["Bob", "John", "Jane", "Sally", "Joe"]}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -209,7 +273,16 @@ const BallotEntry = () => {
           <Row className="pb-2">
             <Col>
               <Form.Label>Upload the scanned ballot PDF (optional):</Form.Label>
-              <Form.Control type="file" />
+              <Form.Control
+                type="file"
+                accept="application/pdf application/x-pdf"
+                onChange={(e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    setBallotField("ballotPdf")(file);
+                  }
+                }}
+              />
             </Col>
           </Row>
         </Container>
@@ -217,7 +290,7 @@ const BallotEntry = () => {
           style={{ height: "50px" }}
           className="fixed-bottom bg-white border-top border-3 text-right"
         >
-          <Button className="mt-2 mr-2" variant="primary" type="submit">
+          <Button className="mt-1 mr-2" variant="primary" type="submit" onClick={handleSubmit}>
             Submit
           </Button>
         </div>

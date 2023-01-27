@@ -156,49 +156,55 @@ function createTemplatesFolder(setupContext: ISetupContext) {
   SheetLogger.log("Creating templates folder in tab directory...");
   templateFolder = setupContext.tabFolder.createFolder(templateFolderName);
 
-  SheetLogger.log("Creating ballot template...");
-  setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
-    ballotTemplateName,
-    templateFolder
-  );
-  const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
-  ballotTemplateSheet
-    .getRangeByName(BallotRange.TournamentName)
-    .setValue(setupContext.tournamentName);
-  ballotTemplateSheet
-    .getRangeByName(BallotRange.FirstPartyName)
-    .setValue(setupContext.firstPartyName);
-  ballotTemplateSheet
-    .getRangeByName(BallotRange.SecondPartyName)
-    .setValue(setupContext.secondPartyName);
-
-  SheetLogger.log("Creating Captains' Form template...");
-  setupContext.captainsFormTemplate =
-    setupContext.captainsFormBaseTemplate.makeCopy(
-      captainsFormTemplateName,
+  if (setupContext.generateVirtualBallots) {
+    SheetLogger.log("Creating ballot template...");
+    setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
+      ballotTemplateName,
       templateFolder
     );
-  const captainsFormTemplateSheet = sheetForFile(
-    setupContext.captainsFormTemplate
-  );
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.TournamentName)
-    .setValue(setupContext.tournamentName);
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.FirstPartyName)
-    .setValue(setupContext.firstPartyName);
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.SecondPartyName)
-    .setValue(setupContext.secondPartyName);
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.AutocompleteEngineLink)
-    .setValue(setupContext.autocompleteEngine.getUrl());
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.CourtroomsCommaSep)
-    .setValue(setupContext.courtroomsInfo.map((info) => info.name).join(","));
-  captainsFormTemplateSheet
-    .getRangeByName(CaptainsFormRange.RoundsCommaSep)
-    .setValue(setupContext.roundsInfo.map((info) => info.name).join(","));
+    const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
+    ballotTemplateSheet
+      .getRangeByName(BallotRange.TournamentName)
+      .setValue(setupContext.tournamentName);
+    ballotTemplateSheet
+      .getRangeByName(BallotRange.FirstPartyName)
+      .setValue(setupContext.firstPartyName);
+    ballotTemplateSheet
+      .getRangeByName(BallotRange.SecondPartyName)
+      .setValue(setupContext.secondPartyName);
+  } else {
+    SheetLogger.log("Not creating ballot template...");
+  }
+
+  if (setupContext.generateCompetitorForms) {
+    SheetLogger.log("Creating Captains' Form template...");
+    setupContext.captainsFormTemplate =
+      setupContext.captainsFormBaseTemplate.makeCopy(
+        captainsFormTemplateName,
+        templateFolder
+      );
+    const captainsFormTemplateSheet = sheetForFile(
+      setupContext.captainsFormTemplate
+    );
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.TournamentName)
+      .setValue(setupContext.tournamentName);
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.FirstPartyName)
+      .setValue(setupContext.firstPartyName);
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.SecondPartyName)
+      .setValue(setupContext.secondPartyName);
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.AutocompleteEngineLink)
+      .setValue(setupContext.autocompleteEngine.getUrl());
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.CourtroomsCommaSep)
+      .setValue(setupContext.courtroomsInfo.map((info) => info.name).join(","));
+    captainsFormTemplateSheet
+      .getRangeByName(CaptainsFormRange.RoundsCommaSep)
+      .setValue(setupContext.roundsInfo.map((info) => info.name).join(","));
+  }
 }
 
 function createTrialFolder(
@@ -228,26 +234,40 @@ function createTrialFolder(
     trialFolder.getUrl()
   );
 
-  const trialCaptainsForm = prepareCaptainsForm(
-    setupContext,
-    trialFolder,
-    trialPrefix,
-    round,
-    courtroomInfo
-  );
-  const trialBallots = [];
-  for (let i = 1; i <= round.numBallots; i++) {
-    const createdBallot = setupContext.ballotTemplate.makeCopy(
-      `${trialPrefix} - Judge ${i} Ballot`,
-      trialFolder
+  let trialCaptainsForm;
+  if (setupContext.generateCompetitorForms) {
+    trialCaptainsForm = prepareCaptainsForm(
+      setupContext,
+      trialFolder,
+      trialPrefix,
+      round,
+      courtroomInfo
     );
-    createdBallot.setSharing(
+    trialCaptainsForm.setSharing(
       DriveApp.Access.ANYONE_WITH_LINK,
       DriveApp.Permission.EDIT
     );
-    trialBallots.push(createdBallot);
   }
-  linkTrialSheets(trialCaptainsForm, trialBallots);
+  const trialBallots = [];
+  if (setupContext.generateVirtualBallots) {
+    for (let i = 1; i <= round.numBallots; i++) {
+      const createdBallot = setupContext.ballotTemplate.makeCopy(
+        `${trialPrefix} - Judge ${i} Ballot`,
+        trialFolder
+      );
+      createdBallot.setSharing(
+        DriveApp.Access.ANYONE_WITH_LINK,
+        DriveApp.Permission.EDIT
+      );
+      trialBallots.push(createdBallot);
+    }
+  }
+  if (
+    setupContext.generateCompetitorForms &&
+    setupContext.generateVirtualBallots
+  ) {
+    linkTrialSheets(trialCaptainsForm, trialBallots);
+  }
   SpreadsheetApp.flush();
 }
 
@@ -276,10 +296,6 @@ function prepareCaptainsForm(
 }
 
 function linkTrialSheets(captainsForm: GoogleFile, ballots: GoogleFile[]) {
-  captainsForm.setSharing(
-    DriveApp.Access.ANYONE_WITH_LINK,
-    DriveApp.Permission.EDIT
-  );
   const captainsFormUrl = captainsForm.getUrl();
   for (let ballot of ballots) {
     const ballotSheet = sheetForFile(ballot);

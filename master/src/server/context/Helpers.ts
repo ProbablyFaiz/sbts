@@ -32,7 +32,7 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
   return SpreadsheetApp.openById(file.getId());
 }
 
-function getChildFolder(
+function getOrCreateChildFolder(
   parentFolder: GoogleAppsScript.Drive.Folder,
   childName: string
 ): GoogleAppsScript.Drive.Folder {
@@ -66,7 +66,7 @@ export {
   flattenRange,
   formatPd,
   sheetForFile,
-  getChildFolder,
+  getOrCreateChildFolder,
   getFileByName,
   getIdFromUrl,
   Spreadsheet,

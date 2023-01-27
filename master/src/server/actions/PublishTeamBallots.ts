@@ -6,7 +6,7 @@
 
 import { SSContext } from "../context/Context";
 import {
-  getChildFolder,
+  getOrCreateChildFolder,
   getFileByName,
   getIdFromUrl,
   sheetForFile,
@@ -45,7 +45,7 @@ function exportBallots(context: SSContext) {
     for (let team of [plaintiffTeam, defenseTeam]) {
       if (team === "") continue;
       const teamFolder = context.teamBallotFolder(team)!;
-      const teamRoundFolder = getChildFolder(teamFolder, `Round ${round} `); // The trailing space is important so we don't get a snafu where one round number is a prefix/suffix of another.
+      const teamRoundFolder = getOrCreateChildFolder(teamFolder, `Round ${round}`);
       let pdfBallot:
         | GoogleAppsScript.Drive.File
         | GoogleAppsScript.Base.Blob

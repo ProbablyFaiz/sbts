@@ -1,5 +1,5 @@
 import { SSContext } from "../context/Context";
-import { getChildFolder } from "../context/Helpers";
+import { getOrCreateChildFolder } from "../context/Helpers";
 import SheetLogger from "../context/SheetLogger";
 
 function CreateTeamBallotFolders() {
@@ -15,7 +15,7 @@ function CreateTeamBallotFolders() {
       SheetLogger.log(
         `Creating ballot publish folder for team ${teamNumber}...`
       );
-      const teamFolder = getChildFolder(
+      const teamFolder = getOrCreateChildFolder(
         context.exportFolder,
         `Team ${teamNumber}`
       );

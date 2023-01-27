@@ -12,6 +12,7 @@ import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
 import DisplayMatchResults from "./tab/DisplayMatchResults";
 import { SSContext } from "./context/Context";
+import { RequiredBallotState } from "../Types";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -20,6 +21,18 @@ const getCourtrooms = () => {
 const getTeams = () => {
   const context = new SSContext();
   return Object.values(context.teamInfo);
+};
+const getRoundNames = () => {
+  const context = new SSContext();
+  return context.roundNames;
+};
+const getJudgeNames = () => {
+  const context = new SSContext();
+  return context.judgeNames;
+};
+const submitBallot = (ballotState: RequiredBallotState) => {
+  const context = new SSContext();
+  context.addEnteredBallot(ballotState);
 };
 
 // Public functions must be exported as named exports
@@ -41,6 +54,9 @@ export {
   DisplayMatchResults,
   getCourtrooms,
   getTeams,
+  getRoundNames,
+  getJudgeNames,
+  submitBallot,
 };
 
 // The webpack functionality for adding these to the global scope is not working
@@ -79,3 +95,9 @@ global.DisplayMatchResults = DisplayMatchResults;
 global.getCourtrooms = getCourtrooms;
 // @ts-ignore
 global.getTeams = getTeams;
+// @ts-ignore
+global.getRoundNames = getRoundNames;
+// @ts-ignore
+global.getJudgeNames = getJudgeNames;
+// @ts-ignore
+global.submitBallot = submitBallot;

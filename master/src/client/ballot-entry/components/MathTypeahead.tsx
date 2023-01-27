@@ -15,20 +15,23 @@ const MathTypeahead = ({ query, setQuery, ...props }: MathTypeaheadProps) => {
   let mathResult = null;
   try {
     mathResult = mathjs.evaluate(query).toString();
-    mathResult = mathResult === query ? null : mathResult;
-  } catch (e) {
-    // Ignore
+  } catch (_) {}
+  const options = mathResult === null ? [] : [query, mathResult];
+  if (options.length === 2 && options[0] === options[1]) {
+    options.pop();
   }
 
   return (
     <>
       <Typeahead
         onInputChange={setQuery}
+        isInvalid={query && mathResult === null}
+        isValid={mathResult !== null}
         filterBy={() => true}
         renderMenuItemChildren={(option, _, i) => (
           <>
             {option}
-            {i == 1 && mathResult && (
+            {i === 1 && mathResult && (
               <span className="text-muted ml-2">
                 <small>
                   ({query} = {mathResult})
@@ -38,7 +41,7 @@ const MathTypeahead = ({ query, setQuery, ...props }: MathTypeaheadProps) => {
           </>
         )}
         minLength={1}
-        options={mathResult === null ? [] : [query, mathResult]}
+        options={options}
         placeholder={"Enter a score or expression"}
         {...props}
       />

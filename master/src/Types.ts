@@ -16,6 +16,10 @@ enum MasterRange {
   BallotLinks = "BallotLinksRange",
   TeamBallots = "TeamBallotsRange",
   IndividualBallots = "IndividualBallotsRange",
+  EnteredTeamBallots = "EnteredTeamBallotsRange",
+  EnteredIndividualBallots = "EnteredIndividualBallotsRange",
+  EnteredTeamBallotsSheet = "Entered Team Ballots",
+  EnteredIndividualBallotsSheet = "Entered Individual Ballots",
   TeamInfo = "TeamInfoRange",
   OrchestratorLink = "OrchestratorLinkRange",
   ParentFolderLink = "ParentFolderLinkRange",
@@ -83,6 +87,7 @@ interface TeamBallotResult {
   side: string;
   pd: number;
   won: number;
+  courtroom: string;
 }
 
 interface IndividualBallotResult {
@@ -92,6 +97,7 @@ interface IndividualBallotResult {
   competitorName: string;
   side: string;
   score: number;
+  courtroom: string;
 }
 
 interface TeamSummary {
@@ -122,6 +128,37 @@ interface RoundResult {
   opponentTeamNumber: string;
 }
 
+type TeamState = {
+  teamNumber: string;
+  issue1Name: string;
+  issue1ScoreExpr: string;
+  issue1Score?: number;
+  issue2Name: string;
+  issue2ScoreExpr: string;
+  issue2Score?: number;
+};
+
+interface BallotState {
+  courtroom: string;
+  round: string;
+  judgeName: string;
+  ballotPdf?: File;
+  petitioner: TeamState;
+  respondent: TeamState;
+}
+
+type RequiredTeamState = Required<
+  Omit<TeamState, "issue1ScoreExpr" | "issue2ScoreExpr">
+>;
+type RequiredBallotState = Omit<
+  Required<BallotState>,
+  "petitioner" | "respondent" | "ballotPdf"
+> & {
+  petitioner: RequiredTeamState;
+  respondent: RequiredTeamState;
+  ballotPdf?: File;
+};
+
 export {
   BallotRange,
   MasterRange,
@@ -140,4 +177,8 @@ export {
   RoundResult,
   Cell,
   SpreadsheetOutput,
+  TeamState,
+  BallotState,
+  RequiredTeamState,
+  RequiredBallotState,
 };

@@ -1,19 +1,21 @@
 import {
-  CourtroomInfo,
   BallotInfo,
-  MasterRange,
-  TeamInfo,
-  TeamBallotResult,
-  IndividualBallotResult,
-  TeamSummary,
-  Cell,
-  MasterSpreadsheet,
   BallotSpreadsheet,
+  Cell,
+  CourtroomInfo,
+  IndividualBallotResult,
+  MasterRange,
+  MasterSpreadsheet,
+  RequiredBallotState,
+  TeamBallotResult,
+  TeamInfo,
+  TeamSummary,
 } from "../../Types";
 import { memoize } from "./CacheHelper";
 import {
   compactRange,
   getIdFromUrl,
+  getOrCreateChildFolder,
   GoogleFile,
   sheetForFile,
 } from "./Helpers";
@@ -29,11 +31,18 @@ interface IContext {
   ballotRecords: BallotInfo[];
   teamBallotResults: TeamBallotResult[];
   individualBallotResults: IndividualBallotResult[];
+  judgeNames: string[];
+  roundNames: string[];
   roundsCompleted: number;
   firstPartyName: string;
   secondPartyName: string;
   tournamentName: string;
   teamResults: Record<string, TeamSummary>;
+  addEnteredBallot: (ballotState: RequiredBallotState) => void;
+  getTrialFolder: (
+    round: string,
+    courtroom: string
+  ) => GoogleAppsScript.Drive.Folder | null;
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
@@ -79,8 +88,11 @@ class SSContext implements IContext {
 
   @memoize
   get teamBallotResults(): TeamBallotResult[] {
-    return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? []).map(
-      (row) => {
+    return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? [])
+      .concat(
+        compactRange(this.getRangeValues(MasterRange.EnteredTeamBallots) ?? [])
+      )
+      .map((row) => {
         return {
           round: row[0],
           judgeName: row[1],
@@ -89,31 +101,55 @@ class SSContext implements IContext {
           side: row[4],
           pd: parseFloat(row[5]),
           won: parseFloat(row[6]),
+          courtroom: row[7],
         };
-      }
-    );
+      });
   }
 
   @memoize
   get individualBallotResults(): IndividualBallotResult[] {
     return compactRange(
       this.getRangeValues(MasterRange.IndividualBallots) ?? []
-    ).map((row) => {
-      return {
-        round: row[0],
-        judgeName: row[1],
-        teamNumber: row[2],
-        competitorName: row[3],
-        side: row[4],
-        score: parseFloat(row[6]),
-      };
-    });
+    )
+      .concat(
+        compactRange(
+          this.getRangeValues(MasterRange.EnteredIndividualBallots) ?? []
+        )
+      )
+      .map((row) => {
+        return {
+          round: row[0],
+          judgeName: row[1],
+          teamNumber: row[2],
+          competitorName: row[3],
+          side: row[4],
+          score: parseFloat(row[6]),
+          courtroom: row[7],
+        };
+      });
+  }
+
+  @memoize
+  get judgeNames(): string[] {
+    return Array.from(
+      new Set(this.teamBallotResults.map((ballot) => ballot.judgeName))
+    );
+  }
+
+  @memoize
+  get roundNames(): string[] {
+    const roundNames = this.teamBallotResults.map((ballot) => ballot.round);
+    // Filter out duplicates, but maintain reverse order
+    return roundNames
+      .filter((roundName, index) => {
+        return roundNames.indexOf(roundName) === index;
+      })
+      .reverse();
   }
 
   @memoize
   get roundsCompleted(): number {
-    const topTeam = Object.values(this.teamResults)[0];
-    return topTeam.timesDefense + topTeam.timesPlaintiff;
+    return this.roundNames.length;
   }
 
   @memoize
@@ -248,6 +284,118 @@ class SSContext implements IContext {
   @memoize
   get secondPartyName(): string {
     return this.getRangeValue(MasterRange.SecondPartyName) ?? "";
+  }
+
+  getTrialFolder(
+    round: string,
+    courtroom: string
+  ): GoogleAppsScript.Drive.Folder | null {
+    const roundFolder = getOrCreateChildFolder(
+      this.tabFolder,
+      `Round ${round}`
+    );
+    const trialFolder = getOrCreateChildFolder(
+      roundFolder,
+      `R${round} - ${courtroom}`
+    );
+    return trialFolder;
+  }
+
+  addEnteredBallot(ballotState: RequiredBallotState) {
+    let ballotPdfUrl = "";
+    if (ballotState.ballotPdf) {
+      const ballotPdf: File = ballotState.ballotPdf;
+      const trialFolder = this.getTrialFolder(
+        ballotState.round,
+        ballotState.courtroom
+      );
+      if (!trialFolder) {
+        throw new Error("Could not find trial folder");
+      }
+      // TODO: Upload file
+    }
+
+    const enteredTeamSheet = this.masterSpreadsheet.getSheetByName(
+      MasterRange.EnteredTeamBallotsSheet
+    );
+    const petitionerMargin =
+      ballotState.petitioner.issue1Score +
+      ballotState.petitioner.issue2Score -
+      ballotState.respondent.issue1Score -
+      ballotState.respondent.issue2Score;
+    const petitionerWon =
+      petitionerMargin === 0 ? 0.5 : petitionerMargin > 0 ? 1 : 0;
+    enteredTeamSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.petitioner.teamNumber,
+      ballotState.respondent.teamNumber,
+      this.firstPartyName,
+      petitionerMargin,
+      petitionerWon,
+      ballotPdfUrl,
+      ballotState.courtroom,
+    ]);
+    enteredTeamSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.respondent.teamNumber,
+      ballotState.petitioner.teamNumber,
+      this.secondPartyName,
+      -petitionerMargin,
+      1 - petitionerWon,
+      ballotState.courtroom,
+      ballotPdfUrl,
+    ]);
+
+    const enteredIndividualSheet = this.masterSpreadsheet.getSheetByName(
+      MasterRange.EnteredIndividualBallotsSheet
+    );
+    enteredIndividualSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.petitioner.teamNumber,
+      ballotState.petitioner.issue1Name,
+      this.firstPartyName,
+      "Attorney",
+      ballotState.petitioner.issue1Score,
+      ballotState.courtroom,
+      ballotPdfUrl,
+    ]);
+    enteredIndividualSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.petitioner.teamNumber,
+      ballotState.petitioner.issue2Name,
+      this.firstPartyName,
+      "Attorney",
+      ballotState.petitioner.issue2Score,
+      ballotState.courtroom,
+      ballotPdfUrl,
+    ]);
+    enteredIndividualSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.respondent.teamNumber,
+      ballotState.respondent.issue1Name,
+      this.secondPartyName,
+      "Attorney",
+      ballotState.respondent.issue1Score,
+      ballotState.courtroom,
+      ballotPdfUrl,
+    ]);
+    enteredIndividualSheet.appendRow([
+      ballotState.round,
+      ballotState.judgeName,
+      ballotState.respondent.teamNumber,
+      ballotState.respondent.issue2Name,
+      this.secondPartyName,
+      "Attorney",
+      ballotState.respondent.issue2Score,
+      ballotState.courtroom,
+      ballotPdfUrl,
+    ]);
+    return null;
   }
 
   private getRangeValue(rangeName: MasterRange): string | undefined {
