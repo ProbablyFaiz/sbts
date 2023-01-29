@@ -26,7 +26,7 @@ const FuzzyTypeahead = <T extends {}>({
   const [fuzzySet, setFuzzySet] = React.useState<FuzzySet | null>(null);
   React.useEffect(() => {
     setFuzzySet(FuzzySet(options.map(labelKey)));
-  }, [options, labelKey]);
+  }, [options]);
 
   const fuzzyResults = new Set(
     fuzzySet?.get(query, [], fuzzyThreshold).map((match) => match[1]) ?? []

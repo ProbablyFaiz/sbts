@@ -19,6 +19,7 @@ import {
   GoogleFile,
   sheetForFile,
 } from "./Helpers";
+import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
 interface IContext {
   teamInfo: Record<string, TeamInfo>;
@@ -42,7 +43,7 @@ interface IContext {
   getTrialFolder: (
     round: string,
     courtroom: string
-  ) => GoogleAppsScript.Drive.Folder | null;
+  ) => GoogleAppsScript.Drive.Folder;
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
@@ -52,15 +53,37 @@ class SSContext implements IContext {
   @memoize
   get teamInfo(): Record<string, TeamInfo> {
     const teamInfoMapping: Record<string, TeamInfo> = {};
+    const ballotCompetitorNames = this.individualBallotResults.reduce(
+      (acc, result) => {
+        if (!acc[result.teamNumber]) {
+          acc[result.teamNumber] = [];
+        }
+        // if already in the array, don't add it again
+        if (acc[result.teamNumber].indexOf(result.competitorName) === -1) {
+          acc[result.teamNumber].push(result.competitorName);
+        }
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
     compactRange(this.getRangeValues(MasterRange.TeamInfo) ?? []).forEach(
       (row) => {
+        const competitorNames = row[3]
+          .split(",")
+          .concat(ballotCompetitorNames[row[0]] ?? [])
+          .map((s) => s.trim());
+        // Filter duplicates and empty strings
+        const uniqueCompetitorNames = Array.from(
+          new Set(competitorNames.filter((s) => !!s))
+        );
         teamInfoMapping[row[0]] = {
           teamNumber: row[0],
           teamName: row[1],
           schoolName: row[2],
           byeBust: row[2] === BYE_BUST_SCHOOL_NAME, // For now, we'll just use a special school name
-          emails: row[3],
-          ballotFolderLink: row[4],
+          competitorNames: uniqueCompetitorNames,
+          emails: row[4],
+          ballotFolderLink: row[5],
         };
       }
     );
@@ -92,18 +115,28 @@ class SSContext implements IContext {
       .concat(
         compactRange(this.getRangeValues(MasterRange.EnteredTeamBallots) ?? [])
       )
-      .map((row) => {
-        return {
-          round: row[0],
-          judgeName: row[1],
-          teamNumber: row[2],
-          opponentTeamNumber: row[3],
-          side: row[4],
-          pd: parseFloat(row[5]),
-          won: parseFloat(row[6]),
-          courtroom: row[7],
-        };
-      });
+      .map(this.teamResultRowToResult);
+  }
+
+  @memoize
+  get enteredTeamBallotResults(): Required<TeamBallotResult>[] {
+    return compactRange(
+      this.getRangeValues(MasterRange.EnteredTeamBallots) ?? []
+    ).map(this.teamResultRowToResult);
+  }
+
+  private teamResultRowToResult(row: string[]): TeamBallotResult {
+    return {
+      round: row[0],
+      judgeName: row[1],
+      teamNumber: row[2],
+      opponentTeamNumber: row[3],
+      side: row[4],
+      pd: parseFloat(row[5]),
+      won: parseFloat(row[6]),
+      courtroom: row[7],
+      ballotLink: row[8],
+    };
   }
 
   @memoize
@@ -289,7 +322,7 @@ class SSContext implements IContext {
   getTrialFolder(
     round: string,
     courtroom: string
-  ): GoogleAppsScript.Drive.Folder | null {
+  ): GoogleAppsScript.Drive.Folder {
     const roundFolder = getOrCreateChildFolder(
       this.tabFolder,
       `Round ${round}`
@@ -302,19 +335,37 @@ class SSContext implements IContext {
   }
 
   addEnteredBallot(ballotState: RequiredBallotState) {
-    let ballotPdfUrl = "";
-    if (ballotState.ballotPdf) {
-      const ballotPdf: File = ballotState.ballotPdf;
+    if (ballotState.pdfData) {
       const trialFolder = this.getTrialFolder(
         ballotState.round,
         ballotState.courtroom
       );
-      if (!trialFolder) {
-        throw new Error("Could not find trial folder");
-      }
-      // TODO: Upload file
+      const pdfName = getBallotPdfName(
+        ballotState.round,
+        ballotState.petitioner.teamNumber,
+        ballotState.respondent.teamNumber,
+        ballotState.judgeName
+      );
+      const decodedPdfData = Utilities.base64Decode(
+        ballotState.pdfData,
+        Utilities.Charset.UTF_8
+      );
+      const pdfBlob = Utilities.newBlob(
+        decodedPdfData,
+        "application/pdf",
+        pdfName
+      );
+      const pdfUrl = trialFolder.createFile(pdfBlob).getUrl();
+      this.addResultRowsForEnteredBallot(ballotState, pdfUrl);
+    } else {
+      this.addResultRowsForEnteredBallot(ballotState, "");
     }
+  }
 
+  private addResultRowsForEnteredBallot(
+    ballotState: RequiredBallotState,
+    ballotPdfUrl: string
+  ) {
     const enteredTeamSheet = this.masterSpreadsheet.getSheetByName(
       MasterRange.EnteredTeamBallotsSheet
     );
@@ -333,8 +384,8 @@ class SSContext implements IContext {
       this.firstPartyName,
       petitionerMargin,
       petitionerWon,
-      ballotPdfUrl,
       ballotState.courtroom,
+      ballotPdfUrl,
     ]);
     enteredTeamSheet.appendRow([
       ballotState.round,
@@ -395,7 +446,6 @@ class SSContext implements IContext {
       ballotState.courtroom,
       ballotPdfUrl,
     ]);
-    return null;
   }
 
   private getRangeValue(rangeName: MasterRange): string | undefined {

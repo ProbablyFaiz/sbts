@@ -32,6 +32,7 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
     "fuzzyset.js": "^1.0.7",
     "mathjs": "^11.5.0",
     "prop-types": "^15.8.1",

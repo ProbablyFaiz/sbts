@@ -19,7 +19,17 @@ function PublishTeamBallots() {
   exportBallots(context);
 }
 
+function getBallotPdfName(
+  round: string,
+  pTeam: string,
+  dTeam: string,
+  judgeName: string
+) {
+  return `R${round} - ${pTeam} v. ${dTeam} (Judge ${judgeName}).pdf`;
+}
+
 function exportBallots(context: SSContext) {
+  let filesWritten = 0;
   for (let ballot of context.ballotRecords) {
     if (!ballot.locked || !ballot.validated) {
       SheetLogger.log(
@@ -39,13 +49,21 @@ function exportBallots(context: SSContext) {
     const judgeName = ballotSheet
       .getRangeByName(BallotRange.JudgeName)!
       .getValue();
-    const pdfName = `R${round} - ${plaintiffTeam} v. ${defenseTeam} (Judge ${judgeName}).pdf`;
+    const pdfName = getBallotPdfName(
+      round,
+      plaintiffTeam,
+      defenseTeam,
+      judgeName
+    );
 
     let existingBallot;
     for (let team of [plaintiffTeam, defenseTeam]) {
       if (team === "") continue;
       const teamFolder = context.teamBallotFolder(team)!;
-      const teamRoundFolder = getOrCreateChildFolder(teamFolder, `Round ${round}`);
+      const teamRoundFolder = getOrCreateChildFolder(
+        teamFolder,
+        `Round ${round}`
+      );
       let pdfBallot:
         | GoogleAppsScript.Drive.File
         | GoogleAppsScript.Base.Blob
@@ -55,6 +73,7 @@ function exportBallots(context: SSContext) {
         pdfBallot.setName(pdfName);
         existingBallot = pdfBallot; // We can save half of the exports by saving the ballot blob for the second go-round.
         teamRoundFolder.createFile(pdfBallot);
+        filesWritten += 1;
         SheetLogger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`);
       } else {
         SheetLogger.log(
@@ -63,7 +82,36 @@ function exportBallots(context: SSContext) {
       }
     }
   }
-  SheetLogger.log(context.ballotFiles.length.toString());
+
+  for (let result of context.enteredTeamBallotResults) {
+    if (!result.ballotLink) {
+      continue;
+    }
+    const ballotFile = DriveApp.getFileById(getIdFromUrl(result.ballotLink));
+    if (ballotFile.getMimeType() !== "application/pdf") {
+      continue;
+    }
+    const teamFolder = context.teamBallotFolder(result.teamNumber)!;
+    const teamRoundFolder = getOrCreateChildFolder(
+      teamFolder,
+      `Round ${result.round}`
+    );
+    const pdfName = ballotFile.getName();
+    const pdfBallot = getFileByName(teamRoundFolder, pdfName);
+    if (!pdfBallot) {
+      SheetLogger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`);
+      const newPdfBallot = ballotFile.makeCopy(pdfName, teamRoundFolder);
+      newPdfBallot.setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.VIEW);
+      filesWritten += 1;
+    } else {
+      SheetLogger.log(
+        `${pdfName} already present in ${teamFolder.getName()}, skipping...`
+      );
+    }
+  }
+  SheetLogger.log(
+    `Wrote ${filesWritten} new ballot PDF files to team folders.`
+  );
 }
 
-export { PublishTeamBallots };
+export { PublishTeamBallots, getBallotPdfName };

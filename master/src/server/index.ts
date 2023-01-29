@@ -22,6 +22,10 @@ const getTeams = () => {
   const context = new SSContext();
   return Object.values(context.teamInfo);
 };
+const getTeamBallotResults = () => {
+  const context = new SSContext();
+  return context.teamBallotResults;
+};
 const getRoundNames = () => {
   const context = new SSContext();
   return context.roundNames;
@@ -54,6 +58,7 @@ export {
   DisplayMatchResults,
   getCourtrooms,
   getTeams,
+  getTeamBallotResults,
   getRoundNames,
   getJudgeNames,
   submitBallot,
@@ -95,6 +100,8 @@ global.DisplayMatchResults = DisplayMatchResults;
 global.getCourtrooms = getCourtrooms;
 // @ts-ignore
 global.getTeams = getTeams;
+// @ts-ignore
+global.getTeamBallotResults = getTeamBallotResults;
 // @ts-ignore
 global.getRoundNames = getRoundNames;
 // @ts-ignore

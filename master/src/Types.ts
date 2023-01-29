@@ -54,6 +54,7 @@ interface TeamInfo {
   teamNumber: string;
   teamName: string;
   schoolName: string;
+  competitorNames: string[];
   byeBust: boolean;
   ballotFolderLink: string;
   emails: string;
@@ -88,6 +89,7 @@ interface TeamBallotResult {
   pd: number;
   won: number;
   courtroom: string;
+  ballotLink: string;
 }
 
 interface IndividualBallotResult {
@@ -156,7 +158,8 @@ type RequiredBallotState = Omit<
 > & {
   petitioner: RequiredTeamState;
   respondent: RequiredTeamState;
-  ballotPdf?: File;
+  pdfData?: string;
+  ballotPdf?: undefined;
 };
 
 export {
