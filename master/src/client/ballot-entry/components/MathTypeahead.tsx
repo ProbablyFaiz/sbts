@@ -6,11 +6,12 @@ const mathjs = require("mathjs");
 interface MathTypeaheadProps {
   query: string;
   setQuery: (query: string) => void;
+  isInvalid?: boolean;
 
   [key: string]: any;
 }
 
-const MathTypeahead = ({ query, setQuery, ...props }: MathTypeaheadProps) => {
+const MathTypeahead = ({ query, setQuery, isInvalid, ...props }: MathTypeaheadProps) => {
   // Try to evaluate the query as a math expression
   let mathResult = null;
   try {
@@ -24,8 +25,9 @@ const MathTypeahead = ({ query, setQuery, ...props }: MathTypeaheadProps) => {
   return (
     <>
       <Typeahead
+        {...props}
         onInputChange={setQuery}
-        isInvalid={query && mathResult === null}
+        isInvalid={isInvalid || (query && mathResult === null)}
         isValid={mathResult !== null}
         filterBy={() => true}
         renderMenuItemChildren={(option, _, i) => (
@@ -43,7 +45,6 @@ const MathTypeahead = ({ query, setQuery, ...props }: MathTypeaheadProps) => {
         minLength={1}
         options={options}
         placeholder={"Enter a score or expression"}
-        {...props}
       />
     </>
   );
