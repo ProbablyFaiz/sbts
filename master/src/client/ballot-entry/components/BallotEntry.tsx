@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
 
 // This is a wrapper for google.script.run that lets us use promises.
 import { serverFunctions } from "../../utils/serverFunctions";
@@ -19,6 +19,11 @@ import { Option } from "react-bootstrap-typeahead/types/types";
 
 const mathjs = require("mathjs");
 const Buffer = require("buffer/").Buffer;
+
+interface SubmissionStatus {
+  success: boolean;
+  message: string;
+}
 
 const BallotEntry = () => {
   const getNewBallotState = () => {
@@ -45,7 +50,8 @@ const BallotEntry = () => {
   };
 
   const [ballot, setBallot] = useState<BallotState>(getNewBallotState());
-  const [submitFailed, setSubmitFailed] = useState(false);
+  const [submissionStatus, setSubmissionStatus] =
+    useState<SubmissionStatus>(undefined);
   const [possibleCourtrooms, setPossibleCourtrooms] = useState<CourtroomInfo[]>(
     []
   );
@@ -155,13 +161,17 @@ const BallotEntry = () => {
       };
       serverFunctions.submitBallot(ballotToSubmit).then((response) => {
         setBallot(getNewBallotState());
-        setSubmitFailed(false);
+        setSubmissionStatus({
+          success: true,
+          message: "Ballot submitted successfully",
+        });
         loadTabState();
-        // TODO: Indicate success to user
-        console.log(response);
       });
     } catch (e) {
-      setSubmitFailed(true);
+      setSubmissionStatus({
+        success: false,
+        message: "Error submitting ballot: " + e.message,
+      });
       console.error(e);
     }
   }
@@ -184,7 +194,10 @@ const BallotEntry = () => {
       ballot.respondent.issue2ScoreExpr === ""
     ) {
       console.error("Not all fields are filled out");
-      setSubmitFailed(true);
+      setSubmissionStatus({
+        success: false,
+        message: "Not all fields are filled out",
+      });
       return;
     }
     if (!ballot.ballotPdf) {
@@ -227,7 +240,9 @@ const BallotEntry = () => {
               <Form.Label>Courtroom</Form.Label>
               <FuzzyTypeahead
                 id="courtroom-typeahead"
-                isInvalid={submitFailed && ballot.courtroom === ""}
+                isInvalid={
+                  submissionStatus?.success === false && ballot.courtroom === ""
+                }
                 query={ballot.courtroom}
                 setQuery={setBallotField("courtroom")}
                 options={possibleCourtrooms}
@@ -239,7 +254,9 @@ const BallotEntry = () => {
               <Form.Label>Round</Form.Label>
               <FuzzyTypeahead
                 id="round-typeahead"
-                isInvalid={submitFailed && ballot.round === ""}
+                isInvalid={
+                  submissionStatus?.success === false && ballot.round === ""
+                }
                 query={ballot.round}
                 setQuery={setBallotField("round")}
                 options={possibleRoundNames}
@@ -252,7 +269,9 @@ const BallotEntry = () => {
               <Form.Label>Judge Name</Form.Label>
               <FuzzyTypeahead
                 id="judge-name-typeahead"
-                isInvalid={submitFailed && ballot.judgeName === ""}
+                isInvalid={
+                  submissionStatus?.success === false && ballot.judgeName === ""
+                }
                 query={ballot.judgeName}
                 setQuery={setBallotField("judgeName")}
                 options={possibleJudgeNames}
@@ -267,7 +286,10 @@ const BallotEntry = () => {
               <Form.Label>Petitioner Team #</Form.Label>
               <TeamTypeahead
                 id="petitioner-team-typeahead"
-                isInvalid={submitFailed && ballot.petitioner.teamNumber === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.petitioner.teamNumber === ""
+                }
                 query={ballot.petitioner.teamNumber}
                 setQuery={setTeamField("petitioner")("teamNumber")}
                 options={possibleTeams}
@@ -290,7 +312,10 @@ const BallotEntry = () => {
                 }}
                 onChange={onNameChange("petitioner")("issue1Name")}
                 isValid={petitionerNames.includes(ballot.petitioner.issue1Name)}
-                isInvalid={submitFailed && ballot.petitioner.issue1Name === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.petitioner.issue1Name === ""
+                }
                 options={petitionerNames}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -303,7 +328,8 @@ const BallotEntry = () => {
                 query={ballot.petitioner.issue1ScoreExpr}
                 setQuery={setTeamField("petitioner")("issue1ScoreExpr")}
                 isInvalid={
-                  submitFailed && ballot.petitioner.issue1ScoreExpr === ""
+                  submissionStatus?.success === false &&
+                  ballot.petitioner.issue1ScoreExpr === ""
                 }
               />
             </Col>
@@ -323,7 +349,10 @@ const BallotEntry = () => {
                 }}
                 onChange={onNameChange("petitioner")("issue2Name")}
                 isValid={petitionerNames.includes(ballot.petitioner.issue2Name)}
-                isInvalid={submitFailed && ballot.petitioner.issue2Name === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.petitioner.issue2Name === ""
+                }
                 options={petitionerNames.slice().reverse()}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -336,7 +365,8 @@ const BallotEntry = () => {
                 query={ballot.petitioner.issue2ScoreExpr}
                 setQuery={setTeamField("petitioner")("issue2ScoreExpr")}
                 isInvalid={
-                  submitFailed && ballot.petitioner.issue2ScoreExpr === ""
+                  submissionStatus?.success === false &&
+                  ballot.petitioner.issue2ScoreExpr === ""
                 }
               />
             </Col>
@@ -347,7 +377,10 @@ const BallotEntry = () => {
               <Form.Label>Respondent Team #</Form.Label>
               <TeamTypeahead
                 id="respondent-team-typeahead"
-                isInvalid={submitFailed && ballot.respondent.teamNumber === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.respondent.teamNumber === ""
+                }
                 query={ballot.respondent.teamNumber}
                 setQuery={setTeamField("respondent")("teamNumber")}
                 options={possibleTeams}
@@ -369,7 +402,10 @@ const BallotEntry = () => {
                   setTeamField("respondent")("issue1Name")(value);
                 }}
                 onChange={onNameChange("respondent")("issue1Name")}
-                isInvalid={submitFailed && ballot.respondent.issue1Name === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.respondent.issue1Name === ""
+                }
                 isValid={respondentNames.includes(ballot.respondent.issue1Name)}
                 options={respondentNames}
                 minLength={2}
@@ -383,7 +419,8 @@ const BallotEntry = () => {
                 query={ballot.respondent.issue1ScoreExpr}
                 setQuery={setTeamField("respondent")("issue1ScoreExpr")}
                 isInvalid={
-                  submitFailed && ballot.respondent.issue1ScoreExpr === ""
+                  submissionStatus?.success === false &&
+                  ballot.respondent.issue1ScoreExpr === ""
                 }
               />
             </Col>
@@ -403,7 +440,10 @@ const BallotEntry = () => {
                 }}
                 onChange={onNameChange("respondent")("issue2Name")}
                 isValid={respondentNames.includes(ballot.respondent.issue2Name)}
-                isInvalid={submitFailed && ballot.respondent.issue2Name === ""}
+                isInvalid={
+                  submissionStatus?.success === false &&
+                  ballot.respondent.issue2Name === ""
+                }
                 options={respondentNames.slice().reverse()}
                 minLength={2}
                 placeholder="Enter the speaker's name..."
@@ -416,7 +456,8 @@ const BallotEntry = () => {
                 query={ballot.respondent.issue2ScoreExpr}
                 setQuery={setTeamField("respondent")("issue2ScoreExpr")}
                 isInvalid={
-                  submitFailed && ballot.respondent.issue2ScoreExpr === ""
+                  submissionStatus?.success === false &&
+                  ballot.respondent.issue2ScoreExpr === ""
                 }
               />
             </Col>
@@ -442,6 +483,14 @@ const BallotEntry = () => {
           style={{ height: "50px" }}
           className="fixed-bottom bg-white border-top border-3 text-right"
         >
+          {submissionStatus && (
+            <Alert
+              variant={submissionStatus.success ? "success" : "danger"}
+              className="m-2"
+            >
+              {submissionStatus.message}
+            </Alert>
+          )}
           <Button
             className="mt-1 mr-2"
             variant="primary"
