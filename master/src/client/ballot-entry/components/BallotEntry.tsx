@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Form,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 
 // This is a wrapper for google.script.run that lets us use promises.
 import { serverFunctions } from "../../utils/serverFunctions";
@@ -21,6 +29,7 @@ const mathjs = require("mathjs");
 const Buffer = require("buffer/").Buffer;
 
 interface SubmissionStatus {
+  inProgress: boolean;
   success: boolean;
   message: string;
 }
@@ -50,8 +59,11 @@ const BallotEntry = () => {
   };
 
   const [ballot, setBallot] = useState<BallotState>(getNewBallotState());
-  const [submissionStatus, setSubmissionStatus] =
-    useState<SubmissionStatus>(undefined);
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>({
+    inProgress: false,
+    success: undefined,
+    message: "",
+  });
   const [possibleCourtrooms, setPossibleCourtrooms] = useState<CourtroomInfo[]>(
     []
   );
@@ -63,6 +75,7 @@ const BallotEntry = () => {
       [courtroom: string]: TeamBallotResult[];
     };
   }>({});
+  const [currentKey, setCurrentKey] = useState(0);
 
   const loadTabState = () => {
     console.log("Fetching data from server...");
@@ -142,8 +155,13 @@ const BallotEntry = () => {
 
   useEffect(loadTabState, []);
 
-  function submitBallot(pdfData?: string) {
+  const submitBallot = (pdfData?: string) => {
     try {
+      setSubmissionStatus({
+        inProgress: true,
+        success: undefined,
+        message: undefined,
+      });
       const ballotToSubmit: RequiredBallotState = {
         ...ballot,
         petitioner: {
@@ -160,21 +178,25 @@ const BallotEntry = () => {
         ballotPdf: undefined,
       };
       serverFunctions.submitBallot(ballotToSubmit).then((response) => {
+        const nextKey = currentKey + 1;
+        setCurrentKey(nextKey);
         setBallot(getNewBallotState());
         setSubmissionStatus({
+          inProgress: false,
           success: true,
           message: "Ballot submitted successfully",
         });
         loadTabState();
+        window.scroll(0, 0);
       });
     } catch (e) {
       setSubmissionStatus({
+        inProgress: false,
         success: false,
         message: "Error submitting ballot: " + e.message,
       });
-      console.error(e);
     }
-  }
+  };
 
   const handleSubmit = () => {
     // Check that all fields are filled out
@@ -195,6 +217,7 @@ const BallotEntry = () => {
     ) {
       console.error("Not all fields are filled out");
       setSubmissionStatus({
+        inProgress: false,
         success: false,
         message: "Not all fields are filled out",
       });
@@ -233,9 +256,22 @@ const BallotEntry = () => {
         example, you can enter <code>1+2+3+4</code> to get a total of 10, or
         just <code>10</code>.
       </p>
-      <Form.Group>
+      <Form.Group key={currentKey}>
         <Container style={{ marginBottom: "50px" }} className="p-0 ml-0 mr-0">
           <Row>
+            <Col>
+              <Form.Label>Round</Form.Label>
+              <FuzzyTypeahead
+                id="round-typeahead"
+                isInvalid={
+                  submissionStatus?.success === false && ballot.round === ""
+                }
+                query={ballot.round}
+                setQuery={setBallotField("round")}
+                options={possibleRoundNames}
+                placeholder="Enter the round..."
+              />
+            </Col>
             <Col>
               <Form.Label>Courtroom</Form.Label>
               <FuzzyTypeahead
@@ -250,19 +286,6 @@ const BallotEntry = () => {
                 placeholder="Enter the courtroom..."
               />
             </Col>
-            <Col>
-              <Form.Label>Round</Form.Label>
-              <FuzzyTypeahead
-                id="round-typeahead"
-                isInvalid={
-                  submissionStatus?.success === false && ballot.round === ""
-                }
-                query={ballot.round}
-                setQuery={setBallotField("round")}
-                options={possibleRoundNames}
-                placeholder="Enter the round..."
-              />
-            </Col>
           </Row>
           <Row className="pt-2">
             <Col>
@@ -275,8 +298,7 @@ const BallotEntry = () => {
                 query={ballot.judgeName}
                 setQuery={setBallotField("judgeName")}
                 options={possibleJudgeNames}
-                placeholder="Enter the judge's name..."
-                minLength={2}
+                placeholder="Enter the judge name..."
               />
             </Col>
           </Row>
@@ -483,22 +505,37 @@ const BallotEntry = () => {
           style={{ height: "50px" }}
           className="fixed-bottom bg-white border-top border-3 text-right"
         >
-          {submissionStatus && (
-            <Alert
-              variant={submissionStatus.success ? "success" : "danger"}
-              className="m-2"
-            >
-              {submissionStatus.message}
-            </Alert>
-          )}
-          <Button
-            className="mt-1 mr-2"
-            variant="primary"
-            type="submit"
-            onClick={handleSubmit}
-          >
-            Submit
-          </Button>
+          <Container>
+            <Row>
+              <Col xs={9}>
+                {submissionStatus.inProgress === false &&
+                  submissionStatus.success !== undefined && (
+                    <Alert
+                      variant={submissionStatus.success ? "success" : "danger"}
+                      className="mt-2 mb-2 text-center"
+                    >
+                      {submissionStatus.message}
+                    </Alert>
+                  )}
+              </Col>
+              <Col xs={1}>
+                {submissionStatus.inProgress && (
+                  <Spinner animation="border" className="m-2" />
+                )}
+              </Col>
+              <Col xs={2}>
+                <Button
+                  className="mt-2 mr-2"
+                  variant="primary"
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={submissionStatus.inProgress}
+                >
+                  Submit
+                </Button>
+              </Col>
+            </Row>
+          </Container>
         </div>
       </Form.Group>
     </div>

@@ -26,7 +26,13 @@ const MathTypeahead = ({ query, setQuery, isInvalid, ...props }: MathTypeaheadPr
     <>
       <Typeahead
         {...props}
+        selected={options.length > 0 ? [options[0]] : []}
         onInputChange={setQuery}
+        onChange={(values) => {
+          if (values.length > 0) {
+            setQuery(values[0] as string);
+          }
+        }}
         isInvalid={isInvalid || (query && mathResult === null)}
         isValid={mathResult !== null}
         filterBy={() => true}
