@@ -1,8 +1,8 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-import { BallotRange, CaptainsFormRange } from "../../Types";
-
-import { MasterRange } from "../../Types";
+import { BallotRange, CaptainsFormRange, MasterRange } from "../../Types";
+import { compactRange } from "../context/Helpers";
+import { SSContext } from "../context/Context";
 
 function PopulateTeamBallots() {
   populateBallots(MasterRange.TeamBallots, BallotRange.TeamResults, 2);
@@ -17,13 +17,16 @@ function PopulateIndividualBallots() {
 }
 
 function populateBallots(
-  outputRangeName: string,
+  outputRangeName: MasterRange,
   resultsRangeName: string,
   rowsPerBallot: number
 ) {
-  const masterSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const ballotLinksRange = masterSheet.getRangeByName(MasterRange.BallotLinks)!;
-  const outputRange = masterSheet.getRangeByName(outputRangeName)!;
+  const context = new SSContext();
+  const ballotLinksRange = context.masterSpreadsheet.getRangeByName(
+    MasterRange.BallotLinks
+  )!;
+  const outputRange =
+    context.masterSpreadsheet.getRangeByName(outputRangeName)!;
   const ballotLinks = getValidatedBallotLinks(ballotLinksRange);
   const outputCells = [];
   const emptyRow = ["", "", "", "", "", "", "", "", ""];
@@ -43,6 +46,93 @@ function populateBallots(
       outputCells.push(emptyRow);
     }
   }
+
+  const formResults = context.formBallotResults;
+  if (formResults.length > 0) {
+    for (let i = 0; i < formResults.length; i += 1) {
+      const res = formResults[i];
+      if (outputRangeName == MasterRange.TeamBallots) {
+        const petitionerPd =
+          res.pIssue1Score +
+          res.pIssue2Score -
+          res.rIssue1Score -
+          res.rIssue2Score;
+        const petitionerWon =
+          petitionerPd === 0 ? 0.5 : petitionerPd > 0 ? 1 : 0;
+        const respondentPd = -petitionerPd;
+        const respondentWon = 1 - petitionerWon;
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.pTeam,
+          res.rTeam,
+          context.firstPartyName,
+          petitionerPd,
+          petitionerWon,
+          res.courtroom,
+          "",
+        ]);
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.rTeam,
+          res.pTeam,
+          context.secondPartyName,
+          respondentPd,
+          respondentWon,
+          res.courtroom,
+          "",
+        ]);
+      } else if (outputRangeName == MasterRange.IndividualBallots) {
+        // Round #	Judge Name	Team #	Competitor Name	Side	Type	Rank Value	Courtroom	Ballot Link
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.pTeam,
+          res.pIssue1Name,
+          context.firstPartyName,
+          "Attorney",
+          res.pIssue1Score,
+          res.courtroom,
+          "",
+        ]);
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.pTeam,
+          res.pIssue2Name,
+          context.firstPartyName,
+          "Attorney",
+          res.pIssue2Score,
+          res.courtroom,
+          "",
+        ]);
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.rTeam,
+          res.rIssue1Name,
+          context.secondPartyName,
+          "Attorney",
+          res.rIssue1Score,
+          res.courtroom,
+          "",
+        ]);
+        outputCells.push([
+          res.round,
+          res.judgeName,
+          res.rTeam,
+          res.rIssue2Name,
+          context.secondPartyName,
+          "Attorney",
+          res.rIssue2Score,
+          res.courtroom,
+          "",
+        ]);
+      }
+    }
+  }
+
   const outputRangeSize = outputRange.getNumRows();
   while (outputCells.length < outputRangeSize) {
     outputCells.push(emptyRow);

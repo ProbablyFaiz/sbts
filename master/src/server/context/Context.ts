@@ -3,6 +3,7 @@ import {
   BallotSpreadsheet,
   Cell,
   CourtroomInfo,
+  FormBallotResult,
   IndividualBallotResult,
   MasterRange,
   MasterSpreadsheet,
@@ -318,6 +319,44 @@ class SSContext implements IContext {
   get secondPartyName(): string {
     return this.getRangeValue(MasterRange.SecondPartyName) ?? "";
   }
+  
+  @memoize
+  get formBallotResults(): FormBallotResult[] {
+    const formResponseSheets = this.masterSpreadsheet
+      .getSheets()
+      .filter((sheet) => sheet.getName().startsWith("Form Responses "));
+    const formBallotResults: FormBallotResult[] = [];
+    const formRowToResult = (response: string[]) => {
+      const getScore = (start: number, end: number) =>
+        response
+          .slice(start, end + 1)
+          .reduce((acc, cur) => acc + parseInt(cur), 0);
+      return {
+        judgeName: response[1],
+        round: response[2],
+        courtroom: response[3],
+        pTeam: response[4],
+        pIssue1Name: response[5],
+        pIssue1Score: getScore(6, 8),
+        pIssue2Name: response[9],
+        pIssue2Score: getScore(10, 12),
+        rTeam: response[13],
+        rIssue1Name: response[14],
+        rIssue1Score: getScore(15, 17),
+        rIssue2Name: response[18],
+        rIssue2Score: getScore(19, 21),
+      } as FormBallotResult;
+    };
+    formResponseSheets.forEach((sheet) => {
+      const formResponses = sheet
+        .getDataRange()
+        .getValues()
+        .map(formRowToResult);
+      formBallotResults.push(...formResponses);
+    });
+    return formBallotResults;
+  }
+
 
   getTrialFolder(
     round: string,

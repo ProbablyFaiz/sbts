@@ -162,6 +162,23 @@ type RequiredBallotState = Omit<
   ballotPdf?: undefined;
 };
 
+interface FormBallotResult {
+  judgeName: string;
+  round: string;
+  courtroom: string;
+  pTeam: string;
+  pIssue1Name: string;
+  pIssue1Score: number;
+  pIssue2Name: string;
+  pIssue2Score: number;
+  rTeam: string;
+  rIssue1Name: string;
+  rIssue1Score: number;
+  rIssue2Name: string;
+  rIssue2Score: number;
+}
+
+
 export {
   BallotRange,
   MasterRange,
@@ -175,6 +192,7 @@ export {
   BallotInfo,
   TeamBallotResult,
   IndividualBallotResult,
+  FormBallotResult,
   TeamSummary,
   IndividualSummary,
   RoundResult,
