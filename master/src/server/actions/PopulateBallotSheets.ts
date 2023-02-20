@@ -1,7 +1,6 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
 import { BallotRange, CaptainsFormRange, MasterRange } from "../../Types";
-import { compactRange } from "../context/Helpers";
 import { SSContext } from "../context/Context";
 
 function PopulateTeamBallots() {
@@ -164,3 +163,5 @@ function getValidatedBallotLinks(
     )
     .map((linkInfo) => linkInfo[0]);
 }
+
+export { PopulateTeamBallots, PopulateIndividualBallots };

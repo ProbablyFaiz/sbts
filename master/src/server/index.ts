@@ -11,8 +11,13 @@ import DetectNameTypos from "./tab/DetectNameTypos";
 import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
 import DisplayMatchResults from "./tab/DisplayMatchResults";
+import {
+  PopulateTeamBallots,
+  PopulateIndividualBallots,
+} from "./actions/PopulateBallotSheets";
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
+import PrintTabSummary from "./tab/PrintTabSummary";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -55,7 +60,10 @@ export {
   DetectNameTypos,
   TabulateIndividualBallots,
   TabulateTeamBallots,
+  PopulateIndividualBallots,
+  PopulateTeamBallots,
   DisplayMatchResults,
+  PrintTabSummary,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -95,7 +103,13 @@ global.TabulateIndividualBallots = TabulateIndividualBallots;
 // @ts-ignore
 global.TabulateTeamBallots = TabulateTeamBallots;
 // @ts-ignore
+global.PopulateIndividualBallots = PopulateIndividualBallots;
+// @ts-ignore
+global.PopulateTeamBallots = PopulateTeamBallots;
+// @ts-ignore
 global.DisplayMatchResults = DisplayMatchResults;
+// @ts-ignore
+global.PrintTabSummary = PrintTabSummary;
 // @ts-ignore
 global.getCourtrooms = getCourtrooms;
 // @ts-ignore

@@ -10,16 +10,10 @@ import {
   RequiredBallotState,
   TeamBallotResult,
   TeamInfo,
-  TeamSummary,
+  TeamSummary
 } from "../../Types";
 import { memoize } from "./CacheHelper";
-import {
-  compactRange,
-  getIdFromUrl,
-  getOrCreateChildFolder,
-  GoogleFile,
-  sheetForFile,
-} from "./Helpers";
+import { compactRange, getIdFromUrl, getOrCreateChildFolder, GoogleFile, sheetForFile } from "./Helpers";
 import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
 interface IContext {
@@ -319,7 +313,7 @@ class SSContext implements IContext {
   get secondPartyName(): string {
     return this.getRangeValue(MasterRange.SecondPartyName) ?? "";
   }
-  
+
   @memoize
   get formBallotResults(): FormBallotResult[] {
     const formResponseSheets = this.masterSpreadsheet
@@ -348,15 +342,13 @@ class SSContext implements IContext {
       } as FormBallotResult;
     };
     formResponseSheets.forEach((sheet) => {
-      const formResponses = sheet
-        .getDataRange()
-        .getValues()
-        .map(formRowToResult);
+      const formResponses = compactRange(
+        sheet.getDataRange().getValues().slice(1)
+      ).map(formRowToResult);
       formBallotResults.push(...formResponses);
     });
     return formBallotResults;
   }
-
 
   getTrialFolder(
     round: string,
