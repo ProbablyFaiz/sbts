@@ -1,15 +1,26 @@
 const START_ELO = 1000;
 const K_FACTOR = 32;
 
-function RankElo(startDate: string, endDate: string) {
-  const start = startDate ? new Date(startDate).getTime() : 0;
-  const end = endDate ? new Date(endDate).getTime() : 1e100;
+interface SchoolElo {
+  schoolName: string;
+  elo: number;
+}
+
+interface EloProgressionEntry {
+  date: Date;
+  tournamentName: string;
+  roundName: string;
+  school1Name: string;
+  school2Name: string;
+  initialElo1: number;
+  initialElo2: number;
+  adjustment1: number;
+  adjustment2: number;
+}
+
+function ComputeEloRankings() {
   const context = new RankerContext();
-  const tournaments = context.tabSummaries.filter(
-    (tabSummary) =>
-      tabSummary.tournamentStartTimestamp >= start &&
-      tabSummary.tournamentStartTimestamp <= end
-  );
+  const tournaments = context.tabSummaries;
   const schools = tournaments
     .flatMap((tournament) => tournament.teams.map((team) => team.teamSchool))
     .filter((school, index, self) => self.indexOf(school) === index);
@@ -19,25 +30,14 @@ function RankElo(startDate: string, endDate: string) {
     return acc;
   }, new Map<string, number>());
 
+  const eloProgression: EloProgressionEntry[] = [];
+
   tournaments.forEach((t) => {
     const teamNumberSchoolMap = t.teams.reduce((acc, team) => {
       acc.set(team.teamNumber, team.teamSchool);
       return acc;
     }, new Map<string, string>());
-    const roundMatchups = Array.from(
-      t.matchupResults
-        .reduce((acc, matchup) => {
-          if (!acc.has(matchup.round)) {
-            acc.set(matchup.round, []);
-          }
-          acc.get(matchup.round).push(matchup);
-          return acc;
-        }, new Map<string, MatchupResult[]>())
-        .entries()
-    ).sort(
-      (a, b) =>
-        t.orderedRoundList.indexOf(a[0]) - t.orderedRoundList.indexOf(b[0])
-    );
+    const roundMatchups = matchupsByRound(t);
 
     roundMatchups.forEach(([round, matchups]) => {
       // We wait to adjust the elos until all matchups in a round have been
@@ -48,22 +48,28 @@ function RankElo(startDate: string, endDate: string) {
         const school1 = teamNumberSchoolMap.get(matchup.pTeamNumber);
         const school2 = teamNumberSchoolMap.get(matchup.dTeamNumber);
         if (school1 === school2) {
+          // Don't adjust elos for intra-school matchups; it would
+          // be zero anyway.
           return;
         }
 
         const elo1 = eloMap.get(school1);
         const elo2 = eloMap.get(school2);
         const expectedOutcome1 = expectedOutcome(elo1, elo2);
-        const actualOutcome1 =
-          matchup.pBallotsWon === matchup.dBallotsWon
-            ? 0.5
-            : matchup.pBallotsWon > matchup.dBallotsWon
-            ? 1
-            : 0;
+        const actualOutcome1 = getOutcome(matchup);
         const eloChange1 = eloChange(expectedOutcome1, actualOutcome1);
-        console.log(
-          `${school1} (${elo1}) vs ${school2} (${elo2}): ${matchup.pBallotsWon} - ${matchup.dBallotsWon} (${eloChange1})`
-        );
+
+        eloProgression.push({
+          date: new Date(t.tournamentStartTimestamp),
+          tournamentName: t.tournamentName,
+          roundName: round,
+          school1Name: school1,
+          school2Name: school2,
+          initialElo1: elo1,
+          initialElo2: elo2,
+          adjustment1: eloChange1,
+          adjustment2: -eloChange1,
+        });
         if (!schoolAdjustments.has(school1)) {
           schoolAdjustments.set(school1, 0);
         }
@@ -84,9 +90,43 @@ function RankElo(startDate: string, endDate: string) {
       });
     });
   });
-  console.log(Array.from(eloMap.entries()).sort((a, b) => b[1] - a[1]));
-  return Array.from(eloMap.entries()).sort((a, b) => b[1] - a[1]);
+
+  const eloResults: SchoolElo[] = Array.from(eloMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([school, elo]) => {
+      return { schoolName: school, elo };
+    });
+  writeEloResults(eloResults, context);
+  writeEloProgression(eloProgression, context);
+  addEloHistoryRow(eloResults, eloProgression, tournaments, context);
 }
+
+const matchupsByRound = (tournament: TabSummary) => {
+  const roundMatchups = Array.from(
+    tournament.matchupResults
+      .reduce((acc, matchup) => {
+        if (!acc.has(matchup.round)) {
+          acc.set(matchup.round, []);
+        }
+        acc.get(matchup.round).push(matchup);
+        return acc;
+      }, new Map<string, MatchupResult[]>())
+      .entries()
+  ).sort(
+    (a, b) =>
+      tournament.orderedRoundList.indexOf(a[0]) -
+      tournament.orderedRoundList.indexOf(b[0])
+  );
+  return roundMatchups;
+};
+
+const getOutcome = (matchup: MatchupResult) => {
+  // if (matchup.pBallotsWon === matchup.dBallotsWon) {
+  //   return 0.5;
+  // }
+  // return matchup.pBallotsWon > matchup.dBallotsWon ? 1 : 0;
+  return matchup.pBallotsWon / (matchup.pBallotsWon + matchup.dBallotsWon);
+};
 
 const expectedOutcome = (elo1: number, elo2: number) => {
   return 1 / (1 + 10 ** ((elo2 - elo1) / 400));
@@ -95,3 +135,66 @@ const expectedOutcome = (elo1: number, elo2: number) => {
 const eloChange = (expectedOutcome: number, actualOutcome: number) => {
   return K_FACTOR * (actualOutcome - expectedOutcome);
 };
+
+const writeEloResults = (eloResults: SchoolElo[], context: RankerContext) => {
+  const sheet = context.rankerSpreadsheet.getSheetByName("Elo Ranking");
+  sheet.clear({ contentsOnly: true });
+  sheet.appendRow(["School", "Elo"]);
+  eloResults.forEach((result) => {
+    sheet.appendRow([result.schoolName, result.elo]);
+  });
+};
+
+const writeEloProgression = (
+  eloProgression: EloProgressionEntry[],
+  context: RankerContext
+) => {
+  const sheet = context.rankerSpreadsheet.getSheetByName("Elo Progression");
+  sheet.clear({ contentsOnly: true });
+  sheet.appendRow([
+    "Date",
+    "Tournament",
+    "Round",
+    "Petitioner School",
+    "Respondent School",
+    "P Initial Elo",
+    "R Initial Elo",
+    "P Adjustment",
+    "R Adjustment",
+  ]);
+  eloProgression.forEach((entry) => {
+    sheet.appendRow([
+      entry.date,
+      entry.tournamentName,
+      entry.roundName,
+      entry.school1Name,
+      entry.school2Name,
+      entry.initialElo1,
+      entry.initialElo2,
+      entry.adjustment1,
+      entry.adjustment2,
+    ]);
+  });
+}
+
+const addEloHistoryRow = (
+  eloResults: SchoolElo[],
+  eloProgression: EloProgressionEntry[],
+  tournaments: TabSummary[],
+  context: RankerContext
+) => {
+  const sheet = context.rankerSpreadsheet.getSheetByName("Ranking History");
+  // Date Generated |	Tournaments Included Dump |	Ranking Dump |	Progression Dump
+  sheet.appendRow([
+    new Date(),
+    JSON.stringify(tournaments.map((t) => {
+      return {
+        name: t.tournamentName,
+        startTimestamp: t.tournamentStartTimestamp,
+        url: t.url,
+      };
+    })),
+    JSON.stringify(eloResults),
+    JSON.stringify(eloProgression),
+  ]);
+}

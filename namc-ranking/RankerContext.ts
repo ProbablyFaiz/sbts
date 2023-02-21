@@ -53,51 +53,61 @@ class RankerContext implements IRankerContext {
   @memoize
   get tabSummaries(): TabSummary[] {
     const tabSummaryLinks = compactRange(
-      this.getRangeValues(RankerRange.TabSummaryLinks)
+      this.rankerSpreadsheet
+        .getRangeByName(RankerRange.TabSummaryLinks)
+        .getValues()
     );
-    const tabSummaries = tabSummaryLinks.map((row) => {
-      const tabSummaryUrl = row[0];
-      const tabSummarySpreadsheet = SpreadsheetApp.openByUrl(tabSummaryUrl);
-      if (!tabSummarySpreadsheet) {
-        console.log(
-          `Could not open tab summary spreadsheet at ${tabSummaryUrl}`
-        );
-      }
-      const teams = this.getTeamsForSummary(tabSummarySpreadsheet);
-      const orderedRoundList = compactRange(
-        this.getSummaryRangeValues(
-          tabSummarySpreadsheet,
-          TabSummaryRange.OrderedRoundList
-        )
-      ).map((row) => row[0]);
-      const matchupResults = this.getMatchupResultsForSummary(
-        tabSummarySpreadsheet
-      ).sort(
-        (a, b) =>
-          orderedRoundList.indexOf(a.round) - orderedRoundList.indexOf(b.round)
-      );
-      return {
-        url: tabSummaryUrl,
-        tournamentName: this.getSummaryRangeValue(
-          tabSummarySpreadsheet,
-          TabSummaryRange.TournamentName
-        ),
-        tournamentType: this.getSummaryRangeValue(
-          tabSummarySpreadsheet,
-          TabSummaryRange.TournamentType
-        ),
-        tournamentStartTimestamp: tabSummarySpreadsheet
-          .getRangeByName(TabSummaryRange.TournamentStartDate)
-          .getValue()
-          .getTime(),
-        orderedRoundList: orderedRoundList,
-        teams: teams,
-        matchupResults: matchupResults,
-      };
-    });
-    return tabSummaries.sort(
-      (a, b) => a.tournamentStartTimestamp - b.tournamentStartTimestamp
+    return tabSummaryLinks
+      .map((row) => {
+        if (!row[3] || row[3].toString().toUpperCase() === "FALSE") {
+          return null;
+        }
+        const tabSummaryUrl = row[0];
+        const tabSummarySpreadsheet = SpreadsheetApp.openByUrl(tabSummaryUrl);
+        if (!tabSummarySpreadsheet) {
+          console.log(
+            `Could not open tab summary spreadsheet at ${tabSummaryUrl}, skipping...`
+          );
+          return null;
+        }
+        return this.getTabSummaryFromSS(tabSummarySpreadsheet);
+      })
+      .filter((tabSummary) => tabSummary !== null)
+      .sort((a, b) => a.tournamentStartTimestamp - b.tournamentStartTimestamp);
+  }
+
+  private getTabSummaryFromSS(tabSummarySpreadsheet: Spreadsheet) {
+    const teams = this.getTeamsForSummary(tabSummarySpreadsheet);
+    const orderedRoundList = compactRange(
+      this.getSummaryRangeValues(
+        tabSummarySpreadsheet,
+        TabSummaryRange.OrderedRoundList
+      )
+    ).map((row) => row[0]);
+    const matchupResults = this.getMatchupResultsForSummary(
+      tabSummarySpreadsheet
+    ).sort(
+      (a, b) =>
+        orderedRoundList.indexOf(a.round) - orderedRoundList.indexOf(b.round)
     );
+    return {
+      url: tabSummarySpreadsheet.getUrl(),
+      tournamentName: this.getSummaryRangeValue(
+        tabSummarySpreadsheet,
+        TabSummaryRange.TournamentName
+      ),
+      tournamentType: this.getSummaryRangeValue(
+        tabSummarySpreadsheet,
+        TabSummaryRange.TournamentType
+      ),
+      tournamentStartTimestamp: tabSummarySpreadsheet
+        .getRangeByName(TabSummaryRange.TournamentStartDate)
+        .getValue()
+        .getTime(),
+      orderedRoundList: orderedRoundList,
+      teams: teams,
+      matchupResults: matchupResults,
+    };
   }
 
   private getTeamsForSummary(tabSummarySpreadsheet: Spreadsheet) {
