@@ -1,9 +1,9 @@
-import { SSContext } from "../context/Context";
+import { IContext, SSContext } from "../context/Context";
 import { flattenRange } from "../context/Helpers";
 import { getAllTeamResults } from "./TabulateTeamBallots";
 
-function getRoundSummaryRows(round: string) {
-  const roundResults = getAllTeamResults([round], 2, new SSContext());
+function getRoundSummaryRows(round: string, context: IContext) {
+  const roundResults = getAllTeamResults([round], 2, context);
   const seenTeams = new Set();
   const outputCells = [];
   for (const teamNumber of Object.keys(roundResults)) {
@@ -32,14 +32,15 @@ function getRoundSummaryRows(round: string) {
 
 function PrintTabSummary(roundRange: any) {
   let rounds: string[];
+  const context = new SSContext();
   if (roundRange === undefined) {
-    rounds = Array.from(new SSContext().roundNames);
+    rounds = Array.from(context.roundNames);
   } else {
     rounds = flattenRange(roundRange);
   }
 
   return rounds.reduce((outputCells, round) => {
-    return outputCells.concat(getRoundSummaryRows(round));
+    return outputCells.concat(getRoundSummaryRows(round, context));
   }, [] as string[]);
 }
 

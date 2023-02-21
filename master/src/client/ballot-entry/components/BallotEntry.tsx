@@ -148,8 +148,7 @@ const BallotEntry = () => {
     );
     if (team && team.competitorNames.length >= 2) {
       teamState.issue1Name = team.competitorNames[0];
-      teamState.issue2Name =
-        team.competitorNames[team.competitorNames.length - 1];
+      teamState.issue2Name = team.competitorNames[1];
     }
   };
 
@@ -339,7 +338,7 @@ const BallotEntry = () => {
                   ballot.petitioner.issue1Name === ""
                 }
                 options={petitionerNames}
-                minLength={2}
+                // minLength={2}
                 placeholder="Enter the speaker's name..."
               />
             </Col>
@@ -376,7 +375,7 @@ const BallotEntry = () => {
                   ballot.petitioner.issue2Name === ""
                 }
                 options={petitionerNames.slice().reverse()}
-                minLength={2}
+                // minLength={2}
                 placeholder="Enter the speaker's name..."
               />
             </Col>
@@ -430,7 +429,7 @@ const BallotEntry = () => {
                 }
                 isValid={respondentNames.includes(ballot.respondent.issue1Name)}
                 options={respondentNames}
-                minLength={2}
+                // minLength={2}
                 placeholder="Enter the speaker's name..."
               />
             </Col>
@@ -467,7 +466,7 @@ const BallotEntry = () => {
                   ballot.respondent.issue2Name === ""
                 }
                 options={respondentNames.slice().reverse()}
-                minLength={2}
+                // minLength={2}
                 placeholder="Enter the speaker's name..."
               />
             </Col>

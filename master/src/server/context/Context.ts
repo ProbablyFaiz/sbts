@@ -10,10 +10,16 @@ import {
   RequiredBallotState,
   TeamBallotResult,
   TeamInfo,
-  TeamSummary
+  TeamSummary,
 } from "../../Types";
 import { memoize } from "./CacheHelper";
-import { compactRange, getIdFromUrl, getOrCreateChildFolder, GoogleFile, sheetForFile } from "./Helpers";
+import {
+  compactRange,
+  getIdFromUrl,
+  getOrCreateChildFolder,
+  GoogleFile,
+  sheetForFile,
+} from "./Helpers";
 import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
 interface IContext {
@@ -67,16 +73,32 @@ class SSContext implements IContext {
           .split(",")
           .concat(ballotCompetitorNames[row[0]] ?? [])
           .map((s) => s.trim());
-        // Filter duplicates and empty strings
-        const uniqueCompetitorNames = Array.from(
-          new Set(competitorNames.filter((s) => !!s))
+        // Filter duplicates and empty strings and count freqs
+        const nameFreqs = competitorNames.reduce((acc, name) => {
+          if (!name) {
+            return acc;
+          }
+          if (!acc[name]) {
+            acc[name] = 0;
+          }
+          acc[name]++;
+          return acc;
+        }, {} as Record<string, number>);
+        const freqSortedNames = Object.keys(nameFreqs).sort(
+          (a, b) => {
+            if (nameFreqs[a] !== nameFreqs[b]) {
+              return nameFreqs[b] - nameFreqs[a];
+            }
+            // Otherwise, the one that first occurs in competitorNames wins
+            return competitorNames.indexOf(a) - competitorNames.indexOf(b);
+          }
         );
         teamInfoMapping[row[0]] = {
           teamNumber: row[0],
           teamName: row[1],
           schoolName: row[2],
           byeBust: row[2] === BYE_BUST_SCHOOL_NAME, // For now, we'll just use a special school name
-          competitorNames: uniqueCompetitorNames,
+          competitorNames: freqSortedNames,
           emails: row[4],
           ballotFolderLink: row[5],
         };
