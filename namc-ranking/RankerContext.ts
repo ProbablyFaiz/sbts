@@ -1,3 +1,5 @@
+const BALLOTS_PER_ROUND = 2;
+
 interface TeamRank {
   rank: number;
   teamNumber: string;
@@ -83,7 +85,7 @@ class RankerContext implements IRankerContext {
         tabSummarySpreadsheet,
         TabSummaryRange.OrderedRoundList
       )
-    ).map((row) => row[0]);
+    ).map((row) => row[0].trim());
     const matchupResults = this.getMatchupResultsForSummary(
       tabSummarySpreadsheet
     ).sort(
@@ -120,11 +122,11 @@ class RankerContext implements IRankerContext {
       .map((teamCells) => {
         return {
           rank: parseInt(teamCells[0]),
-          teamNumber: teamCells[1],
-          teamSchool: teamCells[2],
-          competitor1Name: teamCells[3],
-          competitor2Name: teamCells[4],
-          teamEmail: teamCells[5],
+          teamNumber: teamCells[1].trim(),
+          teamSchool: teamCells[2].trim(),
+          competitor1Name: teamCells[3].trim(),
+          competitor2Name: teamCells[4].trim(),
+          teamEmail: teamCells[5].trim(),
         };
       })
       .filter((team) => !!team.teamNumber);
@@ -136,16 +138,25 @@ class RankerContext implements IRankerContext {
         tabSummarySpreadsheet,
         TabSummaryRange.MatchupResults
       )
-    ).map((matchupCells) => {
-      return {
-        round: matchupCells[0],
-        pTeamNumber: matchupCells[1],
-        dTeamNumber: matchupCells[2],
-        pBallotsWon: parseFloat(matchupCells[3]),
-        dBallotsWon: parseFloat(matchupCells[4]),
-        notes: matchupCells[5],
-      };
-    });
+    )
+      .map((matchupCells) => {
+        let pBallotsWon = parseFloat(matchupCells[3]);
+        let dBallotsWon = parseFloat(matchupCells[4]);
+        if (isNaN(pBallotsWon) || isNaN(dBallotsWon)) {
+          return null;
+        }
+        pBallotsWon = pBallotsWon * BALLOTS_PER_ROUND / (pBallotsWon + dBallotsWon);
+        dBallotsWon = dBallotsWon * BALLOTS_PER_ROUND / (pBallotsWon + dBallotsWon);
+        return {
+          round: matchupCells[0].trim(),
+          pTeamNumber: matchupCells[1].trim(),
+          dTeamNumber: matchupCells[2].trim(),
+          pBallotsWon: pBallotsWon,
+          dBallotsWon: dBallotsWon,
+          notes: matchupCells[5],
+        };
+      })
+      .filter((matchup) => !!matchup);
   }
 
   private getRangeValues(range: RankerRange): string[][] {

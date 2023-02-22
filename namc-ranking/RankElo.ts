@@ -18,8 +18,12 @@ interface EloProgressionEntry {
   adjustment2: number;
 }
 
-function ComputeEloRankings() {
-  const context = new RankerContext();
+interface EloData {
+  eloResults: SchoolElo[];
+  eloProgression: EloProgressionEntry[];
+}
+
+function calculateEloData(context: IRankerContext): EloData {
   const tournaments = context.tabSummaries;
   const schools = tournaments
     .flatMap((tournament) => tournament.teams.map((team) => team.teamSchool))
@@ -96,9 +100,15 @@ function ComputeEloRankings() {
     .map(([school, elo]) => {
       return { schoolName: school, elo };
     });
+  return { eloProgression, eloResults };
+}
+
+function ComputeEloRankings() {
+  const context = new RankerContext();
+  const { eloProgression, eloResults } = calculateEloData(context);
   writeEloResults(eloResults, context);
   writeEloProgression(eloProgression, context);
-  addEloHistoryRow(eloResults, eloProgression, tournaments, context);
+  addEloHistoryRow(eloResults, eloProgression, context.tabSummaries, context);
 }
 
 const matchupsByRound = (tournament: TabSummary) => {
@@ -139,6 +149,21 @@ const eloChange = (expectedOutcome: number, actualOutcome: number) => {
 const writeEloResults = (eloResults: SchoolElo[], context: RankerContext) => {
   const sheet = context.rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
+  // Remove all but the top 5 rows
+  sheet.deleteRows(6, sheet.getMaxRows() - 5);
+  sheet.appendRow(["National Program Ranking"]);
+  // Date format: February 10, 2023 at 9:30 PM
+  sheet.appendRow([
+    `Updated: ${new Date().toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "America/Los_Angeles",
+    })}`,
+  ]);
   sheet.appendRow(["School", "Elo"]);
   eloResults.forEach((result) => {
     sheet.appendRow([result.schoolName, result.elo]);
@@ -175,7 +200,7 @@ const writeEloProgression = (
       entry.adjustment2,
     ]);
   });
-}
+};
 
 const addEloHistoryRow = (
   eloResults: SchoolElo[],
@@ -187,14 +212,16 @@ const addEloHistoryRow = (
   // Date Generated |	Tournaments Included Dump |	Ranking Dump |	Progression Dump
   sheet.appendRow([
     new Date(),
-    JSON.stringify(tournaments.map((t) => {
-      return {
-        name: t.tournamentName,
-        startTimestamp: t.tournamentStartTimestamp,
-        url: t.url,
-      };
-    })),
+    JSON.stringify(
+      tournaments.map((t) => {
+        return {
+          name: t.tournamentName,
+          startTimestamp: t.tournamentStartTimestamp,
+          url: t.url,
+        };
+      })
+    ),
     JSON.stringify(eloResults),
     JSON.stringify(eloProgression),
   ]);
-}
+};
