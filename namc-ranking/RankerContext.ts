@@ -28,8 +28,17 @@ interface TabSummary {
   matchupResults: MatchupResult[];
 }
 
+interface RankingConfig {
+  startingElo: number;
+  kFactor: number;
+  topN: number;
+}
+
 enum RankerRange {
   TabSummaryLinks = "TabSummaryLinks",
+  StartingElo = "StartingElo",
+  KFactor = "KFactor",
+  TopN = "TopN",
 }
 
 enum TabSummaryRange {
@@ -43,6 +52,7 @@ enum TabSummaryRange {
 
 interface IRankerContext {
   tabSummaries: TabSummary[];
+  rankingConfig: RankingConfig;
 }
 
 class RankerContext implements IRankerContext {
@@ -50,6 +60,24 @@ class RankerContext implements IRankerContext {
 
   constructor() {
     this.rankerSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  }
+  
+  @memoize
+  get rankingConfig(): RankingConfig {
+    const startingElo = this.rankerSpreadsheet
+      .getRangeByName(RankerRange.StartingElo)
+      .getValue();
+    const kFactor = this.rankerSpreadsheet
+      .getRangeByName(RankerRange.KFactor)
+      .getValue();
+    const topN = this.rankerSpreadsheet
+      .getRangeByName(RankerRange.TopN)
+      .getValue();
+    return {
+      startingElo,
+      kFactor,
+      topN,
+    };
   }
 
   @memoize

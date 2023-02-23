@@ -23,14 +23,106 @@ interface EloData {
   eloProgression: EloProgressionEntry[];
 }
 
-function calculateEloData(context: IRankerContext): EloData {
+function ComputeEloRankings() {
+  const context = new RankerContext();
+  const rankingConfig = context.rankingConfig;
+  const { eloProgression, eloResults } = calculateEloData(context);
+  writeEloResults(eloResults, rankingConfig.topN, context.rankerSpreadsheet);
+  writeEloProgression(eloProgression, context.rankerSpreadsheet);
+  addEloHistoryRow(
+    eloResults,
+    eloProgression,
+    context.tabSummaries,
+    context.rankerSpreadsheet
+  );
+}
+
+function EloRankingDryRun() {
+  // In the dry run, we ignore the topN setting and show all schools.
+  const context = new RankerContext();
+  const { eloProgression, eloResults } = calculateEloData(context);
+  const ui = SpreadsheetApp.getUi();
+  // Create an html dialog that shows the ranked schools as a table with their elo (rounded to the nearest integer).
+  const html = HtmlService.createHtmlOutput(
+    `<h2>Elo Rankings</h2>
+    <table>
+      <tr>
+        <th>Rank</th>
+        <th>School</th>
+        <th>Elo</th>
+      </tr>
+      ${eloResults
+        .map(
+          (schoolElo, index) =>
+            `<tr>
+              <td>${index + 1}</td>
+              <td>${schoolElo.schoolName}</td>
+              <td>${Math.round(schoolElo.elo)}</td>
+            </tr>`
+        )
+        .join("")}
+    </table>
+    <h2>Elo Progression</h2>
+    <table>
+      <tr>
+        <th>Date</th>
+        <th>Tournament</th>
+        <th>Round</th>
+        <th>Team 1</th>
+        <th>Team 2</th>
+        <th>In. Elo 1</th>
+        <th>In. Elo 2</th>
+        <th>Adj. 1</th>
+        <th>Adj. 2</th>
+      </tr>
+      ${eloProgression
+        .map(
+          (entry) =>
+            `<tr>
+              <td>${entry.date.toLocaleDateString()}</td>
+              <td>${entry.tournamentName}</td>
+              <td>${entry.roundName}</td>
+              <td>${entry.school1Name}</td>
+              <td>${entry.school2Name}</td>
+              <td>${Math.round(entry.initialElo1 * 10) / 10}</td>
+              <td>${Math.round(entry.initialElo2 * 10) / 10}</td>
+              <td>${Math.round(entry.adjustment1 * 10) / 10}</td>
+              <td>${Math.round(entry.adjustment2 * 10) / 10}</td>
+            </tr>`
+        )
+        .join("")}
+    </table>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 5px;
+      }
+      tr:nth-child(even) {
+        background-color: #eee;
+      }
+      tr:nth-child(odd) {
+        background-color:#fff;
+      }
+    </style>`
+  )
+    .setWidth(800)
+    .setHeight(600);
+  ui.showModelessDialog(html, "Elo Ranking Dry Run");
+}
+
+const calculateEloData = (context: IRankerContext): EloData => {
   const tournaments = context.tabSummaries;
   const schools = tournaments
     .flatMap((tournament) => tournament.teams.map((team) => team.teamSchool))
     .filter((school, index, self) => self.indexOf(school) === index);
 
+  const startElo = context.rankingConfig.startingElo || START_ELO;
+  const kFactor = context.rankingConfig.kFactor || K_FACTOR;
   const eloMap = schools.reduce((acc, school) => {
-    acc.set(school, START_ELO);
+    acc.set(school, startElo);
     return acc;
   }, new Map<string, number>());
 
@@ -61,7 +153,7 @@ function calculateEloData(context: IRankerContext): EloData {
         const elo2 = eloMap.get(school2);
         const expectedOutcome1 = expectedOutcome(elo1, elo2);
         const actualOutcome1 = getOutcome(matchup);
-        const eloChange1 = eloChange(expectedOutcome1, actualOutcome1);
+        const eloChange1 = eloChange(expectedOutcome1, actualOutcome1, kFactor);
 
         eloProgression.push({
           date: new Date(t.tournamentStartTimestamp),
@@ -101,15 +193,7 @@ function calculateEloData(context: IRankerContext): EloData {
       return { schoolName: school, elo };
     });
   return { eloProgression, eloResults };
-}
-
-function ComputeEloRankings() {
-  const context = new RankerContext();
-  const { eloProgression, eloResults } = calculateEloData(context);
-  writeEloResults(eloResults, context);
-  writeEloProgression(eloProgression, context);
-  addEloHistoryRow(eloResults, eloProgression, context.tabSummaries, context);
-}
+};
 
 const matchupsByRound = (tournament: TabSummary) => {
   const roundMatchups = Array.from(
@@ -142,12 +226,20 @@ const expectedOutcome = (elo1: number, elo2: number) => {
   return 1 / (1 + 10 ** ((elo2 - elo1) / 400));
 };
 
-const eloChange = (expectedOutcome: number, actualOutcome: number) => {
+const eloChange = (
+  expectedOutcome: number,
+  actualOutcome: number,
+  kFactor: number
+) => {
   return K_FACTOR * (actualOutcome - expectedOutcome);
 };
 
-const writeEloResults = (eloResults: SchoolElo[], context: RankerContext) => {
-  const sheet = context.rankerSpreadsheet.getSheetByName("Elo Ranking");
+const writeEloResults = (
+  eloResults: SchoolElo[],
+  topN: number,
+  rankerSpreadsheet: Spreadsheet
+) => {
+  const sheet = rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
   // Remove all but the top 5 rows
   sheet.deleteRows(6, sheet.getMaxRows() - 5);
@@ -172,9 +264,9 @@ const writeEloResults = (eloResults: SchoolElo[], context: RankerContext) => {
 
 const writeEloProgression = (
   eloProgression: EloProgressionEntry[],
-  context: RankerContext
+  rankerSpreadsheet: Spreadsheet
 ) => {
-  const sheet = context.rankerSpreadsheet.getSheetByName("Elo Progression");
+  const sheet = rankerSpreadsheet.getSheetByName("Elo Progression");
   sheet.clear({ contentsOnly: true });
   sheet.appendRow([
     "Date",
@@ -206,9 +298,9 @@ const addEloHistoryRow = (
   eloResults: SchoolElo[],
   eloProgression: EloProgressionEntry[],
   tournaments: TabSummary[],
-  context: RankerContext
+  rankerSpreadsheet: Spreadsheet
 ) => {
-  const sheet = context.rankerSpreadsheet.getSheetByName("Ranking History");
+  const sheet = rankerSpreadsheet.getSheetByName("Ranking History");
   // Date Generated |	Tournaments Included Dump |	Ranking Dump |	Progression Dump
   sheet.appendRow([
     new Date(),
