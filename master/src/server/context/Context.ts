@@ -353,14 +353,14 @@ class SSContext implements IContext {
         courtroom: response[3],
         pTeam: response[4],
         pIssue1Name: response[5],
-        pIssue1Score: getScore(6, 8),
-        pIssue2Name: response[9],
-        pIssue2Score: getScore(10, 12),
-        rTeam: response[13],
-        rIssue1Name: response[14],
-        rIssue1Score: getScore(15, 17),
-        rIssue2Name: response[18],
-        rIssue2Score: getScore(19, 21),
+        pIssue1Score: getScore(7, 9),
+        pIssue2Name: response[10],
+        pIssue2Score: getScore(12, 14),
+        rTeam: response[15],
+        rIssue1Name: response[16],
+        rIssue1Score: getScore(18, 20),
+        rIssue2Name: response[21],
+        rIssue2Score: getScore(23, 25),
       } as FormBallotResult;
     };
     formResponseSheets.forEach((sheet) => {

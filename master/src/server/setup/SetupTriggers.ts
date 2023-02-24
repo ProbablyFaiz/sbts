@@ -16,6 +16,14 @@ function SetupTriggers() {
     .forSpreadsheet(masterSheet)
     .onEdit()
     .create();
+  ScriptApp.newTrigger("PopulateTeamBallots")
+    .forSpreadsheet(masterSheet)
+    .onFormSubmit()
+    .create();
+  ScriptApp.newTrigger("PopulateIndividualBallots")
+    .forSpreadsheet(masterSheet)
+    .onFormSubmit()
+    .create();
 }
 
 export { SetupTriggers };

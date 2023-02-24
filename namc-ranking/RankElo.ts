@@ -25,9 +25,14 @@ interface EloData {
 
 function ComputeEloRankings() {
   const context = new RankerContext();
-  const rankingConfig = context.rankingConfig;
-  const { eloProgression, eloResults } = calculateEloData(context);
-  writeEloResults(eloResults, rankingConfig.topN, context.rankerSpreadsheet);
+  const { eloProgression, eloResults } = calculateEloData(
+    context.tabSummaries,
+    context.rankingConfig
+  );
+  writeEloResults(
+    eloResults.slice(0, context.rankingConfig.topN),
+    context.rankerSpreadsheet
+  );
   writeEloProgression(eloProgression, context.rankerSpreadsheet);
   addEloHistoryRow(
     eloResults,
@@ -40,7 +45,10 @@ function ComputeEloRankings() {
 function EloRankingDryRun() {
   // In the dry run, we ignore the topN setting and show all schools.
   const context = new RankerContext();
-  const { eloProgression, eloResults } = calculateEloData(context);
+  const { eloProgression, eloResults } = calculateEloData(
+    context.tabSummaries,
+    context.rankingConfig
+  );
   const ui = SpreadsheetApp.getUi();
   // Create an html dialog that shows the ranked schools as a table with their elo (rounded to the nearest integer).
   const html = HtmlService.createHtmlOutput(
@@ -113,14 +121,16 @@ function EloRankingDryRun() {
   ui.showModelessDialog(html, "Elo Ranking Dry Run");
 }
 
-const calculateEloData = (context: IRankerContext): EloData => {
-  const tournaments = context.tabSummaries;
+const calculateEloData = (
+  tournaments: TabSummary[],
+  config: RankingConfig
+): EloData => {
   const schools = tournaments
     .flatMap((tournament) => tournament.teams.map((team) => team.teamSchool))
     .filter((school, index, self) => self.indexOf(school) === index);
 
-  const startElo = context.rankingConfig.startingElo || START_ELO;
-  const kFactor = context.rankingConfig.kFactor || K_FACTOR;
+  const startElo = config.startingElo || START_ELO;
+  const kFactor = config.kFactor || K_FACTOR;
   const eloMap = schools.reduce((acc, school) => {
     acc.set(school, startElo);
     return acc;
@@ -236,14 +246,13 @@ const eloChange = (
 
 const writeEloResults = (
   eloResults: SchoolElo[],
-  topN: number,
   rankerSpreadsheet: Spreadsheet
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
   // Remove all but the top 5 rows
   sheet.deleteRows(6, sheet.getMaxRows() - 5);
-  sheet.appendRow(["National Program Ranking"]);
+  sheet.appendRow(["Top Programs"]);
   // Date format: February 10, 2023 at 9:30 PM
   sheet.appendRow([
     `Updated: ${new Date().toLocaleDateString("en-US", {
