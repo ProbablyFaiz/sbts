@@ -3,11 +3,11 @@ import {
   BallotSpreadsheet,
   Cell,
   CourtroomInfo,
-  NonSheetBallotResult,
   IndividualBallotResult,
   MasterRange,
   MasterSpreadsheet,
   NonSheetBallotReadout,
+  NonSheetBallotResult,
   RequiredBallotState,
   TeamBallotResult,
   TeamInfo,
@@ -46,6 +46,8 @@ interface IContext {
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
 const PAST_OPPONENTS_SEPARATOR = ", ";
+
+const ENTERED_BALLOTS_SHEET = "Entered Ballots";
 
 class SSContext implements IContext {
   @memoize
@@ -337,7 +339,7 @@ class SSContext implements IContext {
     formResponseSheets.forEach((sheet) => {
       const formResponses = compactRange(
         sheet.getDataRange().getValues().slice(1)
-      ).map(this.formRowToReadout);
+      ).map((row) => this.formRowToReadout(row, sheet.getName()));
       formBallotReadouts.push(...formResponses);
     });
     return formBallotReadouts;
@@ -350,15 +352,19 @@ class SSContext implements IContext {
 
   @memoize
   get enteredBallotReadouts(): NonSheetBallotReadout[] {
-    const enteredBallotSheets =
-      this.masterSpreadsheet.getSheetByName("Entered Ballots");
+    const enteredBallotSheets = this.masterSpreadsheet.getSheetByName(
+      ENTERED_BALLOTS_SHEET
+    );
     if (!enteredBallotSheets) return [];
     return compactRange(
       enteredBallotSheets.getDataRange().getValues().slice(1)
-    ).map(this.formRowToReadout);
+    ).map((row) => this.formRowToReadout(row, ENTERED_BALLOTS_SHEET));
   }
 
-  private formRowToReadout(response: string[]): NonSheetBallotReadout {
+  private formRowToReadout(
+    response: string[],
+    sourceSheet: string
+  ): NonSheetBallotReadout {
     const getScores = (start: number, end: number) =>
       response
         .slice(start, end + 1)
@@ -383,6 +389,7 @@ class SSContext implements IContext {
       rIssue2WrittenFeedback: response[22],
       rIssue2Scores: getScores(23, 25),
       ballotPdfUrl: response.length > 26 ? response[26] : undefined,
+      sourceSheet: sourceSheet,
     };
   }
 
@@ -406,6 +413,44 @@ class SSContext implements IContext {
     };
   }
 
+  setReadoutPdfUrl(
+    readout: NonSheetBallotReadout,
+    ballotPdfUrl: string
+  ) {
+    const sourceSheet = this.masterSpreadsheet.getSheetByName(
+      readout.sourceSheet
+    );
+    if (!sourceSheet) {
+      Logger.log(
+        `Could not find sheet ${readout.sourceSheet} to update ballot PDF URL. This is really weird and scary.`
+      );
+      return;
+    }
+    const row = sourceSheet
+      .getDataRange()
+      .getValues()
+      .slice(1)
+      .findIndex((row) => {
+        const rowReadout = this.formRowToReadout(row, readout.sourceSheet);
+        // This ought to be sufficient to conclude it's the same one
+        return (
+          rowReadout.timestamp === readout.timestamp &&
+          rowReadout.judgeName === readout.judgeName &&
+          rowReadout.round === readout.round &&
+          rowReadout.courtroom === readout.courtroom &&
+          rowReadout.pTeam === readout.pTeam &&
+          rowReadout.rTeam === readout.rTeam
+        );
+      });
+    if (row === -1) {
+      Logger.log(`Could not find row to update ballot PDF URL. Giving up...`);
+      return;
+    }
+    // We add 2 to the row because we cut off the header row before findIndex,
+    // and second because Google Sheets is 1-indexed
+    sourceSheet.getRange(row + 2, 27).setValue(ballotPdfUrl);
+  }
+
   getOrCreateTrialFolder(
     round: string,
     courtroom: string
@@ -422,8 +467,9 @@ class SSContext implements IContext {
   }
 
   addEnteredBallot(ballotState: RequiredBallotState) {
-    const enteredBallotsSheet =
-      this.masterSpreadsheet.getSheetByName("Entered Ballots");
+    const enteredBallotsSheet = this.masterSpreadsheet.getSheetByName(
+      ENTERED_BALLOTS_SHEET
+    );
     let pdfUrl = "";
     if (ballotState.pdfData) {
       const trialFolder = this.getOrCreateTrialFolder(

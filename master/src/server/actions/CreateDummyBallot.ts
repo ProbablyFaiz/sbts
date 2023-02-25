@@ -9,20 +9,6 @@ const COMMENT_TEXT_COLUMN_INDEX = 2;
 const CHARACTERS_PER_HEIGHT_PIXEL = 5.4; // Computed based on a column width of 700 and Times New Roman 12 pt. font.
 const HEIGHT_PIXELS_PER_LINE = 21.0;
 
-function hideRowsBelowScores(
-  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
-) {
-  const endOfScoresRange = ballotSpreadsheet.getRangeByName(
-    BallotRange.EndOfScores
-  );
-  // We want to hide all rows below the end of the scores range.
-  const scoresSheet = endOfScoresRange.getSheet();
-  const endOfScoresRow =
-    endOfScoresRange.getRow() + endOfScoresRange.getNumRows() - 1;
-  const numRowsToHide = scoresSheet.getMaxRows() - endOfScoresRow;
-  scoresSheet.hideRows(endOfScoresRow + 1, numRowsToHide);
-}
-
 function createDummyBallot(
   ballotReadout: NonSheetBallotReadout,
   context: SSContext
@@ -105,10 +91,25 @@ function createDummyBallot(
   const pdfBlob = ballotSpreadsheet.getAs("application/pdf");
   pdfBlob.setName(ballotPdfName);
   const ballotPdf = trialFolder.createFile(pdfBlob);
+  context.setReadoutPdfUrl(ballotReadout, ballotPdf.getUrl());
   ballotFile.setTrashed(true);
 
   return ballotPdf;
 }
+
+const hideRowsBelowScores = (
+  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
+) => {
+  const endOfScoresRange = ballotSpreadsheet.getRangeByName(
+    BallotRange.EndOfScores
+  );
+  // We want to hide all rows below the end of the scores range.
+  const scoresSheet = endOfScoresRange.getSheet();
+  const endOfScoresRow =
+    endOfScoresRange.getRow() + endOfScoresRange.getNumRows() - 1;
+  const numRowsToHide = scoresSheet.getMaxRows() - endOfScoresRow;
+  scoresSheet.hideRows(endOfScoresRow + 1, numRowsToHide);
+};
 
 const fixCommentBoxHeights = (
   ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet

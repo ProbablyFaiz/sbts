@@ -10,7 +10,7 @@ enum BallotRange {
   Submitted = "SubmittedRange",
   TeamResults = "TeamResults",
   IndividualResults = "IndividualResults",
-  
+
   EndOfScores = "EndOfScores",
   PIssue1Name = "PAttorney1",
   PIssue1Comments = "CommentsRangeP1",
@@ -189,6 +189,7 @@ interface NonSheetBallotResult {
   rIssue2Score: number;
 }
 
+
 interface NonSheetBallotReadout {
   timestamp: string;
   judgeName: string;
@@ -209,6 +210,7 @@ interface NonSheetBallotReadout {
   rIssue2WrittenFeedback: string;
   rIssue2Scores: number[];
   ballotPdfUrl?: string;
+  sourceSheet: string;
 }
 
 export {
