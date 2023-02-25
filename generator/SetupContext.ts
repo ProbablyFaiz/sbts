@@ -5,6 +5,7 @@ enum GeneratorRange {
   BallotTemplate = "BallotTemplateRange",
   CaptainsFormTemplate = "CaptainsFormTemplateRange",
   AutocompleteTemplate = "AutocompleteTemplateRange",
+  FormBallotTemplate = "FormBallotTemplateRange",
   TournamentName = "TournamentNameRange",
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
@@ -16,6 +17,7 @@ enum GeneratorRange {
   GenerationLog = "GenerationLogRange",
   GenerateVirtualBallots = "GenerateVirtualBallotsRange",
   GenerateCompetitorForms = "GenerateCompetitorFormsRange",
+  SetUpGoogleFormBallot = "SetUpFormBallotRange",
 }
 
 interface ICourtroomInfo {
@@ -49,11 +51,13 @@ interface ISetupContext {
   ballotBaseTemplate: GoogleFile;
   captainsFormBaseTemplate: GoogleFile;
   autocompleteEngineTemplate: GoogleFile;
+  formBallotTemplate: GoogleFile;
 
   tournamentName: string;
   tournamentContactEmail: string;
   generateVirtualBallots: boolean;
   generateCompetitorForms: boolean;
+  setUpGoogleFormBallot: boolean;
   firstPartyName: string;
   secondPartyName: string;
   courtroomsInfo: ICourtroomInfo[];
@@ -164,6 +168,15 @@ class SetupContext implements ISetupContext {
   }
 
   @memoize
+  get formBallotTemplate(): GoogleFile {
+    return DriveApp.getFileById(
+      getIdFromUrl(
+        this.getRangeValue(GeneratorRange.FormBallotTemplate)
+      ).toString()
+    );
+  }
+
+  @memoize
   get tournamentName(): string {
     return this.getRangeValue(GeneratorRange.TournamentName);
   }
@@ -172,15 +185,26 @@ class SetupContext implements ISetupContext {
   get tournamentContactEmail(): string {
     return this.getRangeValue(GeneratorRange.TournamentContactEmail);
   }
-  
+
   @memoize
   get generateVirtualBallots(): boolean {
-    return this.getRangeValue(GeneratorRange.GenerateVirtualBallots) === "TRUE";
+    return !!this.generatorSpreadsheet
+      .getRangeByName(GeneratorRange.GenerateVirtualBallots)
+      .getValue();
   }
-  
+
   @memoize
   get generateCompetitorForms(): boolean {
-    return this.getRangeValue(GeneratorRange.GenerateCompetitorForms) === "TRUE";
+    return !!this.generatorSpreadsheet
+      .getRangeByName(GeneratorRange.GenerateCompetitorForms)
+      .getValue();
+  }
+
+  @memoize
+  get setUpGoogleFormBallot(): boolean {
+    return !!this.generatorSpreadsheet
+      .getRangeByName(GeneratorRange.SetUpGoogleFormBallot)
+      .getValue();
   }
 
   @memoize
@@ -194,27 +218,27 @@ class SetupContext implements ISetupContext {
 
   @memoize
   get courtroomsInfo(): ICourtroomInfo[] {
-    return compactRange(this.getRangeValues(GeneratorRange.CourtroomNames))
-      .map((courtroomCells) => {
+    return compactRange(this.getRangeValues(GeneratorRange.CourtroomNames)).map(
+      (courtroomCells) => {
         return {
           name: courtroomCells[0],
           bailiffEmails: courtroomCells[1].split(","),
         };
-      })
-      .slice(0, this.numCourtrooms);
+      }
+    );
   }
 
   @memoize
   get roundsInfo(): IRoundInfo[] {
-    return compactRange(this.getRangeValues(GeneratorRange.RoundsInfo))
-      .map((roundCells) => {
+    return compactRange(this.getRangeValues(GeneratorRange.RoundsInfo)).map(
+      (roundCells) => {
         return {
           name: roundCells[0],
           numCourtrooms: parseInt(roundCells[1]),
           numBallots: parseInt(roundCells[2]),
         };
-      })
-      .slice(0, this.numRounds);
+      }
+    );
   }
 
   @memoize

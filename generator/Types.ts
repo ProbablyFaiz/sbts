@@ -27,6 +27,7 @@ enum MasterRange {
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
   BallotTemplateLink = "BallotTemplateLinkRange",
+  GoogleFormBallotLink = "GoogleFormBallotLinkRange",
 }
 
 enum CaptainsFormRange {

@@ -26,9 +26,9 @@ function SetupTabulationFolder(tabFolderLink: string) {
     tabFolder,
     AUTOCOMPLETE_SPREADSHEET_NAME
   );
-  if (autocompleteEngineFile) {
+  if (autocompleteEngineFile || !setupContext.generateCompetitorForms) {
     SheetLogger.log(
-      "Existing autocomplete engine spreadsheet found, not creating a new one..."
+      "Not creating an autocomplete engine spreadsheet, one already exists or it is disabled."
     );
   } else {
     autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(
@@ -45,7 +45,11 @@ function SetupTabulationFolder(tabFolderLink: string) {
     tabFolder,
     ORCHESTRATOR_SPREADSHEET_NAME
   );
-  if (orchestratorFile) {
+  if (
+    orchestratorFile ||
+    (!setupContext.generateVirtualBallots &&
+      !setupContext.generateCompetitorForms)
+  ) {
     SheetLogger.log("Orchestrator file found, not creating a new one...");
   } else {
     orchestratorFile = setupContext.orchestratorTemplate.makeCopy(
@@ -56,13 +60,17 @@ function SetupTabulationFolder(tabFolderLink: string) {
     orchestratorSheet
       .getRangeByName(OrchestratorRange.MasterLink)
       .setValue(masterSheetFile.getUrl());
-    orchestratorSheet
-      .getRangeByName(OrchestratorRange.AutocompleteEngineLink)
-      .setValue(autocompleteEngineFile.getUrl());
+    if (autocompleteEngineFile) {
+      orchestratorSheet
+        .getRangeByName(OrchestratorRange.AutocompleteEngineLink)
+        .setValue(autocompleteEngineFile.getUrl());
+    }
   }
   const exportFolder = getOrCreateChildFolder(tabFolder, EXPORT_FOLDER_NAME);
 
   setupContext.masterSpreadsheet = sheetForFile(masterSheetFile);
+  createTemplatesFolder(setupContext);
+
   if (createdMasterSheet) {
     populateMasterSpreadsheet(
       setupContext,
@@ -72,10 +80,62 @@ function SetupTabulationFolder(tabFolderLink: string) {
     );
   }
 
-  createTemplatesFolder(setupContext);
   SpreadsheetApp.flush();
 
-  for (let round of setupContext.roundsInfo) {
+  if (setupContext.setUpGoogleFormBallot) {
+    setUpGoogleFormBallot(setupContext);
+  }
+  createTrialFolders(setupContext, tabFolder);
+  setupContext.writeCourtroomsToMaster();
+  SheetLogger.log(
+    `Created ballots for ${setupContext.roundsInfo.length} round(s).`
+  );
+}
+
+const setUpGoogleFormBallot = (setupContext: SetupContext) => {
+  SheetLogger.log("Setting up Google Form ballot...");
+  const formTemplate = setupContext.formBallotTemplate;
+  // Copy into tab folder
+  const formFile = formTemplate.makeCopy(
+    `${setupContext.tournamentName} Ballot`,
+    setupContext.tabFolder
+  );
+  const form = FormApp.openById(formFile.getId());
+  form.setTitle(`${setupContext.tournamentName} Ballot`);
+
+  const roundItem = form
+    .getItems()
+    .find((item) => item.getTitle() === "Round #");
+  if (roundItem) {
+    const roundDropdown = roundItem.asListItem();
+    const roundOptions = setupContext.roundsInfo.map((round) => round.name);
+    roundDropdown.setChoiceValues(roundOptions);
+  }
+  const courtroomItem = form
+    .getItems()
+    .find((item) => item.getTitle() === "Courtroom");
+  if (courtroomItem) {
+    const courtroomDropdown = courtroomItem.asListItem();
+    const courtroomOptions = setupContext.courtroomsInfo.map(
+      (courtroom) => courtroom.name
+    );
+    courtroomDropdown.setChoiceValues(courtroomOptions);
+  }
+
+  form.setDestination(
+    FormApp.DestinationType.SPREADSHEET,
+    setupContext.masterSpreadsheet.getId()
+  );
+  setupContext.masterSpreadsheet
+    .getRangeByName(MasterRange.GoogleFormBallotLink)
+    .setValue(form.getPublishedUrl());
+};
+
+const createTrialFolders = (
+  setupContext: SetupContext,
+  tabFolder: GoogleAppsScript.Drive.Folder
+) => {
+  for (let round of setupContext.roundsInfo.slice(0, setupContext.numRounds)) {
     const roundFolderName = `Round ${round.name}`;
     let roundFolder = getChildFolder(tabFolder, roundFolderName);
     if (roundFolder == undefined) {
@@ -89,27 +149,27 @@ function SetupTabulationFolder(tabFolderLink: string) {
       );
     }
     setupContext.courtroomsInfo
-      // This is the per-round limiter, not the global one.
+      // Global limiter
+      .slice(0, setupContext.numCourtrooms)
+      // Per-round limiter
       .slice(0, round.numCourtrooms)
       .forEach((info) =>
         createTrialFolder(setupContext, roundFolder, round, info)
       );
   }
-  setupContext.writeCourtroomsToMaster();
-  SheetLogger.log(
-    `Created ballots for ${setupContext.roundsInfo.length} round(s).`
-  );
-}
+};
 
-function populateMasterSpreadsheet(
+const populateMasterSpreadsheet = (
   setupContext: SetupContext,
   orchestratorFile: GoogleAppsScript.Drive.File,
   tabFolder: GoogleAppsScript.Drive.Folder,
   exportFolder: GoogleAppsScript.Drive.Folder
-) {
-  setupContext.masterSpreadsheet
-    .getRangeByName(MasterRange.OrchestratorLink)
-    .setValue(orchestratorFile.getUrl());
+) => {
+  if (orchestratorFile) {
+    setupContext.masterSpreadsheet
+      .getRangeByName(MasterRange.OrchestratorLink)
+      .setValue(orchestratorFile.getUrl());
+  }
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.ParentFolderLink)
     .setValue(tabFolder.getUrl());
@@ -131,9 +191,9 @@ function populateMasterSpreadsheet(
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.BallotTemplateLink)
     .setValue(setupContext.ballotTemplate.getUrl());
-}
+};
 
-function createTemplatesFolder(setupContext: ISetupContext) {
+const createTemplatesFolder = (setupContext: SetupContext) => {
   // Check if "Templates" folder exists in setupContext.tabFolder
   const templateFolderName = "Templates";
   const ballotTemplateName = "Ballot Template";
@@ -204,14 +264,14 @@ function createTemplatesFolder(setupContext: ISetupContext) {
       .getRangeByName(CaptainsFormRange.RoundsCommaSep)
       .setValue(setupContext.roundsInfo.map((info) => info.name).join(","));
   }
-}
+};
 
-function createTrialFolder(
+const createTrialFolder = (
   setupContext: ISetupContext,
   roundFolder: Folder,
   round: IRoundInfo,
   courtroomInfo: ICourtroomInfo
-) {
+) => {
   const trialFolderName = `R${round.name} - ${courtroomInfo.name}`;
   const trialPrefix = `R${round.name} ${courtroomInfo.name}`;
   SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
@@ -268,15 +328,15 @@ function createTrialFolder(
     linkTrialSheets(trialCaptainsForm, trialBallots);
   }
   SpreadsheetApp.flush();
-}
+};
 
-function prepareCaptainsForm(
+const prepareCaptainsForm = (
   setupContext: ISetupContext,
   trialFolder: Folder,
   trialPrefix: string,
   round: IRoundInfo,
   courtroomInfo: ICourtroomInfo
-) {
+) => {
   const captainsForm = setupContext.captainsFormTemplate.makeCopy(
     `${trialPrefix} - Competitor Info Form`,
     trialFolder
@@ -292,13 +352,13 @@ function prepareCaptainsForm(
     .getRangeByName(CaptainsFormRange.AutocompleteEngineLink)
     .setValue(setupContext.autocompleteEngine.getUrl());
   return captainsForm;
-}
+};
 
-function linkTrialSheets(captainsForm: GoogleFile, ballots: GoogleFile[]) {
+const linkTrialSheets = (captainsForm: GoogleFile, ballots: GoogleFile[]) => {
   const captainsFormUrl = captainsForm.getUrl();
   for (let ballot of ballots) {
     const ballotSheet = sheetForFile(ballot);
     const urlRange = ballotSheet.getRangeByName(BallotRange.CaptainsFormUrl);
     urlRange.setValue(captainsFormUrl);
   }
-}
+};

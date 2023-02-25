@@ -27,7 +27,6 @@ function createDummyBallot(
   ballotReadout: NonSheetBallotReadout,
   context: SSContext
 ) {
-  const ballotTemplateFile = context.ballotTemplateFile;
   const trialFolder = context.getOrCreateTrialFolder(
     ballotReadout.round,
     ballotReadout.courtroom
@@ -40,7 +39,7 @@ function createDummyBallot(
   );
   const ballotSpreadsheetName = "(DUMMY) " + ballotPdfName;
   SheetLogger.log(`Creating dummy ballot '${ballotPdfName}'...`);
-  const ballotFile = ballotTemplateFile.makeCopy(
+  const ballotFile = context.ballotTemplateFile.makeCopy(
     ballotSpreadsheetName,
     trialFolder
   );
