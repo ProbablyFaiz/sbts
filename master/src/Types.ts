@@ -191,7 +191,7 @@ interface NonSheetBallotResult {
 
 
 interface NonSheetBallotReadout {
-  timestamp: string;
+  timestamp: Date;
   judgeName: string;
   round: string;
   courtroom: string;

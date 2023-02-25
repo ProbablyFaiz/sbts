@@ -106,24 +106,38 @@ const exportNonSheetBallots = (context: SSContext) => {
       ? DriveApp.getFileById(getIdFromUrl(readout.ballotPdfUrl))
       : createDummyBallot(readout, context);
     if (ballotFile.getMimeType() !== "application/pdf") {
+      SheetLogger.log(
+        `Ballot ${ballotFile.getUrl()} is not a PDF, skipping...`
+      );
       continue;
     }
-    const teamFolder = context.teamBallotFolder(readout.pTeam)!;
-    const teamRoundFolder = getOrCreateChildFolder(
-      teamFolder,
-      `Round ${readout.round}`
-    );
-    const pdfName = ballotFile.getName();
-    const pdfBallot = getFileByName(teamRoundFolder, pdfName);
-    if (!pdfBallot) {
-      SheetLogger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`);
-      const newPdfBallot = ballotFile.makeCopy(pdfName, teamRoundFolder);
-      newPdfBallot.setSharing(DriveApp.Access.ANYONE, DriveApp.Permission.VIEW);
-      filesWritten += 1;
-    } else {
-      SheetLogger.log(
-        `${pdfName} already present in ${teamFolder.getName()}, skipping...`
+    for (let team of [readout.pTeam, readout.rTeam]) {
+      const teamFolder = context.teamBallotFolder(team);
+      if (teamFolder === undefined) {
+        SheetLogger.log(
+          `Team ${team} folder not found, skipping adding of ballot ${ballotFile.getName()}...`
+        );
+        continue;
+      }
+      const teamRoundFolder = getOrCreateChildFolder(
+        teamFolder,
+        `Round ${readout.round}`
       );
+      const pdfName = ballotFile.getName();
+      const pdfBallot = getFileByName(teamRoundFolder, pdfName);
+      if (!pdfBallot) {
+        SheetLogger.log(`Adding ${pdfName} to ${teamFolder.getName()}...`);
+        const newPdfBallot = ballotFile.makeCopy(pdfName, teamRoundFolder);
+        newPdfBallot.setSharing(
+          DriveApp.Access.ANYONE,
+          DriveApp.Permission.VIEW
+        );
+        filesWritten += 1;
+      } else {
+        SheetLogger.log(
+          `${pdfName} already present in ${teamFolder.getName()}, skipping...`
+        );
+      }
     }
   }
   return filesWritten;

@@ -214,7 +214,7 @@ class SSContext implements IContext {
       (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber
     );
     if (!teamRow) return false;
-    teamRow[4] = ballotFolderLink;
+    teamRow[5] = ballotFolderLink;
     teamInfoRange.setValues(teamInfoValues);
     return true;
   }
@@ -362,7 +362,7 @@ class SSContext implements IContext {
   }
 
   private formRowToReadout(
-    response: string[],
+    response: any[],
     sourceSheet: string
   ): NonSheetBallotReadout {
     const getScores = (start: number, end: number) =>
@@ -434,7 +434,7 @@ class SSContext implements IContext {
         const rowReadout = this.formRowToReadout(row, readout.sourceSheet);
         // This ought to be sufficient to conclude it's the same one
         return (
-          rowReadout.timestamp === readout.timestamp &&
+          rowReadout.timestamp.getTime() === readout.timestamp.getTime() &&
           rowReadout.judgeName === readout.judgeName &&
           rowReadout.round === readout.round &&
           rowReadout.courtroom === readout.courtroom &&

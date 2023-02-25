@@ -1,13 +1,23 @@
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
     .createMenu("Tab System")
-    .addItem("Ballot Entry", "openDialogBootstrap")
-    // .addItem("About me", "openAboutSidebar");
+    .addItem("Ballot Entry", "openBallotEntry")
+    .addItem("Publish Ballots to Teams", "OnPublishBallotsClick")
+    .addItem("Set Up Tab System (One-Time)", "OnSetupMasterSpreadsheetClick")
+    .addItem(
+      "Create Team Ballot Folders (One-Time)",
+      "OnCreateTeamBallotFolderClick"
+    )
+    .addItem(
+      "Email Team Ballot Folder Links (One-Time)",
+      "OnEmailTeamBallotFolderLinksClick"
+    );
+  // .addItem("About me", "openAboutSidebar");
 
   menu.addToUi();
 };
 
-export const openDialogBootstrap = () => {
+export const openBallotEntry = () => {
   const html = HtmlService.createHtmlOutputFromFile("ballot-entry")
     .setWidth(600)
     .setHeight(600);
