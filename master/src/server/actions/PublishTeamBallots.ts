@@ -6,13 +6,18 @@
 
 import { SSContext } from "../context/Context";
 import {
-  getOrCreateChildFolder,
   getFileByName,
   getIdFromUrl,
+  getOrCreateChildFolder,
   sheetForFile,
 } from "../context/Helpers";
 import SheetLogger from "../context/SheetLogger";
-import { BallotRange, BallotSpreadsheet } from "../../Types";
+import {
+  BallotRange,
+  BallotSpreadsheet,
+  NonSheetBallotReadout,
+} from "../../Types";
+import { createDummyBallot } from "./CreateDummyBallot";
 
 function PublishTeamBallots() {
   const context = new SSContext();
@@ -29,6 +34,15 @@ function getBallotPdfName(
 }
 
 function exportBallots(context: SSContext) {
+  let filesWritten = 0;
+  filesWritten += exportSheetBallots(context);
+  filesWritten += exportNonSheetBallots(context);
+  SheetLogger.log(
+    `Wrote ${filesWritten} new ballot PDF files to team folders.`
+  );
+}
+
+const exportSheetBallots = (context: SSContext) => {
   let filesWritten = 0;
   for (let ballot of context.ballotRecords) {
     if (!ballot.locked || !ballot.validated) {
@@ -82,19 +96,22 @@ function exportBallots(context: SSContext) {
       }
     }
   }
+  return filesWritten;
+};
 
-  for (let result of context.enteredTeamBallotResults) {
-    if (!result.ballotLink) {
-      continue;
-    }
-    const ballotFile = DriveApp.getFileById(getIdFromUrl(result.ballotLink));
+const exportNonSheetBallots = (context: SSContext) => {
+  let filesWritten = 0;
+  for (let readout of context.formBallotReadouts) {
+    const ballotFile = readout.ballotPdfUrl
+      ? DriveApp.getFileById(getIdFromUrl(readout.ballotPdfUrl))
+      : createDummyBallot(readout, context);
     if (ballotFile.getMimeType() !== "application/pdf") {
       continue;
     }
-    const teamFolder = context.teamBallotFolder(result.teamNumber)!;
+    const teamFolder = context.teamBallotFolder(readout.pTeam)!;
     const teamRoundFolder = getOrCreateChildFolder(
       teamFolder,
-      `Round ${result.round}`
+      `Round ${readout.round}`
     );
     const pdfName = ballotFile.getName();
     const pdfBallot = getFileByName(teamRoundFolder, pdfName);
@@ -109,9 +126,7 @@ function exportBallots(context: SSContext) {
       );
     }
   }
-  SheetLogger.log(
-    `Wrote ${filesWritten} new ballot PDF files to team folders.`
-  );
-}
+  return filesWritten;
+};
 
 export { PublishTeamBallots, getBallotPdfName };

@@ -250,8 +250,6 @@ const writeEloResults = (
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
-  // Remove all but the top 5 rows
-  sheet.deleteRows(6, sheet.getMaxRows() - 5);
   sheet.appendRow(["Top Programs"]);
   // Date format: February 10, 2023 at 9:30 PM
   sheet.appendRow([
@@ -269,6 +267,10 @@ const writeEloResults = (
   eloResults.forEach((result) => {
     sheet.appendRow([result.schoolName, result.elo]);
   });
+  const lastRow = sheet.getLastRow();
+  if (lastRow < sheet.getMaxRows()) {
+    sheet.deleteRows(lastRow + 1, sheet.getMaxRows() - lastRow);
+  }
 };
 
 const writeEloProgression = (

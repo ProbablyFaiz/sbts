@@ -10,16 +10,26 @@ enum BallotRange {
   Submitted = "SubmittedRange",
   TeamResults = "TeamResults",
   IndividualResults = "IndividualResults",
+  
+  EndOfScores = "EndOfScores",
+  PIssue1Name = "PAttorney1",
+  PIssue1Comments = "CommentsRangeP1",
+  PIssue1Scores = "BallotRangeP1",
+  PIssue2Name = "PAttorney2",
+  PIssue2Comments = "CommentsRangeP2",
+  PIssue2Scores = "BallotRangeP2",
+  RIssue1Name = "DAttorney1",
+  RIssue1Comments = "CommentsRangeD1",
+  RIssue1Scores = "BallotRangeD1",
+  RIssue2Name = "DAttorney2",
+  RIssue2Comments = "CommentsRangeD2",
+  RIssue2Scores = "BallotRangeD2",
 }
 
 enum MasterRange {
   BallotLinks = "BallotLinksRange",
   TeamBallots = "TeamBallotsRange",
   IndividualBallots = "IndividualBallotsRange",
-  EnteredTeamBallots = "EnteredTeamBallotsRange",
-  EnteredIndividualBallots = "EnteredIndividualBallotsRange",
-  EnteredTeamBallotsSheet = "Entered Team Ballots",
-  EnteredIndividualBallotsSheet = "Entered Individual Ballots",
   TeamInfo = "TeamInfoRange",
   OrchestratorLink = "OrchestratorLinkRange",
   ParentFolderLink = "ParentFolderLinkRange",
@@ -31,6 +41,7 @@ enum MasterRange {
   CourtroomInfo = "CourtroomInfoRange",
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
+  BallotTemplateLink = "BallotTemplateLinkRange",
 }
 
 enum CaptainsFormRange {
@@ -162,7 +173,7 @@ type RequiredBallotState = Omit<
   ballotPdf?: undefined;
 };
 
-interface FormBallotResult {
+interface NonSheetBallotResult {
   judgeName: string;
   round: string;
   courtroom: string;
@@ -178,6 +189,27 @@ interface FormBallotResult {
   rIssue2Score: number;
 }
 
+interface NonSheetBallotReadout {
+  timestamp: string;
+  judgeName: string;
+  round: string;
+  courtroom: string;
+  pTeam: string;
+  pIssue1Name: string;
+  pIssue1WrittenFeedback: string;
+  pIssue1Scores: number[];
+  pIssue2Name: string;
+  pIssue2WrittenFeedback: string;
+  pIssue2Scores: number[];
+  rTeam: string;
+  rIssue1Name: string;
+  rIssue1WrittenFeedback: string;
+  rIssue1Scores: number[];
+  rIssue2Name: string;
+  rIssue2WrittenFeedback: string;
+  rIssue2Scores: number[];
+  ballotPdfUrl?: string;
+}
 
 export {
   BallotRange,
@@ -192,7 +224,7 @@ export {
   BallotInfo,
   TeamBallotResult,
   IndividualBallotResult,
-  FormBallotResult,
+  NonSheetBallotResult,
   TeamSummary,
   IndividualSummary,
   RoundResult,
@@ -202,4 +234,5 @@ export {
   BallotState,
   RequiredTeamState,
   RequiredBallotState,
+  NonSheetBallotReadout,
 };

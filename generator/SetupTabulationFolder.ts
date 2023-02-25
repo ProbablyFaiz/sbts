@@ -128,6 +128,9 @@ function populateMasterSpreadsheet(
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.SecondPartyName)
     .setValue(setupContext.secondPartyName);
+  setupContext.masterSpreadsheet
+    .getRangeByName(MasterRange.BallotTemplateLink)
+    .setValue(setupContext.ballotTemplate.getUrl());
 }
 
 function createTemplatesFolder(setupContext: ISetupContext) {
@@ -156,25 +159,21 @@ function createTemplatesFolder(setupContext: ISetupContext) {
   SheetLogger.log("Creating templates folder in tab directory...");
   templateFolder = setupContext.tabFolder.createFolder(templateFolderName);
 
-  if (setupContext.generateVirtualBallots) {
-    SheetLogger.log("Creating ballot template...");
-    setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
-      ballotTemplateName,
-      templateFolder
-    );
-    const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
-    ballotTemplateSheet
-      .getRangeByName(BallotRange.TournamentName)
-      .setValue(setupContext.tournamentName);
-    ballotTemplateSheet
-      .getRangeByName(BallotRange.FirstPartyName)
-      .setValue(setupContext.firstPartyName);
-    ballotTemplateSheet
-      .getRangeByName(BallotRange.SecondPartyName)
-      .setValue(setupContext.secondPartyName);
-  } else {
-    SheetLogger.log("Not creating ballot template...");
-  }
+  SheetLogger.log("Creating ballot template...");
+  setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
+    ballotTemplateName,
+    templateFolder
+  );
+  const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
+  ballotTemplateSheet
+    .getRangeByName(BallotRange.TournamentName)
+    .setValue(setupContext.tournamentName);
+  ballotTemplateSheet
+    .getRangeByName(BallotRange.FirstPartyName)
+    .setValue(setupContext.firstPartyName);
+  ballotTemplateSheet
+    .getRangeByName(BallotRange.SecondPartyName)
+    .setValue(setupContext.secondPartyName);
 
   if (setupContext.generateCompetitorForms) {
     SheetLogger.log("Creating Captains' Form template...");

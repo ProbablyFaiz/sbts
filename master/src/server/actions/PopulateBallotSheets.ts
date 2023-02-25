@@ -46,7 +46,10 @@ function populateBallots(
     }
   }
 
-  const formResults = context.formBallotResults;
+  const formResults = [
+    ...context.formBallotResults,
+    ...context.enteredBallotResults,
+  ];
   if (formResults.length > 0) {
     for (let i = 0; i < formResults.length; i += 1) {
       const res = formResults[i];

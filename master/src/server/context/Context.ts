@@ -3,10 +3,11 @@ import {
   BallotSpreadsheet,
   Cell,
   CourtroomInfo,
-  FormBallotResult,
+  NonSheetBallotResult,
   IndividualBallotResult,
   MasterRange,
   MasterSpreadsheet,
+  NonSheetBallotReadout,
   RequiredBallotState,
   TeamBallotResult,
   TeamInfo,
@@ -41,10 +42,6 @@ interface IContext {
   tournamentName: string;
   teamResults: Record<string, TeamSummary>;
   addEnteredBallot: (ballotState: RequiredBallotState) => void;
-  getTrialFolder: (
-    round: string,
-    courtroom: string
-  ) => GoogleAppsScript.Drive.Folder;
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
@@ -84,15 +81,13 @@ class SSContext implements IContext {
           acc[name]++;
           return acc;
         }, {} as Record<string, number>);
-        const freqSortedNames = Object.keys(nameFreqs).sort(
-          (a, b) => {
-            if (nameFreqs[a] !== nameFreqs[b]) {
-              return nameFreqs[b] - nameFreqs[a];
-            }
-            // Otherwise, the one that first occurs in competitorNames wins
-            return competitorNames.indexOf(a) - competitorNames.indexOf(b);
+        const freqSortedNames = Object.keys(nameFreqs).sort((a, b) => {
+          if (nameFreqs[a] !== nameFreqs[b]) {
+            return nameFreqs[b] - nameFreqs[a];
           }
-        );
+          // Otherwise, the one that first occurs in competitorNames wins
+          return competitorNames.indexOf(a) - competitorNames.indexOf(b);
+        });
         teamInfoMapping[row[0]] = {
           teamNumber: row[0],
           teamName: row[1],
@@ -128,18 +123,9 @@ class SSContext implements IContext {
 
   @memoize
   get teamBallotResults(): TeamBallotResult[] {
-    return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? [])
-      .concat(
-        compactRange(this.getRangeValues(MasterRange.EnteredTeamBallots) ?? [])
-      )
-      .map(this.teamResultRowToResult);
-  }
-
-  @memoize
-  get enteredTeamBallotResults(): Required<TeamBallotResult>[] {
-    return compactRange(
-      this.getRangeValues(MasterRange.EnteredTeamBallots) ?? []
-    ).map(this.teamResultRowToResult);
+    return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? []).map(
+      this.teamResultRowToResult
+    );
   }
 
   private teamResultRowToResult(row: string[]): TeamBallotResult {
@@ -160,23 +146,17 @@ class SSContext implements IContext {
   get individualBallotResults(): IndividualBallotResult[] {
     return compactRange(
       this.getRangeValues(MasterRange.IndividualBallots) ?? []
-    )
-      .concat(
-        compactRange(
-          this.getRangeValues(MasterRange.EnteredIndividualBallots) ?? []
-        )
-      )
-      .map((row) => {
-        return {
-          round: row[0],
-          judgeName: row[1],
-          teamNumber: row[2],
-          competitorName: row[3],
-          side: row[4],
-          score: parseFloat(row[6]),
-          courtroom: row[7],
-        };
-      });
+    ).map((row) => {
+      return {
+        round: row[0],
+        judgeName: row[1],
+        teamNumber: row[2],
+        competitorName: row[3],
+        side: row[4],
+        score: parseFloat(row[6]),
+        courtroom: row[7],
+      };
+    });
   }
 
   @memoize
@@ -210,6 +190,12 @@ class SSContext implements IContext {
   @memoize
   get tournamentEmail(): string {
     return this.getRangeValue(MasterRange.TournamentEmail) ?? "";
+  }
+
+  @memoize
+  get ballotTemplateFile(): GoogleAppsScript.Drive.File {
+    const templateFileLink = this.getRangeValue(MasterRange.BallotTemplateLink);
+    return DriveApp.getFileById(getIdFromUrl(templateFileLink));
   }
 
   // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.
@@ -337,42 +323,90 @@ class SSContext implements IContext {
   }
 
   @memoize
-  get formBallotResults(): FormBallotResult[] {
+  get formBallotResults(): NonSheetBallotResult[] {
+    return this.formBallotReadouts.map(this.readoutToResult);
+  }
+
+  @memoize
+  get formBallotReadouts(): NonSheetBallotReadout[] {
     const formResponseSheets = this.masterSpreadsheet
       .getSheets()
-      .filter((sheet) => sheet.getName().startsWith("Form Responses "));
-    const formBallotResults: FormBallotResult[] = [];
-    const formRowToResult = (response: string[]) => {
-      const getScore = (start: number, end: number) =>
-        response
-          .slice(start, end + 1)
-          .reduce((acc, cur) => acc + parseInt(cur), 0);
-      return {
-        judgeName: response[1],
-        round: response[2],
-        courtroom: response[3],
-        pTeam: response[4],
-        pIssue1Name: response[5],
-        pIssue1Score: getScore(7, 9),
-        pIssue2Name: response[10],
-        pIssue2Score: getScore(12, 14),
-        rTeam: response[15],
-        rIssue1Name: response[16],
-        rIssue1Score: getScore(18, 20),
-        rIssue2Name: response[21],
-        rIssue2Score: getScore(23, 25),
-      } as FormBallotResult;
-    };
+      .filter((sheet) => sheet.getFormUrl());
+    const formBallotReadouts: NonSheetBallotReadout[] = [];
+
     formResponseSheets.forEach((sheet) => {
       const formResponses = compactRange(
         sheet.getDataRange().getValues().slice(1)
-      ).map(formRowToResult);
-      formBallotResults.push(...formResponses);
+      ).map(this.formRowToReadout);
+      formBallotReadouts.push(...formResponses);
     });
-    return formBallotResults;
+    return formBallotReadouts;
   }
 
-  getTrialFolder(
+  @memoize
+  get enteredBallotResults(): NonSheetBallotResult[] {
+    return this.enteredBallotReadouts.map(this.readoutToResult);
+  }
+
+  @memoize
+  get enteredBallotReadouts(): NonSheetBallotReadout[] {
+    const enteredBallotSheets =
+      this.masterSpreadsheet.getSheetByName("Entered Ballots");
+    if (!enteredBallotSheets) return [];
+    return compactRange(
+      enteredBallotSheets.getDataRange().getValues().slice(1)
+    ).map(this.formRowToReadout);
+  }
+
+  private formRowToReadout(response: string[]): NonSheetBallotReadout {
+    const getScores = (start: number, end: number) =>
+      response
+        .slice(start, end + 1)
+        .reduce((acc, cur) => [...acc, parseInt(cur)], [] as number[]);
+    return {
+      timestamp: response[0],
+      judgeName: response[1],
+      round: response[2],
+      courtroom: response[3],
+      pTeam: response[4],
+      pIssue1Name: response[5],
+      pIssue1WrittenFeedback: response[6],
+      pIssue1Scores: getScores(7, 9),
+      pIssue2Name: response[10],
+      pIssue2WrittenFeedback: response[11],
+      pIssue2Scores: getScores(12, 14),
+      rTeam: response[15],
+      rIssue1Name: response[16],
+      rIssue1WrittenFeedback: response[17],
+      rIssue1Scores: getScores(18, 20),
+      rIssue2Name: response[21],
+      rIssue2WrittenFeedback: response[22],
+      rIssue2Scores: getScores(23, 25),
+      ballotPdfUrl: response.length > 26 ? response[26] : undefined,
+    };
+  }
+
+  private readoutToResult(
+    readout: NonSheetBallotReadout
+  ): NonSheetBallotResult {
+    return {
+      judgeName: readout.judgeName,
+      round: readout.round,
+      courtroom: readout.courtroom,
+      pTeam: readout.pTeam,
+      pIssue1Name: readout.pIssue1Name,
+      pIssue1Score: readout.pIssue1Scores.reduce((a, b) => a + b, 0),
+      pIssue2Name: readout.pIssue2Name,
+      pIssue2Score: readout.pIssue2Scores.reduce((a, b) => a + b, 0),
+      rTeam: readout.rTeam,
+      rIssue1Name: readout.rIssue1Name,
+      rIssue1Score: readout.rIssue1Scores.reduce((a, b) => a + b, 0),
+      rIssue2Name: readout.rIssue2Name,
+      rIssue2Score: readout.rIssue2Scores.reduce((a, b) => a + b, 0),
+    };
+  }
+
+  getOrCreateTrialFolder(
     round: string,
     courtroom: string
   ): GoogleAppsScript.Drive.Folder {
@@ -388,8 +422,11 @@ class SSContext implements IContext {
   }
 
   addEnteredBallot(ballotState: RequiredBallotState) {
+    const enteredBallotsSheet =
+      this.masterSpreadsheet.getSheetByName("Entered Ballots");
+    let pdfUrl = "";
     if (ballotState.pdfData) {
-      const trialFolder = this.getTrialFolder(
+      const trialFolder = this.getOrCreateTrialFolder(
         ballotState.round,
         ballotState.courtroom
       );
@@ -408,97 +445,40 @@ class SSContext implements IContext {
         "application/pdf",
         pdfName
       );
-      const pdfUrl = trialFolder.createFile(pdfBlob).getUrl();
-      this.addResultRowsForEnteredBallot(ballotState, pdfUrl);
-    } else {
-      this.addResultRowsForEnteredBallot(ballotState, "");
+      pdfUrl = trialFolder.createFile(pdfBlob).getUrl();
     }
-  }
-
-  private addResultRowsForEnteredBallot(
-    ballotState: RequiredBallotState,
-    ballotPdfUrl: string
-  ) {
-    const enteredTeamSheet = this.masterSpreadsheet.getSheetByName(
-      MasterRange.EnteredTeamBallotsSheet
-    );
-    const petitionerMargin =
-      ballotState.petitioner.issue1Score +
-      ballotState.petitioner.issue2Score -
-      ballotState.respondent.issue1Score -
-      ballotState.respondent.issue2Score;
-    const petitionerWon =
-      petitionerMargin === 0 ? 0.5 : petitionerMargin > 0 ? 1 : 0;
-    enteredTeamSheet.appendRow([
-      ballotState.round,
+    // There are lots of empty strings and 0s in the below array
+    // to maintain the same interface as the form responses sheet
+    const rowToAdd = [
+      new Date(),
       ballotState.judgeName,
-      ballotState.petitioner.teamNumber,
-      ballotState.respondent.teamNumber,
-      this.firstPartyName,
-      petitionerMargin,
-      petitionerWon,
+      ballotState.round,
       ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
-    enteredTeamSheet.appendRow([
-      ballotState.round,
-      ballotState.judgeName,
-      ballotState.respondent.teamNumber,
-      ballotState.petitioner.teamNumber,
-      this.secondPartyName,
-      -petitionerMargin,
-      1 - petitionerWon,
-      ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
-
-    const enteredIndividualSheet = this.masterSpreadsheet.getSheetByName(
-      MasterRange.EnteredIndividualBallotsSheet
-    );
-    enteredIndividualSheet.appendRow([
-      ballotState.round,
-      ballotState.judgeName,
       ballotState.petitioner.teamNumber,
       ballotState.petitioner.issue1Name,
-      this.firstPartyName,
-      "Attorney",
+      "",
       ballotState.petitioner.issue1Score,
-      ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
-    enteredIndividualSheet.appendRow([
-      ballotState.round,
-      ballotState.judgeName,
-      ballotState.petitioner.teamNumber,
+      0,
+      0,
       ballotState.petitioner.issue2Name,
-      this.firstPartyName,
-      "Attorney",
+      "",
       ballotState.petitioner.issue2Score,
-      ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
-    enteredIndividualSheet.appendRow([
-      ballotState.round,
-      ballotState.judgeName,
+      0,
+      0,
       ballotState.respondent.teamNumber,
       ballotState.respondent.issue1Name,
-      this.secondPartyName,
-      "Attorney",
+      "",
       ballotState.respondent.issue1Score,
-      ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
-    enteredIndividualSheet.appendRow([
-      ballotState.round,
-      ballotState.judgeName,
-      ballotState.respondent.teamNumber,
+      0,
+      0,
       ballotState.respondent.issue2Name,
-      this.secondPartyName,
-      "Attorney",
+      "",
       ballotState.respondent.issue2Score,
-      ballotState.courtroom,
-      ballotPdfUrl,
-    ]);
+      0,
+      0,
+      pdfUrl,
+    ];
+    enteredBallotsSheet.appendRow(rowToAdd);
   }
 
   private getRangeValue(rangeName: MasterRange): string | undefined {
