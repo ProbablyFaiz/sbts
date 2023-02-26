@@ -187,6 +187,7 @@ interface NonSheetBallotResult {
   rIssue1Score: number;
   rIssue2Name: string;
   rIssue2Score: number;
+  ballotPdfUrl?: string;
 }
 
 

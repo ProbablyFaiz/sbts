@@ -10,7 +10,7 @@ export const onOpen = () => {
     )
     .addItem(
       "Email Team Ballot Folder Links (One-Time)",
-      "OnEmailTeamBallotFolderLinksClick"
+      "OnEmailBallotFolderLinksClick"
     );
   // .addItem("About me", "openAboutSidebar");
 

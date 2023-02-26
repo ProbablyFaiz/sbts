@@ -69,7 +69,7 @@
     "dotenv": "^16.0.1",
     "gas-client": "^1.1.1",
     "gas-lib": "^2.0.4",
-    "gas-types-detailed": "^1.1.0",
+    "gas-types-detailed": "^1.1.1",
     "gas-webpack-plugin": "^2.2.2",
     "html-webpack-plugin": "^5.5.0",
     "mkdirp": "^1.0.4",

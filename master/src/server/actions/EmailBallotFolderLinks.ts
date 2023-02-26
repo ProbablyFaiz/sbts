@@ -33,7 +33,7 @@ const ballotFolderEmail = (context: IContext, teamInfo: TeamInfo) => {
 Thank you for attending ${context.tournamentName}. At the conclusion of each round of the tournament, your team's ballots will be accessible in the following folder:
 ${teamInfo.ballotFolderLink}
 
-During the tournament, no formal ballot verification will take place. However, you will have access to your team's ballots immediately after each round and are welcome to contact the tabulation director (via ${context.tournamentEmail}) with any questions or concerns you may have.
+During the tournament, no formal ballot verification will take place. However, you will have access to your team's ballots after each round and are welcome to contact the tabulation director (via ${context.tournamentEmail}) with any questions or concerns you may have.
 
 Best regards,
 ${context.tournamentName}`,

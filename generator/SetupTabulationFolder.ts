@@ -129,6 +129,39 @@ const setUpGoogleFormBallot = (setupContext: SetupContext) => {
   setupContext.masterSpreadsheet
     .getRangeByName(MasterRange.GoogleFormBallotLink)
     .setValue(form.getPublishedUrl());
+
+  const responseSheets = setupContext.masterSpreadsheet
+    .getSheets()
+    .filter((sheet) => sheet.getFormUrl());
+  responseSheets.forEach((sheet) => {
+    const range = sheet.getRange(
+      1,
+      1,
+      sheet.getLastRow(),
+      sheet.getLastColumn()
+    );
+    // Add alternating-color formatting
+    range.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
+    sheet.setFrozenRows(1);
+    // Set a constant row height so it doesn't expand when multi-line responses are added
+    sheet.setRowHeightsForced(1, sheet.getLastRow(), 25);
+    // Set the font to 12pt Times New Roman
+    range.setFontFamily("Times New Roman");
+    range.setFontSize(12);
+    // Add Ballot PDF Link column
+    sheet.insertColumnsAfter(sheet.getLastColumn(), 1);
+    sheet.getRange(1, sheet.getLastColumn()).setValue("Ballot PDF Link");
+    // Replace "Petitioner" with "P" and "Respondent" with "R" in the header row
+    const firstRow = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+    firstRow.setValues([
+      firstRow
+        .getValues()[0]
+        .map((cell) =>
+          cell.toString().replace("Petitioner", "P").replace("Respondent", "R")
+        ),
+    ]);
+    firstRow.setFontWeight("bold");
+  });
 };
 
 const createTrialFolders = (

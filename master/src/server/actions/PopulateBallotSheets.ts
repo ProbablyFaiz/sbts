@@ -72,7 +72,7 @@ function populateBallots(
           petitionerPd,
           petitionerWon,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
         outputCells.push([
           res.round,
@@ -83,7 +83,7 @@ function populateBallots(
           respondentPd,
           respondentWon,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
       } else if (outputRangeName == MasterRange.IndividualBallots) {
         // Round #	Judge Name	Team #	Competitor Name	Side	Type	Rank Value	Courtroom	Ballot Link
@@ -96,7 +96,7 @@ function populateBallots(
           "Attorney",
           res.pIssue1Score,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
         outputCells.push([
           res.round,
@@ -107,7 +107,7 @@ function populateBallots(
           "Attorney",
           res.pIssue2Score,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
         outputCells.push([
           res.round,
@@ -118,7 +118,7 @@ function populateBallots(
           "Attorney",
           res.rIssue1Score,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
         outputCells.push([
           res.round,
@@ -129,7 +129,7 @@ function populateBallots(
           "Attorney",
           res.rIssue2Score,
           res.courtroom,
-          "",
+          res.ballotPdfUrl ?? "",
         ]);
       }
     }

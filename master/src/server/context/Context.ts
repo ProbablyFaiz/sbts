@@ -410,6 +410,7 @@ class SSContext implements IContext {
       rIssue1Score: readout.rIssue1Scores.reduce((a, b) => a + b, 0),
       rIssue2Name: readout.rIssue2Name,
       rIssue2Score: readout.rIssue2Scores.reduce((a, b) => a + b, 0),
+      ballotPdfUrl: readout.ballotPdfUrl,
     };
   }
 
