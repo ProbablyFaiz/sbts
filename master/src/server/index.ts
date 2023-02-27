@@ -1,4 +1,4 @@
-import { onOpen, openDialogBootstrap, openAboutSidebar } from "./ui";
+import { onOpen, openBallotEntry, openAboutSidebar } from "./ui";
 
 import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from "./sheets";
 import {
@@ -47,7 +47,7 @@ const submitBallot = (ballotState: RequiredBallotState) => {
 // Public functions must be exported as named exports
 export {
   onOpen,
-  openDialogBootstrap,
+  openBallotEntry,
   openAboutSidebar,
   getSheetsData,
   addSheet,
@@ -74,51 +74,47 @@ export {
 
 // The webpack functionality for adding these to the global scope is not working
 // so we have to add them manually
-// @ts-ignore
 global.onOpen = onOpen;
-// @ts-ignore
-global.openDialogBootstrap = openDialogBootstrap;
-// @ts-ignore
+global.openBallotEntry = openBallotEntry;
 global.openAboutSidebar = openAboutSidebar;
-// @ts-ignore
-global.getSheetsData = getSheetsData;
-// @ts-ignore
-global.addSheet = addSheet;
-// @ts-ignore
-global.deleteSheet = deleteSheet;
-// @ts-ignore
-global.setActiveSheet = setActiveSheet;
-// @ts-ignore
 global.OnCreateTeamBallotFolderClick = OnCreateTeamBallotFolderClick;
-// @ts-ignore
 global.OnEmailBallotFolderLinksClick = OnEmailBallotFolderLinksClick;
-// @ts-ignore
 global.OnPublishBallotsClick = OnPublishBallotsClick;
-// @ts-ignore
 global.OnSetupMasterSpreadsheetClick = OnSetupMasterSpreadsheetClick;
-// @ts-ignore
+/**
+ * Tabulate individual results for the given rounds. Arguments provided after the below-listed argument are
+ * solely for telling the custom function when to recalculate.
+ * @param {string[] | string} roundRange The rounds to tabulate. Can be a single round, a range of rounds, or an array of rounds.
+ * @return {(string|number)[][]} The tabulated individual results, of the form (Rank, Team #, Team Name, Speaker Name, Average Score)
+ * @customfunction
+ */
+global.TabulateIndividualBallots = (roundRange: string | string[]) =>
+  TabulateIndividualBallots(roundRange);
+/**
+ * Tabulate team results for the given rounds. The arguments provided after the below-listed arguments are
+ * solely for telling the custom function when to recalculate.
+ * @param {string[] | string} roundRange The rounds to tabulate. Can be a single round, a range of rounds, or an array of rounds.
+ * @param {number} ballotsPerMatch The number of ballots per round to normalize to. For example, if this is 2, then a
+ * team that wins a round 2 ballots to 1 will receive 2*2/3 = 1.33 ballots for that round.
+ * @param {boolean} byeAdjustment Whether to adjust for bye rounds. If true, teams with fewer than the maximum number of opponents
+ * will have their totals multiplied by the factor of the number of opponents. E.g. a team with 2 opponents when
+ * other teams have 3 opponents will have their totals multiplied by 3/2.
+ * @return {(string|number)[][]} The tabulated team results, of the form (Rank, Team #, Team Name, Ballots Won, Combined Strength, Point Differential, Times Petitioner, Times Respondent, Past Opponents)
+ * @customfunction
+ */
+global.TabulateTeamBallots = (
+  roundRange: string | string[],
+  ballotsPerMatch: number,
+  byeAdjustment: boolean
+) => TabulateTeamBallots(roundRange, ballotsPerMatch, byeAdjustment);
 global.DetectNameTypos = DetectNameTypos;
-// @ts-ignore
-global.TabulateIndividualBallots = TabulateIndividualBallots;
-// @ts-ignore
-global.TabulateTeamBallots = TabulateTeamBallots;
-// @ts-ignore
 global.PopulateIndividualBallots = PopulateIndividualBallots;
-// @ts-ignore
 global.PopulateTeamBallots = PopulateTeamBallots;
-// @ts-ignore
 global.DisplayMatchResults = DisplayMatchResults;
-// @ts-ignore
 global.PrintTabSummary = PrintTabSummary;
-// @ts-ignore
 global.getCourtrooms = getCourtrooms;
-// @ts-ignore
 global.getTeams = getTeams;
-// @ts-ignore
 global.getTeamBallotResults = getTeamBallotResults;
-// @ts-ignore
 global.getRoundNames = getRoundNames;
-// @ts-ignore
 global.getJudgeNames = getJudgeNames;
-// @ts-ignore
 global.submitBallot = submitBallot;

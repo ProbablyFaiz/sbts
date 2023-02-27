@@ -33,7 +33,7 @@ function getRoundSummaryRows(round: string, context: IContext) {
 function PrintTabSummary(roundRange: any) {
   let rounds: string[];
   const context = new SSContext();
-  if (roundRange === undefined) {
+  if (!roundRange) {
     rounds = Array.from(context.roundNames);
   } else {
     rounds = flattenRange(roundRange);

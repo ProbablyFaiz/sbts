@@ -137,8 +137,8 @@ const setUpGoogleFormBallot = (setupContext: SetupContext) => {
     const range = sheet.getRange(
       1,
       1,
-      sheet.getLastRow(),
-      sheet.getLastColumn()
+      sheet.getMaxRows(),
+      sheet.getMaxColumns()
     );
     // Add alternating-color formatting
     range.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
