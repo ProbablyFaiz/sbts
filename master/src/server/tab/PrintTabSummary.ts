@@ -1,6 +1,7 @@
 import { IContext, SSContext } from "../context/Context";
 import { flattenRange } from "../context/Helpers";
 import { getAllTeamResults } from "./TabulateTeamBallots";
+import { TeamSummary } from "../../Types";
 
 function getRoundSummaryRows(round: string, context: IContext) {
   const roundResults = getAllTeamResults([round], 2, context);
@@ -17,20 +18,18 @@ function getRoundSummaryRows(round: string, context: IContext) {
     seenTeams.add(opponentNumber);
     const pTeam = teamResult.timesPlaintiff > 0 ? teamResult : opponentResult;
     const dTeam = teamResult.timesPlaintiff > 0 ? opponentResult : teamResult;
-    outputCells.push(
-      [
-        round,
-        pTeam.teamNumber,
-        dTeam.teamNumber,
-        pTeam.ballotsWon,
-        dTeam.ballotsWon,
-      ]
-    )
+    outputCells.push([
+      round,
+      pTeam.teamNumber,
+      dTeam.teamNumber,
+      pTeam.ballotsWon,
+      dTeam.ballotsWon,
+    ]);
   }
   return outputCells;
 }
 
-function PrintTabSummary(roundRange: any) {
+function PrintMatchupSummary(roundRange: any) {
   let rounds: string[];
   const context = new SSContext();
   if (!roundRange) {
@@ -39,9 +38,66 @@ function PrintTabSummary(roundRange: any) {
     rounds = flattenRange(roundRange);
   }
 
-  return rounds.reduce((outputCells, round) => {
+  const output = rounds.reduce((outputCells, round) => {
     return outputCells.concat(getRoundSummaryRows(round, context));
-  }, [] as string[]);
+  }, [] as any[][]);
+  if (output.length === 0) {
+    output.push(["No results found."]);
+  }
+  return output;
 }
 
-export default PrintTabSummary;
+function PrintTeamSummary(roundRange: any) {
+  let rounds: string[];
+  const context = new SSContext();
+  if (!roundRange) {
+    rounds = Array.from(context.roundNames);
+  } else {
+    rounds = flattenRange(roundRange);
+  }
+
+  const getLastRound = (team: Required<TeamSummary>) =>
+    team.roundsCompeted.reduce(
+      (latest, curr) =>
+        rounds.indexOf(curr) > latest ? rounds.indexOf(curr) : latest,
+      -1
+    );
+
+  const teamResults = Object.values(getAllTeamResults(rounds, 2, context));
+  // Sort the team results by the latest round they competed in, and then
+  // by ballots won
+  teamResults.sort((a, b) => {
+    const aLastRound = getLastRound(a);
+    const bLastRound = getLastRound(b);
+    if (aLastRound !== bLastRound) {
+      return bLastRound - aLastRound;
+    }
+    if (a.ballotsWon !== b.ballotsWon) {
+      return b.ballotsWon - a.ballotsWon;
+    }
+    return b.combinedStrength - a.combinedStrength;
+  });
+
+  const teamInfo = context.teamInfo;
+  const output = teamResults.reduce((outputCells, teamResult, i) => {
+    const team = teamInfo[teamResult.teamNumber];
+    outputCells.push([
+      i,
+      teamResult.teamNumber,
+      team.schoolName,
+      team.competitorNames.length >= 2 ? team.competitorNames[0] : "",
+      team.competitorNames.length >= 2 ? team.competitorNames[1] : "",
+      team.emails,
+      getLastRound(teamResult),
+      teamResult.ballotsWon,
+      teamResult.combinedStrength,
+    ]);
+    return outputCells;
+  }, [] as any[][]);
+  if (output.length === 0) {
+    output.push(["No results found."]);
+  }
+  return output;
+}
+
+export { PrintMatchupSummary, PrintTeamSummary };

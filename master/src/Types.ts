@@ -124,6 +124,7 @@ interface TeamSummary {
   pastOpponents?: string[];
   timesPlaintiff: number;
   timesDefense: number;
+  roundsCompeted?: string[];
 }
 
 interface IndividualSummary {

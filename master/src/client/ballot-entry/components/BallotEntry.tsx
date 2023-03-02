@@ -81,7 +81,9 @@ const BallotEntry = () => {
     console.log("Fetching data from server...");
     serverFunctions.getCourtrooms().then(setPossibleCourtrooms);
     serverFunctions.getTeams().then(setPossibleTeams);
-    serverFunctions.getRoundNames().then(setPossibleRoundNames);
+    serverFunctions
+      .getRoundNames()
+      .then((roundNames) => setPossibleRoundNames(roundNames.reverse()));
     serverFunctions.getJudgeNames().then(setPossibleJudgeNames);
     serverFunctions.getTeamBallotResults().then((results) => {
       // Group results by round and courtroom

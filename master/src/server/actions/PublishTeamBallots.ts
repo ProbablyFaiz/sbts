@@ -101,7 +101,10 @@ const exportSheetBallots = (context: SSContext) => {
 
 const exportNonSheetBallots = (context: SSContext) => {
   let filesWritten = 0;
-  for (let readout of context.formBallotReadouts) {
+  const readouts = context.formBallotReadouts.concat(
+    context.enteredBallotReadouts
+  );
+  for (let readout of readouts) {
     const ballotFile = readout.ballotPdfUrl
       ? DriveApp.getFileById(getIdFromUrl(readout.ballotPdfUrl))
       : createDummyBallot(readout, context);

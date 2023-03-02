@@ -17,7 +17,7 @@ import {
 } from "./actions/PopulateBallotSheets";
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
-import PrintTabSummary from "./tab/PrintTabSummary";
+import {PrintMatchupSummary, PrintTeamSummary} from "./tab/PrintTabSummary";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -42,6 +42,11 @@ const getJudgeNames = () => {
 const submitBallot = (ballotState: RequiredBallotState) => {
   const context = new SSContext();
   context.addEnteredBallot(ballotState);
+  // appendRow doesn't trigger onEdit, so we have to manually update the ballot sheets
+  // TODO: Set the range values instead of using appendRow (if it can be done
+  //  safely/atomically) so that onEdit is triggered
+  PopulateTeamBallots();
+  PopulateIndividualBallots();
 };
 
 // Public functions must be exported as named exports
@@ -63,7 +68,8 @@ export {
   PopulateIndividualBallots,
   PopulateTeamBallots,
   DisplayMatchResults,
-  PrintTabSummary,
+  PrintMatchupSummary,
+  PrintTeamSummary,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -111,7 +117,8 @@ global.DetectNameTypos = DetectNameTypos;
 global.PopulateIndividualBallots = PopulateIndividualBallots;
 global.PopulateTeamBallots = PopulateTeamBallots;
 global.DisplayMatchResults = DisplayMatchResults;
-global.PrintTabSummary = PrintTabSummary;
+global.PrintMatchupSummary = PrintMatchupSummary;
+global.PrintTeamSummary = PrintTeamSummary;
 global.getCourtrooms = getCourtrooms;
 global.getTeams = getTeams;
 global.getTeamBallotResults = getTeamBallotResults;

@@ -171,12 +171,10 @@ class SSContext implements IContext {
   @memoize
   get roundNames(): string[] {
     const roundNames = this.teamBallotResults.map((ballot) => ballot.round);
-    // Filter out duplicates, but maintain reverse order
     return roundNames
       .filter((roundName, index) => {
         return roundNames.indexOf(roundName) === index;
-      })
-      .reverse();
+      });
   }
 
   @memoize

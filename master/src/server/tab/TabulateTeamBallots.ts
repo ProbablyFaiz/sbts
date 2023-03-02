@@ -45,7 +45,8 @@ function getTeamResult(
       acc.pointDifferential += roundResult.pointDifferential;
 
       // We intentionally allow duplicate opponents here in case a team faces the same opponent multiple times
-      acc.pastOpponents!.push(roundResult.opponentTeamNumber);
+      acc.pastOpponents.push(roundResult.opponentTeamNumber);
+      acc.roundsCompeted.push(roundBallots[0].round);
 
       if (roundResult.side === firstPartyName) {
         acc.timesPlaintiff++;
@@ -61,6 +62,7 @@ function getTeamResult(
       timesPlaintiff: 0,
       timesDefense: 0,
       pastOpponents: [],
+      roundsCompeted: [],
     } as TeamSummary
   );
   return teamResult;
