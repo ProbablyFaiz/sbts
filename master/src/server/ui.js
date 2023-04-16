@@ -1,6 +1,9 @@
 export const onOpen = () => {
+  const tabSetUp = SpreadsheetApp.getActiveSpreadsheet()
+    .getRangeByName("TabSystemSetUpRange");
+  const menuName = tabSetUp?.getValue() ? "Tab System" : "Tab System (Setup Needed!)";
   const menu = SpreadsheetApp.getUi()
-    .createMenu("Tab System")
+    .createMenu(menuName)
     .addItem("Ballot Entry", "openBallotEntry")
     .addItem("Publish Ballots to Teams", "OnPublishBallotsClick")
     .addItem("Set Up Tab System (One-Time)", "OnSetupMasterSpreadsheetClick")
@@ -13,7 +16,8 @@ export const onOpen = () => {
       "OnEmailBallotFolderLinksClick"
     );
   // .addItem("About me", "openAboutSidebar");
-
+  
+  tabSetUp?.setValue(true);
   menu.addToUi();
 };
 

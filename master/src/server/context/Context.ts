@@ -133,7 +133,7 @@ class SSContext implements IContext {
   private teamResultRowToResult(row: string[]): TeamBallotResult {
     return {
       round: row[0],
-      judgeName: row[1],
+      judgeName: row[1].trim(),
       teamNumber: row[2],
       opponentTeamNumber: row[3],
       side: row[4],
@@ -151,9 +151,9 @@ class SSContext implements IContext {
     ).map((row) => {
       return {
         round: row[0],
-        judgeName: row[1],
+        judgeName: row[1].trim(),
         teamNumber: row[2],
-        competitorName: row[3],
+        competitorName: row[3].trim(),
         side: row[4],
         score: parseFloat(row[6]),
         courtroom: row[7],
@@ -271,7 +271,7 @@ class SSContext implements IContext {
           link: row[0],
           info: row[1],
           captainsFormLink: row[2],
-          judgeName: row[4],
+          judgeName: row[4].trim(),
           locked: row[5] === "true",
           validated: row[6] === "true",
         };

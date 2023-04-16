@@ -59,16 +59,16 @@ function PrintTeamSummary(roundRange: any) {
   const getLastRound = (team: Required<TeamSummary>) =>
     team.roundsCompeted.reduce(
       (latest, curr) =>
-        rounds.indexOf(curr) > latest ? rounds.indexOf(curr) : latest,
-      -1
+        rounds.indexOf(curr) > rounds.indexOf(latest) ? curr : latest,
+      undefined
     );
 
   const teamResults = Object.values(getAllTeamResults(rounds, 2, context));
   // Sort the team results by the latest round they competed in, and then
   // by ballots won
   teamResults.sort((a, b) => {
-    const aLastRound = getLastRound(a);
-    const bLastRound = getLastRound(b);
+    const aLastRound = rounds.indexOf(getLastRound(a));
+    const bLastRound = rounds.indexOf(getLastRound(b));
     if (aLastRound !== bLastRound) {
       return bLastRound - aLastRound;
     }
@@ -82,7 +82,7 @@ function PrintTeamSummary(roundRange: any) {
   const output = teamResults.reduce((outputCells, teamResult, i) => {
     const team = teamInfo[teamResult.teamNumber];
     outputCells.push([
-      i,
+      i + 1,
       teamResult.teamNumber,
       team.schoolName,
       team.competitorNames.length >= 2 ? team.competitorNames[0] : "",

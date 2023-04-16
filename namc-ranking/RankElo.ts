@@ -251,7 +251,7 @@ const writeEloResults = (
   const sheet = rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
   sheet.appendRow(["Top Programs"]);
-  // Date format: February 10, 2023 at 9:30 PM
+  // Date format: February 10, 2023 at 9:30 PM PST
   sheet.appendRow([
     `Updated: ${new Date().toLocaleDateString("en-US", {
       month: "long",
@@ -259,7 +259,7 @@ const writeEloResults = (
       year: "numeric",
       hour: "numeric",
       minute: "numeric",
-      hour12: true,
+      timeZoneName: "short",
       timeZone: "America/Los_Angeles",
     })}`,
   ]);

@@ -15,19 +15,37 @@ function OnPublishBallotsClick() {
     ui.ButtonSet.YES_NO
   );
 
-  // Process the user's response.
-  if (result == ui.Button.YES) {
-    // User clicked "Yes".
-    ui.alert("Publishing ballots...");
-    PublishTeamBallots();
-    const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Ballots were successfully published to team folders.</p>"
-    )
-      .setWidth(250)
-      .setHeight(100);
-    ui.showModelessDialog(htmlOutput, "Success!");
-  } else {
-    // User clicked "No" or X in the title bar.
+  const lock = LockService.getDocumentLock();
+  if (!lock.tryLock(1000)) {
+    ui.alert(
+      "Please wait",
+      "Another ballot publishing operation is in progress. Please wait for it to finish before trying again.",
+      ui.ButtonSet.OK
+    );
+    return;
+  }
+
+  try {
+    if (result == ui.Button.YES) {
+      ui.showModelessDialog(
+        HtmlService.createHtmlOutput(
+          "<p>This may take several minutes. You can close this window.</p>"
+        ),
+        "Publishing ballots..."
+      );
+      PublishTeamBallots();
+      const htmlOutput = HtmlService.createHtmlOutput(
+        "<p>Ballots were successfully published to team folders.</p>"
+      )
+        .setWidth(250)
+        .setHeight(100);
+      ui.showModelessDialog(htmlOutput, "Success!");
+    } else {
+      // User clicked "No" or X in the title bar.
+    }
+  }
+  finally {
+    lock.releaseLock();
   }
 }
 

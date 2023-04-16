@@ -157,7 +157,8 @@ class RankerContext implements IRankerContext {
           teamEmail: teamCells[5].trim(),
         };
       })
-      .filter((team) => !!team.teamNumber);
+      .filter((team) => !!team.teamNumber)
+      .sort((a, b) => a.rank - b.rank);
   }
 
   private getMatchupResultsForSummary(tabSummarySpreadsheet: Spreadsheet) {
