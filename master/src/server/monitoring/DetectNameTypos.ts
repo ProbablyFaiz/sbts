@@ -17,7 +17,7 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
     const groupKeyObject: TeamKey = JSON.parse(groupKey);
     const existingMatchSet: Set<string> = new Set();
     nameSet.values().forEach((name) => {
-      const nameSearchResults = nameSet.get(name);
+      const nameSearchResults = nameSet.get(name, undefined, 0.34);
       if (nameSearchResults && nameSearchResults.length > 1) {
         nameSearchResults
           .filter((result) => result[1] !== name)

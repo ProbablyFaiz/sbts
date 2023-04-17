@@ -110,6 +110,7 @@ function getMaxNumBallots(
 function getAllTeamResults(
   rounds: string[],
   ballotsPerMatch: number | undefined,
+  adjustForBye: boolean,
   context: IContext
 ): Record<string, Required<TeamSummary>> {
   const roundSet = new Set(rounds);
@@ -146,6 +147,11 @@ function getAllTeamResults(
       teamResults
     );
   });
+  if (adjustForBye) {
+    return adjustForByeRound(
+      teamResults as Record<string, Required<TeamSummary>>
+    );
+  }
   return teamResults as Record<string, Required<TeamSummary>>;
 }
 
@@ -227,12 +233,14 @@ function TabulateTeamBallots(
   byeAdjustment: boolean
 ) {
   const rounds = flattenRange(roundRange);
-  let teamResults = getAllTeamResults(rounds, ballotsPerMatch, new SSContext());
-  if (byeAdjustment) {
-    teamResults = adjustForByeRound(teamResults);
-  }
+  let teamResults = getAllTeamResults(
+    rounds,
+    ballotsPerMatch,
+    byeAdjustment,
+    new SSContext()
+  );
   const output = getTeamResultsOutput(teamResults);
   return output.length > 0 ? output : [["No results to display"]];
 }
 
-export { TabulateTeamBallots, getAllTeamResults };
+export { TabulateTeamBallots, getAllTeamResults, compareTeamSummaries };

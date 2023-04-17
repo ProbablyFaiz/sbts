@@ -2,8 +2,8 @@ import { SSContext } from "../context/Context";
 import { flattenRange, formatPd } from "../context/Helpers";
 import { getAllTeamResults } from "./TabulateTeamBallots";
 
-function displayRoundMatchResults(round: string) {
-  const roundResults = getAllTeamResults([round], undefined, new SSContext());
+const displayRoundMatchResults = (round: string) => {
+  const roundResults = getAllTeamResults([round], undefined, false, new SSContext());
   const seenTeams = new Set();
   const outputCells = [`${round} Round Summary`];
   for (const teamNumber of Object.keys(roundResults)) {

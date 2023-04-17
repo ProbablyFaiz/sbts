@@ -7,7 +7,7 @@ import {
   OnPublishBallotsClick,
   OnSetupMasterSpreadsheetClick,
 } from "./ControlPanel";
-import DetectNameTypos from "./tab/DetectNameTypos";
+import DetectNameTypos from "./monitoring/DetectNameTypos";
 import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
 import DisplayMatchResults from "./tab/DisplayMatchResults";
@@ -18,6 +18,7 @@ import {
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
 import {PrintMatchupSummary, PrintTeamSummary} from "./tab/PrintTabSummary";
+import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -114,6 +115,7 @@ global.TabulateTeamBallots = (
   byeAdjustment: boolean
 ) => TabulateTeamBallots(roundRange, ballotsPerMatch, byeAdjustment);
 global.DetectNameTypos = DetectNameTypos;
+global.DetectMatchupTypos = DetectMatchupTypos;
 global.PopulateIndividualBallots = PopulateIndividualBallots;
 global.PopulateTeamBallots = PopulateTeamBallots;
 global.DisplayMatchResults = DisplayMatchResults;
