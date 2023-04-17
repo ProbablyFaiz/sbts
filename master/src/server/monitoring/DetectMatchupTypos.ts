@@ -18,7 +18,7 @@ const getMultipleMatchupTypos = (context: IContext) => {
       const otherMatchupKey = getMatchupKey(otherMatchup);
       if (matchupKey !== otherMatchupKey) {
         matchupTypoCandidates.push(
-          `Found two different matchups for round ${round} courtroom ${courtroom}: ${matchupKey} (judge ${teamBallotResult.judgeName}) and ${otherMatchupKey} (judge ${otherMatchup.judgeName})`
+          `Found two different matchups for round ${round}, courtroom ${courtroom}: ${matchupKey} (Judge ${teamBallotResult.judgeName}) and ${otherMatchupKey} (Judge ${otherMatchup.judgeName})`
         );
       }
     }
@@ -46,9 +46,9 @@ const getTeamHasMultipleMatchups = (context: IContext) => {
         teamHasMultipleMatchups.push(
           `Team ${teamNumber} has multiple matchups in round ${round}: ${getMatchupKey(
             teamBallotResult
-          )} (judge ${teamBallotResult.judgeName}) and ${getMatchupKey(
+          )} (Judge ${teamBallotResult.judgeName}) and ${getMatchupKey(
             otherMatchup
-          )} (judge ${otherMatchup.judgeName})`
+          )} (Judge ${otherMatchup.judgeName})`
         );
       }
     }
@@ -62,7 +62,7 @@ const getTeamFacingItself = (context: IContext) => {
     const { teamNumber, opponentTeamNumber } = teamBallotResult;
     if (teamNumber === opponentTeamNumber) {
       teamFacingItself.push(
-        `Team ${teamNumber} is facing itself in round ${teamBallotResult.round} courtroom ${teamBallotResult.courtroom} (judge ${teamBallotResult.judgeName})`
+        `Team ${teamNumber} is facing itself in round ${teamBallotResult.round}, courtroom ${teamBallotResult.courtroom} (Judge ${teamBallotResult.judgeName})`
       );
     }
   });
