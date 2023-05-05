@@ -72,9 +72,6 @@ function PairTeamsWithMetadata(): SpreadsheetOutput {
 
 function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
   const context = new SSContext();
-  if (Object.entries(context.teamResults).length % 2) {
-    return "Error: Pairing is not supported with an odd number of teams.";
-  }
   const pairingFunction =
     context.swissConfig.previousRounds.length % 2
       ? pairTeamsEvenRound
