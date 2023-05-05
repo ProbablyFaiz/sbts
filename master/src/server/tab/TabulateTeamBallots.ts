@@ -241,6 +241,7 @@ function adjustForByeRound(
         newResult.ballotsWon += ballotsPerMatch;
         newResult.combinedStrength *= adjustmentFactor;
         newResult.pointDifferential *= adjustmentFactor;
+        newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
       }
     }
     acc[teamNumber] = newResult;
