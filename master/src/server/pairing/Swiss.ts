@@ -160,8 +160,8 @@ const pairTeamsOddRound = (
       const swapToMake: Swap | undefined = possibleSwapIndexPairs
         .map(([x, y]) => [pairings[i][y], pairings[x][y]] as Swap)
         .filter((swap) => !swaps.has(swapKey(swap))) // Exclude previously made swaps
-        .filter((swap) => !pairingConflicts(postSwapPairing(pairings[i])(swap)))
-        .sort(compareSwaps(teamResults))[0]; // Sort possible swaps by "least difference" metric // Select best possible swap, undefined if no swaps are possible.
+        .filter((swap) => !pairingConflicts(postSwapPairing(pairings[i])(swap))) // Exclude swaps that would just create a new conflict here
+        .sort(compareSwaps(teamResults))[0]; // Sort possible swaps by "least difference" metric, then select the best possible swap, undefined if no swaps are possible.
       if (swapToMake) {
         const [indexToSwap, positionToSwap] = possibleSwapIndexPairs.find(
           ([x, y]) => pairings[x][y] === swapToMake[1]
