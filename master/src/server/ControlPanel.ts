@@ -43,8 +43,7 @@ function OnPublishBallotsClick() {
     } else {
       // User clicked "No" or X in the title bar.
     }
-  }
-  finally {
+  } finally {
     lock.releaseLock();
   }
 }
@@ -67,10 +66,13 @@ function OnSetupMasterSpreadsheetClick() {
       PopulateBallotLinks();
       SheetLogger.log("Creating triggers...");
       SetupTriggers();
-      SheetLogger.log("Creating team ballot folders...");
+      const tabSetUp = SpreadsheetApp.getActiveSpreadsheet()
+        .getRangeByName("TabSystemSetUpRange");
+      tabSetUp?.setValue(true);
       const htmlOutput = HtmlService.createHtmlOutput(
         "<p>Master spreadsheet was successfully configured for use. " +
-          "Remember to set up the orchestrator as well.</p>"
+          "Remember to set up the orchestrator as well (if this system isn't " +
+          "using exclusively Google Form ballots).</p>"
       )
         .setWidth(250)
         .setHeight(100);

@@ -81,7 +81,6 @@ function spreadsheetTruthy(val: any): boolean {
   return !!val;
 }
 
-
 const getByeStrategy = (byeStrategyInput: string): ByeStrategy => {
   if (!byeStrategyInput) {
     return ByeStrategy.NO_ADJUSTMENT;
@@ -101,6 +100,41 @@ const getByeStrategy = (byeStrategyInput: string): ByeStrategy => {
   );
 };
 
+class SeededRandom {
+  private seed: number;
+
+  constructor(seed: string) {
+    this.seed = this.stringToSeed(seed);
+  }
+
+  private stringToSeed(seed: string): number {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const charCode = seed.charCodeAt(i);
+      hash = (hash << 5) - hash + charCode;
+      hash = hash & hash; // Convert to a 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  private random(): number {
+    const x = Math.sin(this.seed++) * 10000;
+    return x - Math.floor(x);
+  }
+
+  public nextFloat(): number {
+    return this.random();
+  }
+
+  public nextInt(min: number, max: number): number {
+    return Math.floor(this.random() * (max - min + 1)) + min;
+  }
+
+  public nextBoolean(): boolean {
+    return this.random() >= 0.5;
+  }
+}
+
 export {
   NUM_BALLOTS,
   compactRange,
@@ -112,6 +146,7 @@ export {
   getIdFromUrl,
   spreadsheetTruthy,
   getByeStrategy,
+  SeededRandom,
   Spreadsheet,
   GoogleFile,
 };

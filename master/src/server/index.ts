@@ -142,6 +142,7 @@ global.PairTeamsWithCourtrooms = PairTeamsWithCourtrooms;
  * custom function when to recalculate.
  * @return {string[][]} A series of intermediate pairing steps used to generate
  * the final pairings.
+ * @customfunction
  */
 global.PairTeamsWithMetadata = PairTeamsWithMetadata;
 global.getCourtrooms = getCourtrooms;

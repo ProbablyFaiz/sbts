@@ -10,6 +10,7 @@ import {
   compareTeamSummaries,
   getAllTeamResults,
 } from "../tab/TabulateTeamBallots";
+import { SeededRandom } from "../context/Helpers";
 
 type Pairing = [team1: string, team2: string];
 type Swap = [team1: string, team2: string];
@@ -41,9 +42,13 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
   const pairings = PairTeams();
   if (typeof pairings === "string") return pairings;
   const courtrooms = context.courtroomRecords.map((rec) => rec.name);
-  pairings.sort(() => Math.random() - 0.5);
+  
+  // Seeding the rng with the pairings ensures that we have the same
+  // arbitrary order of pairings each time the function is re-run.
+  const rng = new SeededRandom(JSON.stringify(pairings));
+  pairings.sort(() => rng.nextFloat() - 0.5);
   // If it's round 3, flip a coin to determine side
-  if (context.roundsCompleted % 2 === 0 && Math.random() < 0.5)
+  if (context.roundsCompleted % 2 === 0 && rng.nextFloat() < 0.5)
     pairings.forEach((pair) => pair.reverse());
   if (courtrooms.length < pairings.length) {
     // Add fake courtrooms
@@ -52,7 +57,8 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
       courtrooms.push(`Courtroom ${courtrooms.length + 1}`);
     }
   }
-  return pairings.map((pair, i) => [courtrooms[i], ...pair]);
+  const output = pairings.map((pair, i) => [courtrooms[i], ...pair]);
+  return output.length ? output : [["No pairings to display."]];
 }
 
 function PairTeamsWithMetadata(): SpreadsheetOutput {

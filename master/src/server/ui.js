@@ -16,8 +16,6 @@ export const onOpen = () => {
       "OnEmailBallotFolderLinksClick"
     );
   // .addItem("About me", "openAboutSidebar");
-  
-  tabSetUp?.setValue(true);
   menu.addToUi();
 };
 
