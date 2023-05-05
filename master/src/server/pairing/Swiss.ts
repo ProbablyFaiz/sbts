@@ -42,7 +42,7 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
   const pairings = PairTeams();
   if (typeof pairings === "string") return pairings;
   const courtrooms = context.courtroomRecords.map((rec) => rec.name);
-  
+
   // Seeding the rng with the pairings ensures that we have the same
   // arbitrary order of pairings each time the function is re-run.
   const rng = new SeededRandom(JSON.stringify(pairings));
@@ -194,21 +194,11 @@ const pairTeamsEvenRound = (
   pairingMetadata?: PairingMetadata
 ): Cell[][] | string => {
   const sortedTeams = sortedTeamResults(teamResults);
-  const plaintiffTeams = sortedTeams
-    .filter(
-      ([_, teamSummary]) =>
-        teamSummary.timesDefense > teamSummary.timesPlaintiff
-    )
-    .map(([teamNumber, _]) => teamNumber);
-  const defenseTeams = sortedTeams
-    .filter(
-      ([_, teamSummary]) =>
-        teamSummary.timesDefense < teamSummary.timesPlaintiff
-    )
-    .map(([teamNumber, _]) => teamNumber);
+  const [plaintiffTeams, defenseTeams] = balanceTeamSides(sortedTeams);
   if (plaintiffTeams.length !== defenseTeams.length) {
-    return "Unequal number of plaintiff and defense teams found. This should be impossible and the tab system can't handle this case";
+    return "Failed to resolve disparity among sides of case, cannot pair teams evenly.";
   }
+
   const pairings: Pairing[] = plaintiffTeams.map((plaintiffTeam, i) => [
     plaintiffTeam,
     defenseTeams[i],
@@ -274,6 +264,60 @@ const pairTeamsEvenRound = (
   }
   return pairings;
 };
+
+function balanceTeamSides(
+  teams: [string, TeamSummary][]
+): [string[], string[]] {
+  // If there are fewer flexible teams than the size of the disparity,
+  // then it's impossible to resolve. Also, if the size of the disparity
+  // is an odd number, then it can't be resolved by an even number of
+  // flexible teams, and vice versa. Otherwise, we can resolve the disparity
+  // by assigning flexible teams to sides.
+
+  const plaintiffTeams = teams
+    .filter(
+      ([_, teamSummary]) =>
+        teamSummary.timesDefense > teamSummary.timesPlaintiff
+    )
+    .map(([teamNumber, _]) => teamNumber);
+  const defenseTeams = teams
+    .filter(
+      ([_, teamSummary]) =>
+        teamSummary.timesDefense < teamSummary.timesPlaintiff
+    )
+    .map(([teamNumber, _]) => teamNumber);
+  const flexibleTeams = teams
+    .filter(
+      ([_, teamSummary]) =>
+        teamSummary.timesDefense === teamSummary.timesPlaintiff
+    )
+    .map(([teamNumber, _]) => teamNumber);
+
+  // First, resolve the disparity by allocating flexible teams to the
+  // side with fewer teams.
+  let currentDisparity = plaintiffTeams.length - defenseTeams.length;
+  while (currentDisparity !== 0 && flexibleTeams.length > 0) {
+    const teamToSwap = flexibleTeams.pop();
+    // More plaintiff teams, assign to defense
+    if (currentDisparity > 0) {
+      defenseTeams.push(teamToSwap);
+      currentDisparity -= 1;
+    } else {
+      plaintiffTeams.push(teamToSwap);
+      currentDisparity += 1;
+    }
+  }
+  const numRemainingFlexibleTeams = flexibleTeams.length;
+  // Now, allocate any remaining flexible teams equally
+  for (let i = 0; i < numRemainingFlexibleTeams; i++) {
+    if (i % 2 === 0) {
+      plaintiffTeams.push(flexibleTeams.pop());
+    } else {
+      defenseTeams.push(flexibleTeams.pop());
+    }
+  }
+  return [plaintiffTeams, defenseTeams];
+}
 
 const sortedTeamResults = (
   teamResults: Record<string, TeamSummary>

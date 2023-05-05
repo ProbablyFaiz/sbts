@@ -66,16 +66,17 @@ function OnSetupMasterSpreadsheetClick() {
       PopulateBallotLinks();
       SheetLogger.log("Creating triggers...");
       SetupTriggers();
-      const tabSetUp = SpreadsheetApp.getActiveSpreadsheet()
-        .getRangeByName("TabSystemSetUpRange");
+      const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
+        "TabSystemSetUpRange"
+      );
       tabSetUp?.setValue(true);
       const htmlOutput = HtmlService.createHtmlOutput(
         "<p>Master spreadsheet was successfully configured for use. " +
           "Remember to set up the orchestrator as well (if this system isn't " +
           "using exclusively Google Form ballots).</p>"
       )
-        .setWidth(250)
-        .setHeight(100);
+        .setWidth(300)
+        .setHeight(150);
       ui.showModelessDialog(htmlOutput, "Success!");
     }
   } else {
