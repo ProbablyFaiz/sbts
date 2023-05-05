@@ -17,8 +17,13 @@ import {
 } from "./actions/PopulateBallotSheets";
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
-import {PrintMatchupSummary, PrintTeamSummary} from "./tab/PrintTabSummary";
+import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
 import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
+import {
+  PairTeams,
+  PairTeamsWithCourtrooms,
+  PairTeamsWithMetadata,
+} from "./pairing/Swiss";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -71,6 +76,9 @@ export {
   DisplayMatchResults,
   PrintMatchupSummary,
   PrintTeamSummary,
+  PairTeams,
+  PairTeamsWithCourtrooms,
+  PairTeamsWithMetadata,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -108,7 +116,7 @@ global.TabulateIndividualBallots = (roundRange: string | string[]) =>
  */
 global.TabulateTeamBallots = (
   roundRange: string | string[],
-  ballotsPerMatch: number,
+  ballotsPerMatch: number
 ) => TabulateTeamBallots(roundRange, ballotsPerMatch);
 global.DetectNameTypos = DetectNameTypos;
 global.DetectMatchupTypos = DetectMatchupTypos;
@@ -117,6 +125,25 @@ global.PopulateTeamBallots = PopulateTeamBallots;
 global.DisplayMatchResults = DisplayMatchResults;
 global.PrintMatchupSummary = PrintMatchupSummary;
 global.PrintTeamSummary = PrintTeamSummary;
+global.PairTeams = PairTeams;
+/**
+ * Pair teams using the Swiss system and assign them to courtrooms.
+ * Order of the matchups is randomized. All parameters are provided via
+ * configuration fields, and not as arguments to this function.
+ * Any passed are solely for telling the custom function when to recalculate.
+ * @return {string[][]} The pairings for the next round, of the form (Courtroom, Petitioner, Respondent)
+ * @customfunction
+ */
+global.PairTeamsWithCourtrooms = PairTeamsWithCourtrooms;
+/**
+ * Pair teams using the Swiss System, showing the pairing process and how each
+ * conflict was resolved. All parameters are provided via configuration fields,
+ * and not as arguments to this function; any passed are solely for telling the
+ * custom function when to recalculate.
+ * @return {string[][]} A series of intermediate pairing steps used to generate
+ * the final pairings.
+ */
+global.PairTeamsWithMetadata = PairTeamsWithMetadata;
 global.getCourtrooms = getCourtrooms;
 global.getTeams = getTeams;
 global.getTeamBallotResults = getTeamBallotResults;

@@ -33,8 +33,7 @@ function PairKnockoutRounds(
 
   const context = new SSContext();
   const seedingResults = Object.values(
-    getAllTeamResults(seedingRounds, 2, true, context)
+    getAllTeamResults(seedingRounds, 2, context.byeStrategy, context)
   ).sort((a, b) => compareTeamSummaries(a, b));
   const teamsBySeed = seedingResults.map((teamResult) => teamResult.teamNumber);
-  
 }

@@ -3,7 +3,12 @@ import { flattenRange, formatPd } from "../context/Helpers";
 import { getAllTeamResults } from "./TabulateTeamBallots";
 
 const displayRoundMatchResults = (round: string) => {
-  const roundResults = getAllTeamResults([round], undefined, false, new SSContext());
+  const roundResults = getAllTeamResults(
+    [round],
+    undefined,
+    undefined,
+    new SSContext()
+  );
   const seenTeams = new Set();
   const outputCells = [`${round} Round Summary`];
   for (const teamNumber of Object.keys(roundResults)) {
@@ -61,7 +66,7 @@ const displayRoundMatchResults = (round: string) => {
     }
   }
   return outputCells;
-}
+};
 
 function DisplayMatchResults(roundRange: any) {
   // Displays the results of each match in each round in a table.

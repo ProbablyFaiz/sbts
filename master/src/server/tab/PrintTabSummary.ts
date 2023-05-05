@@ -4,7 +4,7 @@ import { getAllTeamResults } from "./TabulateTeamBallots";
 import { TeamSummary } from "../../Types";
 
 function getRoundSummaryRows(round: string, context: IContext) {
-  const roundResults = getAllTeamResults([round], 2, false, context);
+  const roundResults = getAllTeamResults([round], 2, undefined, context);
   const seenTeams = new Set();
   const outputCells = [];
   for (const teamNumber of Object.keys(roundResults)) {
@@ -63,7 +63,9 @@ function PrintTeamSummary(roundRange: any) {
       undefined
     );
 
-  const teamResults = Object.values(getAllTeamResults(rounds, 2, false, context));
+  const teamResults = Object.values(
+    getAllTeamResults(rounds, 2, context.byeStrategy, context)
+  );
   // Sort the team results by the latest round they competed in, and then
   // by ballots won
   teamResults.sort((a, b) => {
