@@ -103,17 +103,13 @@ global.TabulateIndividualBallots = (roundRange: string | string[]) =>
  * @param {string[] | string} roundRange The rounds to tabulate. Can be a single round, a range of rounds, or an array of rounds.
  * @param {number} ballotsPerMatch The number of ballots per round to normalize to. For example, if this is 2, then a
  * team that wins a round 2 ballots to 1 will receive 2*2/3 = 1.33 ballots for that round.
- * @param {boolean} byeAdjustment Whether to adjust for bye rounds. If true, teams with fewer than the maximum number of opponents
- * will have their totals multiplied by the factor of the number of opponents. E.g. a team with 2 opponents when
- * other teams have 3 opponents will have their totals multiplied by 3/2.
  * @return {(string|number)[][]} The tabulated team results, of the form (Rank, Team #, Team Name, Ballots Won, Combined Strength, Point Differential, Times Petitioner, Times Respondent, Past Opponents)
  * @customfunction
  */
 global.TabulateTeamBallots = (
   roundRange: string | string[],
   ballotsPerMatch: number,
-  byeAdjustment: boolean
-) => TabulateTeamBallots(roundRange, ballotsPerMatch, byeAdjustment);
+) => TabulateTeamBallots(roundRange, ballotsPerMatch);
 global.DetectNameTypos = DetectNameTypos;
 global.DetectMatchupTypos = DetectMatchupTypos;
 global.PopulateIndividualBallots = PopulateIndividualBallots;

@@ -1,6 +1,7 @@
 import {
   BallotInfo,
   BallotSpreadsheet,
+  ByeStrategy,
   Cell,
   CourtroomInfo,
   IndividualBallotResult,
@@ -9,6 +10,7 @@ import {
   NonSheetBallotReadout,
   NonSheetBallotResult,
   RequiredBallotState,
+  SwissConfig,
   TeamBallotResult,
   TeamInfo,
   TeamSummary,
@@ -16,10 +18,12 @@ import {
 import { memoize } from "./CacheHelper";
 import {
   compactRange,
+  getByeStrategy,
   getIdFromUrl,
   getOrCreateChildFolder,
   GoogleFile,
   sheetForFile,
+  spreadsheetTruthy,
 } from "./Helpers";
 import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
@@ -41,6 +45,8 @@ interface IContext {
   secondPartyName: string;
   tournamentName: string;
   teamResults: Record<string, TeamSummary>;
+  swissConfig: SwissConfig;
+  byeStrategy: ByeStrategy;
   addEnteredBallot: (ballotState: RequiredBallotState) => void;
 }
 
@@ -107,19 +113,24 @@ class SSContext implements IContext {
   @memoize
   get teamResults(): Record<string, TeamSummary> {
     const teamResultMapping: Record<string, TeamSummary> = {};
-    compactRange(this.getRangeValues(MasterRange.TeamResults) ?? []).forEach(
-      (row) => {
-        teamResultMapping[row[1]] = {
-          ballotsWon: parseFloat(row[3]),
-          combinedStrength: parseFloat(row[4]),
-          pointDifferential: parseFloat(row[5]),
-          timesPlaintiff: parseInt(row[6]),
-          timesDefense: parseInt(row[7]),
-          pastOpponents: row[8].split(PAST_OPPONENTS_SEPARATOR),
-          byeBust: this.teamInfo[row[1]].byeBust,
-        };
-      }
+    const resultsRangeValues = compactRange(
+      this.getRangeValues(MasterRange.TeamResults) ?? []
     );
+    if (resultsRangeValues?.[0]?.[0] === "No results to display") {
+      // This is just the default "No results to display" message, not a real result
+      return {};
+    }
+    resultsRangeValues.forEach((row) => {
+      teamResultMapping[row[1]] = {
+        ballotsWon: parseFloat(row[3]),
+        combinedStrength: parseFloat(row[4]),
+        pointDifferential: parseFloat(row[5]),
+        timesPlaintiff: parseInt(row[6]),
+        timesDefense: parseInt(row[7]),
+        pastOpponents: row[8].split(PAST_OPPONENTS_SEPARATOR),
+        byeBust: this.teamInfo[row[1]].byeBust,
+      };
+    });
     return teamResultMapping;
   }
 
@@ -171,10 +182,9 @@ class SSContext implements IContext {
   @memoize
   get roundNames(): string[] {
     const roundNames = this.teamBallotResults.map((ballot) => ballot.round);
-    return roundNames
-      .filter((roundName, index) => {
-        return roundNames.indexOf(roundName) === index;
-      });
+    return roundNames.filter((roundName, index) => {
+      return roundNames.indexOf(roundName) === index;
+    });
   }
 
   @memoize
@@ -190,6 +200,12 @@ class SSContext implements IContext {
   @memoize
   get tournamentEmail(): string {
     return this.getRangeValue(MasterRange.TournamentEmail) ?? "";
+  }
+
+  @memoize
+  get byeStrategy(): ByeStrategy {
+    const byeStrategyStr = this.getRangeValue(MasterRange.ByeStrategy);
+    return getByeStrategy(byeStrategyStr);
   }
 
   @memoize
@@ -359,6 +375,24 @@ class SSContext implements IContext {
     ).map((row) => this.formRowToReadout(row, ENTERED_BALLOTS_SHEET));
   }
 
+  @memoize
+  get swissConfig(): SwissConfig {
+    const previousRounds = compactRange(
+      this.getRangeValues(MasterRange.SwissPreviousRounds) ?? []
+    ).map((row) => row[0]);
+    const allowSameSchool = spreadsheetTruthy(
+      this.getRangeValue(MasterRange.SwissAllowSameSchool)
+    );
+    const allowRepeatMatchup = spreadsheetTruthy(
+      this.getRangeValue(MasterRange.SwissAllowRepeatMatchup)
+    );
+    return {
+      previousRounds,
+      allowSameSchool,
+      allowRepeatMatchup,
+    };
+  }
+
   private formRowToReadout(
     response: any[],
     sourceSheet: string
@@ -412,10 +446,7 @@ class SSContext implements IContext {
     };
   }
 
-  setReadoutPdfUrl(
-    readout: NonSheetBallotReadout,
-    ballotPdfUrl: string
-  ) {
+  setReadoutPdfUrl(readout: NonSheetBallotReadout, ballotPdfUrl: string) {
     const sourceSheet = this.masterSpreadsheet.getSheetByName(
       readout.sourceSheet
     );

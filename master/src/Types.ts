@@ -42,6 +42,10 @@ enum MasterRange {
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
   BallotTemplateLink = "BallotTemplateLinkRange",
+  SwissPreviousRounds = "SwissPreviousRoundsRange",
+  SwissAllowSameSchool = "SwissAllowSameSchoolRange",
+  SwissAllowRepeatMatchup = "SwissAllowRepeatMatchupRange",
+  ByeStrategy = "ByeStrategyRange",
 }
 
 enum CaptainsFormRange {
@@ -215,6 +219,18 @@ interface NonSheetBallotReadout {
   sourceSheet: string;
 }
 
+interface SwissConfig {
+  previousRounds: string[];
+  allowSameSchool: boolean;
+  allowRepeatMatchup: boolean;
+}
+
+enum ByeStrategy {
+  NO_ADJUSTMENT,
+  PROPORTIONAL,
+  AUTO_WIN,
+}
+
 export {
   BallotRange,
   MasterRange,
@@ -239,4 +255,6 @@ export {
   RequiredTeamState,
   RequiredBallotState,
   NonSheetBallotReadout,
+  SwissConfig,
+  ByeStrategy,
 };

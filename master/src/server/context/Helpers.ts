@@ -2,6 +2,7 @@
 
 import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
 import GoogleFile = GoogleAppsScript.Drive.File;
+import { ByeStrategy } from "../../Types";
 
 const NUM_BALLOTS = 2;
 
@@ -60,6 +61,46 @@ function getIdFromUrl(url: string): string {
   return url.match(/[-\w]{25,}/)?.toString() ?? "";
 }
 
+// This is not a good idea, broadly speaking. But it is
+// a way to keep surprising behavior from getting injected
+// into the system when a column accidentally gets changed
+// to text format and other such things.
+function spreadsheetTruthy(val: any): boolean {
+  if (typeof val === "string") {
+    if (val.toLowerCase() === "true" || val.toLowerCase() === "yes") {
+      return true;
+    }
+    if (
+      val.length === 0 ||
+      val.toLowerCase() === "false" ||
+      val.toLowerCase() === "no"
+    ) {
+      return false;
+    }
+  }
+  return !!val;
+}
+
+
+const getByeStrategy = (byeStrategyInput: string): ByeStrategy => {
+  if (!byeStrategyInput) {
+    return ByeStrategy.NO_ADJUSTMENT;
+  } else if (typeof byeStrategyInput === "string") {
+    if (byeStrategyInput === "NO_ADJUSTMENT") {
+      return ByeStrategy.NO_ADJUSTMENT;
+    }
+    if (byeStrategyInput === "AUTO_WIN") {
+      return ByeStrategy.AUTO_WIN;
+    }
+    if (byeStrategyInput === "PROPORTIONAL") {
+      return ByeStrategy.PROPORTIONAL;
+    }
+  }
+  throw new Error(
+    `Invalid bye strategy: ${byeStrategyInput}. Permitted values are "AUTO_WIN", "PROPORTIONAL", and "NO_ADJUSTMENT"`
+  );
+};
+
 export {
   NUM_BALLOTS,
   compactRange,
@@ -69,6 +110,8 @@ export {
   getOrCreateChildFolder,
   getFileByName,
   getIdFromUrl,
+  spreadsheetTruthy,
+  getByeStrategy,
   Spreadsheet,
   GoogleFile,
 };

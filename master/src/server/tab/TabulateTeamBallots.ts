@@ -4,7 +4,12 @@ import {
   SSContext,
 } from "../context/Context";
 import { flattenRange } from "../context/Helpers";
-import { RoundResult, TeamBallotResult, TeamSummary } from "../../Types";
+import {
+  ByeStrategy,
+  RoundResult,
+  TeamBallotResult,
+  TeamSummary,
+} from "../../Types";
 
 function getRoundResult(
   ballotResults: TeamBallotResult[],
@@ -110,7 +115,7 @@ function getMaxNumBallots(
 function getAllTeamResults(
   rounds: string[],
   ballotsPerMatch: number | undefined,
-  adjustForBye: boolean,
+  byeStrategy: ByeStrategy | undefined,
   context: IContext
 ): Record<string, Required<TeamSummary>> {
   const roundSet = new Set(rounds);
@@ -147,9 +152,16 @@ function getAllTeamResults(
       teamResults
     );
   });
-  if (adjustForBye) {
+  if (byeStrategy != undefined) {
+    if (ballotsPerMatch == undefined) {
+      throw new Error(
+        "Cannot adjust for bye round without knowing the number of ballots per match"
+      );
+    }
     return adjustForByeRound(
-      teamResults as Record<string, Required<TeamSummary>>
+      teamResults as Record<string, Required<TeamSummary>>,
+      byeStrategy,
+      ballotsPerMatch!
     );
   }
   return teamResults as Record<string, Required<TeamSummary>>;
@@ -204,7 +216,9 @@ function getTeamResultsOutput(
 }
 
 function adjustForByeRound(
-  teamResults: Record<string, Required<TeamSummary>>
+  teamResults: Record<string, Required<TeamSummary>>,
+  strategy: ByeStrategy,
+  ballotsPerMatch: number
 ): Record<string, Required<TeamSummary>> {
   // Adjust for bye rounds by adjusting totals of teams with fewer than the maximum number of opponents
   const maxOpponents = Math.max(
@@ -215,29 +229,33 @@ function adjustForByeRound(
   return Object.entries(teamResults).reduce((acc, [teamNumber, teamResult]) => {
     const newResult = { ...teamResult };
     if (teamResult.pastOpponents.length < maxOpponents) {
-      // Multiply the totals by the factor of the number of opponents
       const adjustmentFactor = maxOpponents / teamResult.pastOpponents.length;
-      newResult.ballotsWon *= adjustmentFactor;
-      newResult.combinedStrength *= adjustmentFactor;
-      newResult.pointDifferential *= adjustmentFactor;
-      newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+      if (strategy === ByeStrategy.PROPORTIONAL) {
+        // Multiply the totals by the factor of the number of opponents
+        newResult.ballotsWon *= adjustmentFactor;
+        newResult.combinedStrength *= adjustmentFactor;
+        newResult.pointDifferential *= adjustmentFactor;
+        newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+      } else if (strategy === ByeStrategy.AUTO_WIN) {
+        // Give a free win to the team, and adjust CS and PD proportionally
+        newResult.ballotsWon += ballotsPerMatch;
+        newResult.combinedStrength *= adjustmentFactor;
+        newResult.pointDifferential *= adjustmentFactor;
+      }
     }
     acc[teamNumber] = newResult;
     return acc;
   }, {} as Record<string, Required<TeamSummary>>);
 }
 
-function TabulateTeamBallots(
-  roundRange: any,
-  ballotsPerMatch: number,
-  byeAdjustment: boolean
-) {
+function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
+  const context = new SSContext();
   const rounds = flattenRange(roundRange);
   let teamResults = getAllTeamResults(
     rounds,
     ballotsPerMatch,
-    byeAdjustment,
-    new SSContext()
+    context.byeStrategy,
+    context
   );
   const output = getTeamResultsOutput(teamResults);
   return output.length > 0 ? output : [["No results to display"]];
