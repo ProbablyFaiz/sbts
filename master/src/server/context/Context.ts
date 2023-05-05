@@ -44,7 +44,6 @@ interface IContext {
   firstPartyName: string;
   secondPartyName: string;
   tournamentName: string;
-  teamResults: Record<string, TeamSummary>;
   swissConfig: SwissConfig;
   byeStrategy: ByeStrategy;
   addEnteredBallot: (ballotState: RequiredBallotState) => void;
@@ -108,30 +107,6 @@ class SSContext implements IContext {
       }
     );
     return teamInfoMapping;
-  }
-
-  @memoize
-  get teamResults(): Record<string, TeamSummary> {
-    const teamResultMapping: Record<string, TeamSummary> = {};
-    const resultsRangeValues = compactRange(
-      this.getRangeValues(MasterRange.TeamResults) ?? []
-    );
-    if (resultsRangeValues?.[0]?.[0] === "No results to display") {
-      // This is just the default "No results to display" message, not a real result
-      return {};
-    }
-    resultsRangeValues.forEach((row) => {
-      teamResultMapping[row[1]] = {
-        ballotsWon: parseFloat(row[3]),
-        combinedStrength: parseFloat(row[4]),
-        pointDifferential: parseFloat(row[5]),
-        timesPlaintiff: parseInt(row[6]),
-        timesDefense: parseInt(row[7]),
-        pastOpponents: row[8].split(PAST_OPPONENTS_SEPARATOR),
-        byeBust: this.teamInfo[row[1]].byeBust,
-      };
-    });
-    return teamResultMapping;
   }
 
   @memoize

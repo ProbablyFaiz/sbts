@@ -37,7 +37,6 @@ enum MasterRange {
   ExecutionLog = "ExecutionLogRange",
   TournamentName = "TournamentNameRange",
   TournamentEmail = "TournamentEmailRange",
-  TeamResults = "TeamResultsRange",
   CourtroomInfo = "CourtroomInfoRange",
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
