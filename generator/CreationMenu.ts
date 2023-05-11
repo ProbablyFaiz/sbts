@@ -14,10 +14,18 @@ function OnCreateSystemClick() {
     if (tabFolderLinkResponse.getSelectedButton() != ui.Button.OK) {
       return;
     }
-    SheetLogger.log("Generating files...");
-    SetupTabulationFolder(tabFolderLinkResponse.getResponseText());
+    const simpleMode =
+      SpreadsheetApp.getActiveSpreadsheet()
+        .getRangeByName("GeneratorType")
+        .getValue() === "SIMPLE";
+    if (simpleMode) {
+      SimpleSetup(tabFolderLinkResponse.getResponseText());
+    } else {
+      SetupTabulationFolder(tabFolderLinkResponse.getResponseText());
+    }
+
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully generated tab system. Godspeed.</p>"
+      "<p>Successfully generated tab system!</p>"
     )
       .setWidth(250)
       .setHeight(100);

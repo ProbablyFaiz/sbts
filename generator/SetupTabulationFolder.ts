@@ -83,7 +83,14 @@ function SetupTabulationFolder(tabFolderLink: string) {
   SpreadsheetApp.flush();
 
   if (setupContext.setUpGoogleFormBallot) {
-    setUpGoogleFormBallot(setupContext);
+    setUpGoogleFormBallot(
+      tabFolder,
+      setupContext.formBallotTemplate,
+      setupContext.masterSpreadsheet,
+      setupContext.roundsInfo.map((round) => round.name),
+      setupContext.courtroomsInfo.map((courtroom) => courtroom.name),
+      setupContext.tournamentName
+    );
   }
   createTrialFolders(setupContext, tabFolder);
   setupContext.writeCourtroomsToMaster();
@@ -92,45 +99,47 @@ function SetupTabulationFolder(tabFolderLink: string) {
   );
 }
 
-const setUpGoogleFormBallot = (setupContext: SetupContext) => {
+const setUpGoogleFormBallot = (
+  tabFolder: GoogleAppsScript.Drive.Folder,
+  formBallotTemplate: GoogleAppsScript.Drive.File,
+  masterSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+  rounds: string[],
+  courtrooms: string[],
+  tournamentName: string
+) => {
   SheetLogger.log("Setting up Google Form ballot...");
-  const formTemplate = setupContext.formBallotTemplate;
   // Copy into tab folder
-  const formFile = formTemplate.makeCopy(
-    `${setupContext.tournamentName} Ballot`,
-    setupContext.tabFolder
+  const formFile = formBallotTemplate.makeCopy(
+    `${tournamentName} Ballot`,
+    tabFolder
   );
   const form = FormApp.openById(formFile.getId());
-  form.setTitle(`${setupContext.tournamentName} Ballot`);
+  form.setTitle(`${tournamentName} Ballot`);
 
   const roundItem = form
     .getItems()
     .find((item) => item.getTitle() === "Round #");
   if (roundItem) {
     const roundDropdown = roundItem.asListItem();
-    const roundOptions = setupContext.roundsInfo.map((round) => round.name);
-    roundDropdown.setChoiceValues(roundOptions);
+    roundDropdown.setChoiceValues(rounds);
   }
   const courtroomItem = form
     .getItems()
     .find((item) => item.getTitle() === "Courtroom");
   if (courtroomItem) {
     const courtroomDropdown = courtroomItem.asListItem();
-    const courtroomOptions = setupContext.courtroomsInfo.map(
-      (courtroom) => courtroom.name
-    );
-    courtroomDropdown.setChoiceValues(courtroomOptions);
+    courtroomDropdown.setChoiceValues(courtrooms);
   }
 
   form.setDestination(
     FormApp.DestinationType.SPREADSHEET,
-    setupContext.masterSpreadsheet.getId()
+    masterSpreadsheet.getId()
   );
-  setupContext.masterSpreadsheet
+  masterSpreadsheet
     .getRangeByName(MasterRange.GoogleFormBallotLink)
     .setValue(form.getPublishedUrl());
 
-  const responseSheets = setupContext.masterSpreadsheet
+  const responseSheets = masterSpreadsheet
     .getSheets()
     .filter((sheet) => sheet.getFormUrl());
   responseSheets.forEach((sheet) => {

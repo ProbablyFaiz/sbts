@@ -28,6 +28,11 @@ enum MasterRange {
   SecondPartyName = "SecondPartyNameRange",
   BallotTemplateLink = "BallotTemplateLinkRange",
   GoogleFormBallotLink = "GoogleFormBallotLinkRange",
+  
+  TeamIncludeRounds = "TeamIncludeRoundsRange",
+  IndividualIncludeRounds = "IndividualIncludeRoundsRange",
+  KnockoutIncludeRounds = "KnockoutIncludeRoundsRange",
+  ByeStrategy = "ByeStrategyRange",
 }
 
 enum CaptainsFormRange {
