@@ -1,5 +1,5 @@
 import { IContext, SSContext } from "../context/Context";
-import { flattenRange, formatPd } from "../context/Helpers";
+import { compactRange, flattenRange, formatPd } from "../context/Helpers";
 import { getAllTeamResults } from "./TabulateTeamBallots";
 
 const displayRoundMatchResults = (round: string, context: IContext) => {
@@ -70,7 +70,7 @@ const displayRoundMatchResults = (round: string, context: IContext) => {
 
 function DisplayMatchResults(roundRange: any) {
   // Displays the results of each match in each round in a table.
-  const rounds = flattenRange(roundRange);
+  const rounds = flattenRange(compactRange(roundRange));
   const context = new SSContext();
 
   // Get the results for each round

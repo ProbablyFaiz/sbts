@@ -2,19 +2,19 @@ import { IContext, SSContext } from "../context/Context";
 import { TeamBallotResult } from "../../Types";
 
 const getMultipleMatchupTypos = (context: IContext) => {
-  const matchupsByRoundCourtroom = {};
+  const groupedMatchups = {};
   const matchupTypoCandidates = [];
   context.teamBallotResults.forEach((teamBallotResult) => {
     const { round, courtroom, teamNumber, opponentTeamNumber } =
       teamBallotResult;
-    if (!(round in matchupsByRoundCourtroom)) {
-      matchupsByRoundCourtroom[round] = {};
+    if (!(round in groupedMatchups)) {
+      groupedMatchups[round] = {};
     }
     const matchupKey = getMatchupKey(teamBallotResult);
-    if (!(courtroom in matchupsByRoundCourtroom[round])) {
-      matchupsByRoundCourtroom[round][courtroom] = teamBallotResult;
+    if (!(courtroom in groupedMatchups[round])) {
+      groupedMatchups[round][courtroom] = teamBallotResult;
     } else {
-      const otherMatchup = matchupsByRoundCourtroom[round][courtroom];
+      const otherMatchup = groupedMatchups[round][courtroom];
       const otherMatchupKey = getMatchupKey(otherMatchup);
       if (matchupKey !== otherMatchupKey) {
         matchupTypoCandidates.push(

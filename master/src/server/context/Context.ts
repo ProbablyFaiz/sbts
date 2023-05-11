@@ -13,7 +13,6 @@ import {
   SwissConfig,
   TeamBallotResult,
   TeamInfo,
-  TeamSummary,
 } from "../../Types";
 import { memoize } from "./CacheHelper";
 import {
