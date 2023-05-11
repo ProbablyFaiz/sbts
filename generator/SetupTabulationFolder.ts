@@ -107,7 +107,7 @@ const setUpGoogleFormBallot = (
   courtrooms: string[],
   tournamentName: string
 ) => {
-  SheetLogger.log("Setting up Google Form ballot...");
+  Logger.log("Setting up Google Form ballot...");
   // Copy into tab folder
   const formFile = formBallotTemplate.makeCopy(
     `${tournamentName} Ballot`,
@@ -138,10 +138,12 @@ const setUpGoogleFormBallot = (
   masterSpreadsheet
     .getRangeByName(MasterRange.GoogleFormBallotLink)
     .setValue(form.getPublishedUrl());
+  SpreadsheetApp.flush();
 
   const responseSheets = masterSpreadsheet
     .getSheets()
     .filter((sheet) => sheet.getFormUrl());
+  Logger.log(`Found ${responseSheets.length} response sheet(s).`);
   responseSheets.forEach((sheet) => {
     const range = sheet.getRange(
       1,

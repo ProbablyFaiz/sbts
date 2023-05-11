@@ -67,6 +67,12 @@ function flattenRange(roundRange: string | string[] | string[][]): string[] {
   return roundRange as string[];
 }
 
+function flattenByColumns(arr: string[][]): string[] {
+  return arr.reduce((acc, curr) => {
+    return [...acc, ...curr];
+  }, []).map((_, i, arr) => arr[i % arr.length * arr[0].length + Math.floor(i / arr.length)]);
+}
+
 const setAndBackfillRange = (
   range: GoogleAppsScript.Spreadsheet.Range,
   values: any[][]

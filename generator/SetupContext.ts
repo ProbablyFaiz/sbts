@@ -280,7 +280,6 @@ enum SimpleGeneratorRange {
   Courtrooms = "Courtrooms",
 }
 
-
 class SimpleSetupContext {
   tabFolder: Folder;
 
@@ -359,10 +358,11 @@ class SimpleSetupContext {
 
   @memoize
   get courtrooms(): string[] {
-    // courtrooms is two columns so we have to handle it a bit differently
-    return flattenRange(
+    // courtrooms is two columns so we have to handle it column by column
+    const courtroomCells = flattenByColumns(
       this.getRangeValues(SimpleGeneratorRange.Courtrooms)
-    ).filter((c) => !!c);
+    );
+    return courtroomCells.filter((c) => !!c);
   }
 
   private getRangeValue(rangeName: SimpleGeneratorRange): string {

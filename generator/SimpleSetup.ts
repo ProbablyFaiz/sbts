@@ -65,7 +65,7 @@ function SimpleSetup(tabFolderLink: string) {
 
   if (context.showSwissPairings) {
     masterSpreadsheet.getSheetByName("Swiss Pairings").showSheet();
-    masterSpreadsheet.getSheetByName("Swiss Pairing Process").showSheet();
+    // masterSpreadsheet.getSheetByName("Swiss Pairing Process").showSheet();
   } else {
     masterSpreadsheet.getSheetByName("Swiss Pairings").hideSheet();
     masterSpreadsheet.getSheetByName("Swiss Pairing Process").hideSheet();
