@@ -68,9 +68,17 @@ function flattenRange(roundRange: string | string[] | string[][]): string[] {
 }
 
 function flattenByColumns(arr: string[][]): string[] {
-  return arr.reduce((acc, curr) => {
-    return [...acc, ...curr];
-  }, []).map((_, i, arr) => arr[i % arr.length * arr[0].length + Math.floor(i / arr.length)]);
+  const numRows = arr.length;
+  const numCols = arr[0].length;
+  let flattenedArray: string[] = [];
+
+  for (let col = 0; col < numCols; col++) {
+    for (let row = 0; row < numRows; row++) {
+      flattenedArray.push(arr[row][col]);
+    }
+  }
+
+  return flattenedArray;
 }
 
 const setAndBackfillRange = (
