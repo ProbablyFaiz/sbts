@@ -37,6 +37,8 @@ enum ConflictType {
   AlreadyFaced = "already faced",
 }
 
+const BYE_TEAM_NUM = "BYE";
+
 function PairTeamsWithCourtrooms(): SpreadsheetOutput {
   const context = new SSContext();
   const pairings = PairTeams();
@@ -46,10 +48,15 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
   // Seeding the rng with the pairings ensures that we have the same
   // arbitrary order of pairings each time the function is re-run.
   const rng = new SeededRandom(JSON.stringify(pairings));
-  pairings.sort(() => rng.nextFloat() - 0.5);
+  // pairings.sort((a, b) => {
+  //   if (a.some((team) => team === BYE_TEAM_NUM)) return 1;
+  //   if (b.some((team) => team === BYE_TEAM_NUM)) return -1;
+  //   return rng.nextFloat() - 0.5;
+  // });
   // If it's round 3, flip a coin to determine side
-  if (context.roundsCompleted % 2 === 0 && rng.nextFloat() < 0.5)
+  if (context.roundsCompleted % 2 === 0 && rng.nextFloat() < 0.5) {
     pairings.forEach((pair) => pair.reverse());
+  }
   if (courtrooms.length < pairings.length) {
     // Add fake courtrooms
     const numFakeCourtrooms = pairings.length - courtrooms.length;
@@ -76,6 +83,9 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     context.swissConfig.previousRounds.length % 2
       ? pairTeamsEvenRound
       : pairTeamsOddRound;
+  if (context.swissConfig.previousRounds.length > 0 && !context.firstPartyName || !context.secondPartyName) {
+    return "Please set the names of the parties (e.g. Petitioner & Respondent) in the Control Panel tab.";
+  }
   let teamResults: Record<string, TeamSummary> = getAllTeamResults(
     context.swissConfig.previousRounds,
     1,
@@ -87,13 +97,37 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
   // We need to initialize the team results with the team info.
   if (Object.keys(teamResults).length === 0) {
     teamResults = createTeamResults(teamInfo);
+  } else if (Object.keys(teamInfo).length !== Object.keys(teamResults).length) {
+    if (context.swissConfig.previousRounds.length !== 1) {
+      return "The number of teams in the team info and the team results do not match. This should only happen after the first round.";
+    }
+    // Find the teams that are in the team info but not in the team results.
+    const missingTeams = Object.keys(teamInfo).filter(
+      (teamNumber) => !(teamNumber in teamResults)
+    );
+    if (missingTeams.length > 1) {
+      return `There are ${missingTeams.length} teams in the team info but not in the team results. There should be at most one (the team that got a bye).`;
+    }
+    // Add those teams to the team results with 1 win
+    missingTeams.forEach((teamNumber) => {
+      teamResults[teamNumber] = {
+        teamNumber,
+        ballotsWon: 1,
+        pointDifferential: 0,
+        combinedStrength: 0,
+        timesPlaintiff: 0,
+        timesDefense: 0,
+        byeBust: false,
+        pastOpponents: [BYE_TEAM_NUM],
+      };
+    });
   }
   // Inject a fake BYE team if there is an odd number of teams.
   //  This is a dumb and hacky thing to do, but is probably better
   //  than futzing with all this intricate pairing logic.
   if (Object.keys(teamResults).length % 2) {
-    teamResults["BYE"] = createByeTeamSummary(teamResults);
-    teamInfo["BYE"] = createByeTeamInfo();
+    teamResults[BYE_TEAM_NUM] = createByeTeamSummary(teamResults);
+    teamInfo[BYE_TEAM_NUM] = createByeTeamInfo();
   }
   return pairingFunction(
     context.teamInfo,
@@ -316,6 +350,16 @@ function balanceTeamSides(
       defenseTeams.push(flexibleTeams.pop());
     }
   }
+  plaintiffTeams.sort(
+    (a, b) =>
+      teams.findIndex((x) => x[0] === a) -
+      teams.findIndex((x) => x[0] === b)
+  );
+  defenseTeams.sort(
+    (a, b) =>
+      teams.findIndex((x) => x[0] === a) -
+      teams.findIndex((x) => x[0] === b)
+  );
   return [plaintiffTeams, defenseTeams];
 }
 
@@ -436,10 +480,10 @@ const createByeTeamSummary = (
   teamResults: Record<string, TeamSummary>
 ): TeamSummary => {
   const pastOpponents = Object.keys(teamResults).filter((teamId) =>
-    teamResults[teamId].pastOpponents.includes("BYE")
+    teamResults[teamId].pastOpponents.includes(BYE_TEAM_NUM)
   );
   return {
-    teamNumber: "BYE",
+    teamNumber: BYE_TEAM_NUM,
     byeBust: true,
     ballotsWon: 0,
     combinedStrength: 0,
@@ -452,8 +496,8 @@ const createByeTeamSummary = (
 
 const createByeTeamInfo = (): TeamInfo => {
   return {
-    schoolName: "BYE",
-    teamNumber: "BYE",
+    schoolName: BYE_TEAM_NUM,
+    teamNumber: BYE_TEAM_NUM,
     teamName: BYE_BUST_SCHOOL_NAME,
     byeBust: true,
     competitorNames: [],

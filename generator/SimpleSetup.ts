@@ -56,6 +56,12 @@ function SimpleSetup(tabFolderLink: string) {
   masterSpreadsheet
     .getRangeByName(MasterRange.ByeStrategy)
     .setValue(context.byeStrategy);
+  masterSpreadsheet
+    .getRangeByName(MasterRange.FirstPartyName)
+    .setValue("Petitioner");
+  masterSpreadsheet
+    .getRangeByName(MasterRange.SecondPartyName)
+    .setValue("Respondent");
 
   if (context.showKnockoutBracket) {
     masterSpreadsheet.getSheetByName("Knockout Bracket").showSheet();

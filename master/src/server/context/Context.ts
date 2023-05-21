@@ -375,8 +375,12 @@ class SSContext implements IContext {
       response
         .slice(start, end + 1)
         .reduce((acc, cur) => [...acc, parseInt(cur)], [] as number[]);
+    let timestamp = response[0];
+    if (typeof timestamp === "string") {
+      timestamp = new Date(timestamp);
+    }
     return {
-      timestamp: response[0],
+      timestamp: timestamp,
       judgeName: response[1],
       round: response[2],
       courtroom: response[3],
