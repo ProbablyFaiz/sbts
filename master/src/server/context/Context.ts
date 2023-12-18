@@ -374,7 +374,7 @@ class SSContext implements IContext {
     const getScores = (start: number, end: number) =>
       response
         .slice(start, end + 1)
-        .reduce((acc, cur) => [...acc, parseInt(cur)], [] as number[]);
+        .reduce((acc, cur) => [...acc, parseFloat(cur)], [] as number[]);
     let timestamp = response[0];
     if (typeof timestamp === "string") {
       timestamp = new Date(timestamp);
