@@ -153,9 +153,17 @@ const calculateEloData = (
       matchups.forEach((matchup) => {
         const school1 = teamNumberSchoolMap.get(matchup.pTeamNumber);
         const school2 = teamNumberSchoolMap.get(matchup.dTeamNumber);
-        if (school1 === school2) {
-          // Don't adjust elos for intra-school matchups; it would
-          // be zero anyway.
+        if (school1 == null || school2 == null) {
+          const missingSide = school1 == null ? "Petitioner" : "Respondent";
+          throw new Error(
+            `${missingSide}'s school not found for matchup: ${JSON.stringify(
+              matchup
+            )}. Please check the team list in the tab summary.`
+          );
+        }
+
+        if (school1 === school2 || school1 === "Dummy" || school2 === "Dummy") {
+          // Don't adjust elos for intra-school matchups or matchups with a dummy team.
           return;
         }
 
@@ -191,6 +199,7 @@ const calculateEloData = (
           schoolAdjustments.get(school2) - eloChange1
         );
       });
+
       schoolAdjustments.forEach((eloChange, school) => {
         eloMap.set(school, eloMap.get(school) + eloChange);
       });
@@ -201,6 +210,9 @@ const calculateEloData = (
     .sort((a, b) => b[1] - a[1])
     .map(([school, elo]) => {
       return { schoolName: school, elo };
+    })
+    .filter(({ schoolName }) => {
+      return schoolName !== "Dummy";
     });
   return { eloProgression, eloResults };
 };
@@ -254,7 +266,7 @@ const writeEloResults = (
   // Date format: February 10, 2023 at 9:30 PM PST
   sheet.appendRow([
     `Updated: ${new Date().toLocaleDateString("en-US", {
-      month: "long",
+      month: "short",
       day: "numeric",
       year: "numeric",
       hour: "numeric",
@@ -279,7 +291,8 @@ const writeEloProgression = (
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Elo Progression");
   sheet.clear({ contentsOnly: true });
-  sheet.appendRow([
+  const rows: any[][] = [];
+  rows.push([
     "Date",
     "Tournament",
     "Round",
@@ -291,7 +304,7 @@ const writeEloProgression = (
     "R Adjustment",
   ]);
   eloProgression.forEach((entry) => {
-    sheet.appendRow([
+    rows.push([
       entry.date,
       entry.tournamentName,
       entry.roundName,
@@ -303,6 +316,8 @@ const writeEloProgression = (
       entry.adjustment2,
     ]);
   });
+
+  sheet.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
 };
 
 const addEloHistoryRow = (
