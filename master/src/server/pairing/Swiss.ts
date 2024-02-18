@@ -83,7 +83,10 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     context.swissConfig.previousRounds.length % 2
       ? pairTeamsEvenRound
       : pairTeamsOddRound;
-  if (context.swissConfig.previousRounds.length > 0 && !context.firstPartyName || !context.secondPartyName) {
+  if (
+    context.swissConfig.previousRounds.length > 0 &&
+    !(context.firstPartyName && context.secondPartyName)
+  ) {
     return "Please set the names of the parties (e.g. Petitioner & Respondent) in the Control Panel tab.";
   }
   let teamResults: Record<string, TeamSummary> = getAllTeamResults(
@@ -145,6 +148,14 @@ const pairTeamsOddRound = (
 ): Cell[][] | string => {
   // Snake: 1 vs. 2, 4 vs. 3, 5 vs. 6 etc. Randomly decide whether 1,4,5 are P or D.
   const sortedTeams = sortedTeamResults(teamResults);
+  if (swissConfig.previousRounds.length === 0) {
+    const rng = new SeededRandom("initial pairings");
+    // To avoid sequential teams from the same school screwing with the pairings,
+    // shuffle the teams before pairing them.
+    // TODO: In the future, we should also iterate over different shuffles to find one
+    //  that works in case the first one doesn't.
+    sortedTeams.sort((a, b) => rng.nextFloat() - 0.5);
+  }
   const side1Teams = sortedTeams
     .filter((_, i) => [0, 3].includes(i % 4))
     .map(([teamNumber, _]) => teamNumber);
@@ -352,13 +363,11 @@ function balanceTeamSides(
   }
   plaintiffTeams.sort(
     (a, b) =>
-      teams.findIndex((x) => x[0] === a) -
-      teams.findIndex((x) => x[0] === b)
+      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b)
   );
   defenseTeams.sort(
     (a, b) =>
-      teams.findIndex((x) => x[0] === a) -
-      teams.findIndex((x) => x[0] === b)
+      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b)
   );
   return [plaintiffTeams, defenseTeams];
 }
@@ -458,22 +467,21 @@ const formatSwapMetadata = (swapMetadata: SwapMetadata): [string, string][] => {
 const createTeamResults = (
   teamInfo: Record<string, TeamInfo>
 ): Record<string, TeamSummary> => {
-  return Object.fromEntries(
-    Object.entries(teamInfo).map(([teamId, teamInfo]) => {
-      return [
-        teamId,
-        {
-          teamNumber: teamInfo.teamNumber,
-          ballotsWon: 0,
-          combinedStrength: 0,
-          pointDifferential: 0,
-          timesPlaintiff: 0,
-          timesDefense: 0,
-          pastOpponents: [],
-        },
-      ];
-    })
-  );
+  const resultPairs = Object.entries(teamInfo).map(([teamId, teamInfo]) => {
+    return [
+      teamId,
+      {
+        teamNumber: teamInfo.teamNumber,
+        ballotsWon: 0,
+        combinedStrength: 0,
+        pointDifferential: 0,
+        timesPlaintiff: 0,
+        timesDefense: 0,
+        pastOpponents: [],
+      },
+    ];
+  });
+  return Object.fromEntries(resultPairs);
 };
 
 const createByeTeamSummary = (
