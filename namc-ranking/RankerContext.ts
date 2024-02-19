@@ -32,6 +32,7 @@ interface RankingConfig {
   startingElo: number;
   kFactor: number;
   topN: number;
+  halveElosAfter: number;
 }
 
 enum RankerRange {
@@ -39,6 +40,7 @@ enum RankerRange {
   StartingElo = "StartingElo",
   KFactor = "KFactor",
   TopN = "TopN",
+  HalveElosAfter = "HalveElosAfter",
 }
 
 enum TabSummaryRange {
@@ -73,10 +75,14 @@ class RankerContext implements IRankerContext {
     const topN = this.rankerSpreadsheet
       .getRangeByName(RankerRange.TopN)
       .getValue();
+    const halveElosAfter = this.rankerSpreadsheet
+      .getRangeByName(RankerRange.HalveElosAfter)
+      .getValue();
     return {
       startingElo,
       kFactor,
       topN,
+      halveElosAfter,
     };
   }
 
