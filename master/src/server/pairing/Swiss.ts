@@ -45,14 +45,15 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
   if (typeof pairings === "string") return pairings;
   const courtrooms = context.courtroomRecords.map((rec) => rec.name);
 
-  // Seeding the rng with the pairings ensures that we have the same
-  // arbitrary order of pairings each time the function is re-run.
-  const rng = new SeededRandom(JSON.stringify(pairings));
-  // pairings.sort((a, b) => {
-  //   if (a.some((team) => team === BYE_TEAM_NUM)) return 1;
-  //   if (b.some((team) => team === BYE_TEAM_NUM)) return -1;
-  //   return rng.nextFloat() - 0.5;
-  // });
+  const rng = new SeededRandom(`${context.swissConfig.randomSeed}-courtrooms`);
+  if (context.swissConfig.randomizeCourtrooms) {
+    pairings.sort((a, b) => {
+      if (a.some((team) => team === BYE_TEAM_NUM)) return 1;
+      if (b.some((team) => team === BYE_TEAM_NUM)) return -1;
+      return rng.nextFloat() - 0.5;
+    });
+  }
+    
   // If it's round 3, flip a coin to determine side
   if (context.roundsCompleted % 2 === 0 && rng.nextFloat() < 0.5) {
     pairings.forEach((pair) => pair.reverse());
@@ -79,6 +80,9 @@ function PairTeamsWithMetadata(): SpreadsheetOutput {
 
 function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
   const context = new SSContext();
+  // TODO: An odd-round pairing should actually be equivalent to an even-round
+  //  pairing in which all teams are flexible. We should confirm this hypothesis
+  //  and then remove the odd-round pairing function.
   const pairingFunction =
     context.swissConfig.previousRounds.length % 2
       ? pairTeamsEvenRound
@@ -149,7 +153,7 @@ const pairTeamsOddRound = (
   // Snake: 1 vs. 2, 4 vs. 3, 5 vs. 6 etc. Randomly decide whether 1,4,5 are P or D.
   const sortedTeams = sortedTeamResults(teamResults);
   if (swissConfig.previousRounds.length === 0) {
-    const rng = new SeededRandom("initial pairings");
+    const rng = new SeededRandom(`${swissConfig.randomSeed}-initial`);
     // To avoid sequential teams from the same school screwing with the pairings,
     // shuffle the teams before pairing them.
     // TODO: In the future, we should also iterate over different shuffles to find one

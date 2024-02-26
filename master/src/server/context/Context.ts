@@ -360,10 +360,16 @@ class SSContext implements IContext {
     const allowRepeatMatchup = spreadsheetTruthy(
       this.getRangeValue(MasterRange.SwissAllowRepeatMatchup)
     );
+    const randomizeCourtrooms = spreadsheetTruthy(
+      this.getRangeValue(MasterRange.SwissRandomizeCourtrooms)
+    );
+    const randomSeed = this.getRangeValue(MasterRange.SwissRandomSeed) || "0";
     return {
       previousRounds,
       allowSameSchool,
       allowRepeatMatchup,
+      randomizeCourtrooms,
+      randomSeed,
     };
   }
 

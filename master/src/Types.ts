@@ -44,6 +44,8 @@ enum MasterRange {
   SwissPreviousRounds = "SwissPreviousRoundsRange",
   SwissAllowSameSchool = "SwissAllowSameSchoolRange",
   SwissAllowRepeatMatchup = "SwissAllowRepeatMatchupRange",
+  SwissRandomizeCourtrooms = "SwissRandomizeCourtroomsRange",
+  SwissRandomSeed = "SwissRandomSeedRange",
   ByeStrategy = "ByeStrategyRange",
 }
 
@@ -222,6 +224,8 @@ interface SwissConfig {
   previousRounds: string[];
   allowSameSchool: boolean;
   allowRepeatMatchup: boolean;
+  randomizeCourtrooms: boolean;
+  randomSeed: string;
 }
 
 enum ByeStrategy {

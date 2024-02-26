@@ -122,6 +122,8 @@ function EloRankingDryRun() {
   ui.showModelessDialog(html, "Elo Ranking Dry Run");
 }
 
+const EXCLUDED_PROGRAM_NAMES = ["Dummy", "Hybrid"];
+
 const calculateEloData = (
   tournaments: TabSummary[],
   config: RankingConfig
@@ -147,7 +149,9 @@ const calculateEloData = (
           new Date(tournaments[idx - 1].tournamentStartTimestamp).getTime()) /
         (1000 * 60 * 60 * 24);
       if (dayGap > halveElosAfterDays) {
-        Logger.log(`Regressing elos halfway to baseline before ${t.tournamentName}...`);
+        Logger.log(
+          `Regressing elos halfway to baseline before ${t.tournamentName}...`
+        );
         eloMap.forEach((elo, school) => {
           const adjustment = (startElo - elo) / 2;
           eloMap.set(school, elo + adjustment);
@@ -174,7 +178,7 @@ const calculateEloData = (
       return { schoolName: school, elo };
     })
     .filter(({ schoolName }) => {
-      return schoolName !== "Dummy";
+      return !EXCLUDED_PROGRAM_NAMES.includes(schoolName);
     });
   return { eloProgression, eloResults };
 };
@@ -208,8 +212,11 @@ function processTournament(
         );
       }
 
-      if (school1 === school2 || school1 === "Dummy" || school2 === "Dummy") {
-        // Don't adjust elos for intra-school matchups or matchups with a dummy team.
+      // Don't adjust elos for intra-school matchups or matchups with a dummy/hybrid team.
+      if (
+        school1 === school2 ||
+        [school1, school2].every((s) => EXCLUDED_PROGRAM_NAMES.includes(s))
+      ) {
         return;
       }
 
