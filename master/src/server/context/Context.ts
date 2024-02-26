@@ -475,7 +475,7 @@ class SSContext implements IContext {
     );
     const trialFolder = getOrCreateChildFolder(
       roundFolder,
-      `R${round} - ${courtroom}`
+      `${round} - ${courtroom}`
     );
     return trialFolder;
   }

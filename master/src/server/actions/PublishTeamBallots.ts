@@ -30,7 +30,7 @@ function getBallotPdfName(
   dTeam: string,
   judgeName: string
 ) {
-  return `R${round} - ${pTeam} v. ${dTeam} (Judge ${judgeName}).pdf`;
+  return `${round} - ${pTeam} v. ${dTeam} (Judge ${judgeName}).pdf`;
 }
 
 function exportBallots(context: SSContext) {

@@ -316,8 +316,8 @@ const createTrialFolder = (
   round: IRoundInfo,
   courtroomInfo: ICourtroomInfo
 ) => {
-  const trialFolderName = `R${round.name} - ${courtroomInfo.name}`;
-  const trialPrefix = `R${round.name} ${courtroomInfo.name}`;
+  const trialFolderName = `${round.name} - ${courtroomInfo.name}`;
+  const trialPrefix = `${round.name} ${courtroomInfo.name}`;
   SheetLogger.log(`Creating ${trialPrefix} ballots and captain's form...`);
   let trialFolder = getChildFolder(roundFolder, trialFolderName);
   if (trialFolder) {
