@@ -180,7 +180,7 @@ const createTrialFolders = (
   tabFolder: GoogleAppsScript.Drive.Folder
 ) => {
   for (let round of setupContext.roundsInfo.slice(0, setupContext.numRounds)) {
-    const roundFolderName = `Round ${round.name}`;
+    const roundFolderName = round.name;
     let roundFolder = getChildFolder(tabFolder, roundFolderName);
     if (roundFolder == undefined) {
       roundFolder = tabFolder.createFolder(roundFolderName);
@@ -189,7 +189,7 @@ const createTrialFolders = (
       roundFolder.addEditor("damiansheehy.mc@gmail.com");
     } else {
       SheetLogger.log(
-        `Round ${round.name} folder already exists, not creating a new one...`
+        `${round.name} round folder already exists, not creating a new one...`
       );
     }
     setupContext.courtroomsInfo

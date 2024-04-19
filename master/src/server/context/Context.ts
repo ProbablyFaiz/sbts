@@ -471,7 +471,7 @@ class SSContext implements IContext {
   ): GoogleAppsScript.Drive.Folder {
     const roundFolder = getOrCreateChildFolder(
       this.tabFolder,
-      `Round ${round}`
+      round
     );
     const trialFolder = getOrCreateChildFolder(
       roundFolder,

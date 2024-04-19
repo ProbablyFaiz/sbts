@@ -10,7 +10,7 @@ const displayRoundMatchResults = (round: string, context: IContext) => {
     context
   );
   const seenTeams = new Set();
-  const outputCells = [`${round} Round Summary`];
+  const outputCells = [`${round} Summary`];
   for (const teamNumber of Object.keys(roundResults)) {
     const teamResult = roundResults[teamNumber];
     if (seenTeams.has(teamNumber)) {

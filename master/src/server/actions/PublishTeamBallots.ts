@@ -76,7 +76,7 @@ const exportSheetBallots = (context: SSContext) => {
       const teamFolder = context.teamBallotFolder(team)!;
       const teamRoundFolder = getOrCreateChildFolder(
         teamFolder,
-        `Round ${round}`
+        round
       );
       let pdfBallot:
         | GoogleAppsScript.Drive.File
@@ -124,7 +124,7 @@ const exportNonSheetBallots = (context: SSContext) => {
       }
       const teamRoundFolder = getOrCreateChildFolder(
         teamFolder,
-        `Round ${readout.round}`
+        readout.round
       );
       const pdfName = ballotFile.getName();
       const pdfBallot = getFileByName(teamRoundFolder, pdfName);
