@@ -1,7 +1,7 @@
 import { IContext, SSContext } from "../context/Context";
-import { flattenRange } from "../context/Helpers";
-import { getAllTeamResults } from "./TabulateTeamBallots";
-import { TeamSummary } from "../../Types";
+import { compactRange, flattenRange } from "../context/Helpers";
+import { compareTeamSummaries, getAllTeamResults } from "./TabulateTeamBallots";
+import { ByeStrategy, TeamSummary } from "../../Types";
 
 function getRoundSummaryRows(round: string, context: IContext) {
   const roundResults = getAllTeamResults([round], 2, undefined, context);
@@ -47,41 +47,107 @@ function PrintMatchupSummary(roundRange: any) {
   return output;
 }
 
-function PrintTeamSummary(roundRange: any) {
-  let rounds: string[];
+function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
   const context = new SSContext();
-  if (!roundRange) {
-    rounds = Array.from(context.roundNames);
-  } else {
-    rounds = flattenRange(roundRange);
+
+  let prelimRounds: string[] = flattenRange(
+    compactRange(prelimRoundRange || [])
+  );
+  let knockoutRounds: string[] = flattenRange(
+    compactRange(knockoutRoundRange || [])
+  );
+
+  if (!prelimRounds.length) {
+    prelimRounds = context.prelimRounds;
+  }
+  if (!knockoutRounds.length) {
+    knockoutRounds = context.knockoutRounds;
   }
 
-  const getLastRound = (team: Required<TeamSummary>) =>
-    team.roundsCompeted.reduce(
-      (latest, curr) =>
-        rounds.indexOf(curr) > rounds.indexOf(latest) ? curr : latest,
-      undefined
-    );
+  const allRounds = prelimRounds.concat(knockoutRounds);
+  const getLatestRound = (teamResult: TeamSummary) => {
+    // Iterate over the rounds in reverse order to find the latest round
+    for (let i = allRounds.length - 1; i >= 0; i--) {
+      if (teamResult.roundsCompeted.includes(allRounds[i])) {
+        return allRounds[i];
+      }
+    }
+  };
 
-  const teamResults = Object.values(
-    getAllTeamResults(rounds, 2, context.byeStrategy, context)
+  const fullResults = Object.values(
+    getAllTeamResults(prelimRounds, 2, context.byeStrategy, context)
   );
+  const competedInKnockout = new Set();
+  const knockoutResults = getAllTeamResults(
+    knockoutRounds,
+    2,
+    ByeStrategy.NO_ADJUSTMENT,
+    context
+  );
+  // add all the knockout results to the prelim results for the respective teams
+  Object.values(fullResults).forEach((teamResult) => {
+    const knockoutResult = knockoutResults[teamResult.teamNumber];
+    if (knockoutResult) {
+      // We intentionally don't add the combined strength here, as CS isn't
+      //  super well-defined once you start mixing prelim and knockout rounds
+      teamResult.roundsCompeted.push(...knockoutResult.roundsCompeted);
+      teamResult.pastOpponents.push(...knockoutResult.pastOpponents);
+      teamResult.ballotsWon += knockoutResult.ballotsWon;
+      teamResult.pointDifferential += knockoutResult.pointDifferential;
+      teamResult.timesPlaintiff += knockoutResult.timesPlaintiff;
+      teamResult.timesDefense += knockoutResult.timesDefense;
+      competedInKnockout.add(teamResult.teamNumber);
+    }
+  });
+
   // Sort the team results by the latest round they competed in, and then
   // by ballots won
-  teamResults.sort((a, b) => {
-    const aLastRound = rounds.indexOf(getLastRound(a));
-    const bLastRound = rounds.indexOf(getLastRound(b));
-    if (aLastRound !== bLastRound) {
-      return bLastRound - aLastRound;
+  fullResults.sort((a, b) => {
+    // First, if the team competed in knockout, they should be at the top
+    const aInKnockout = competedInKnockout.has(a.teamNumber);
+    const bInKnockout = competedInKnockout.has(b.teamNumber);
+    if (aInKnockout !== bInKnockout) {
+      return aInKnockout ? -1 : 1;
+    } else if (!aInKnockout && !bInKnockout) {
+      // if neither team is in knockout, use the classic sorting
+      return compareTeamSummaries(a, b);
+    } else {
+      // If both teams are in knockout, sort by the latest round they competed in,
+      //  and then the classic sorting
+      const aLatestRound = getLatestRound(a);
+      const bLatestRound = getLatestRound(b);
+
+      if (aLatestRound !== bLatestRound) {
+        return allRounds.indexOf(aLatestRound) > allRounds.indexOf(bLatestRound)
+          ? -1
+          : 1;
+      } else {
+        // If they competed in the same round, check if they competed against each other
+        //  If they did, tiebreak on H2H result. If not, use classic sorting
+        const latestRoundResults = getAllTeamResults(
+          [aLatestRound],
+          2,
+          undefined,
+          context
+        );
+        if (
+          latestRoundResults[a.teamNumber].pastOpponents.includes(b.teamNumber)
+        ) {
+          // a and b did compete, use the winner as the better team
+          return compareTeamSummaries(
+            latestRoundResults[a.teamNumber],
+            latestRoundResults[b.teamNumber]
+          );
+        } else {
+          // They did not compete against each other in the latest round
+          return compareTeamSummaries(a, b);
+        }
+      }
     }
-    if (a.ballotsWon !== b.ballotsWon) {
-      return b.ballotsWon - a.ballotsWon;
-    }
-    return b.combinedStrength - a.combinedStrength;
   });
 
   const teamInfo = context.teamInfo;
-  const output = teamResults.reduce((outputCells, teamResult, i) => {
+  const output = fullResults.reduce((outputCells, teamResult, i) => {
     const team = teamInfo[teamResult.teamNumber];
     outputCells.push([
       i + 1,
@@ -90,7 +156,9 @@ function PrintTeamSummary(roundRange: any) {
       team.competitorNames.length >= 2 ? team.competitorNames[0] : "",
       team.competitorNames.length >= 2 ? team.competitorNames[1] : "",
       team.emails,
-      getLastRound(teamResult),
+      competedInKnockout.has(teamResult.teamNumber)
+        ? getLatestRound(teamResult)
+        : "Prelim",
       teamResult.ballotsWon,
       teamResult.combinedStrength,
     ]);
@@ -98,6 +166,16 @@ function PrintTeamSummary(roundRange: any) {
   }, [] as any[][]);
   if (output.length === 0) {
     output.push(["No results found."]);
+  }
+  if (Array.from(allRounds).sort().join(", ") !== context.roundNames.sort().join(", ")) {
+    output.push(
+      ["WARNING: Not all rounds with results are being displayed."],
+      [
+        "Make sure all rounds are specified on either the Prelim Results or Knockout Results sheets.",
+      ],
+      ["Included rounds: " + allRounds.join(", ")],
+      ["All rounds found: " + context.roundNames.join(", ")]
+    );
   }
   return output;
 }

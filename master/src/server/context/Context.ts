@@ -16,13 +16,13 @@ import {
 } from "../../Types";
 import { memoize } from "./CacheHelper";
 import {
-  compactRange,
+  compactRange, flattenRange,
   getByeStrategy,
   getIdFromUrl,
   getOrCreateChildFolder,
   GoogleFile,
   sheetForFile,
-  spreadsheetTruthy,
+  spreadsheetTruthy
 } from "./Helpers";
 import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
@@ -39,6 +39,8 @@ interface IContext {
   individualBallotResults: IndividualBallotResult[];
   judgeNames: string[];
   roundNames: string[];
+  prelimRounds: string[];
+  knockoutRounds: string[];
   roundsCompleted: number;
   firstPartyName: string;
   secondPartyName: string;
@@ -159,6 +161,20 @@ class SSContext implements IContext {
     return roundNames.filter((roundName, index) => {
       return roundNames.indexOf(roundName) === index;
     });
+  }
+  
+  @memoize
+  get prelimRounds(): string[] {
+    return flattenRange(
+      compactRange(this.getRangeValues(MasterRange.PrelimRounds) ?? [])
+    )
+  }
+  
+  @memoize
+  get knockoutRounds(): string[] {
+    return flattenRange(
+      compactRange(this.getRangeValues(MasterRange.KnockoutRounds) ?? [])
+    )
   }
 
   @memoize

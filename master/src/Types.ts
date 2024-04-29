@@ -47,6 +47,8 @@ enum MasterRange {
   SwissRandomizeCourtrooms = "SwissRandomizeCourtroomsRange",
   SwissRandomSeed = "SwissRandomSeedRange",
   ByeStrategy = "ByeStrategyRange",
+  PrelimRounds = "TeamIncludeRoundsRange",
+  KnockoutRounds = "KnockoutIncludeRoundsRange",
 }
 
 enum CaptainsFormRange {
