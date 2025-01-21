@@ -76,7 +76,11 @@ function SimpleSetup(tabFolderLink: string) {
     masterSpreadsheet.getSheetByName("Swiss Pairings").hideSheet();
     masterSpreadsheet.getSheetByName("Swiss Pairing Process").hideSheet();
   }
-
+  
+  setAndBackfillRange(
+    masterSpreadsheet.getRangeByName(MasterRange.CourtroomInfo),
+    context.courtrooms.map((c) => [c])
+  );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.KnockoutIncludeRounds),
     context.elimRounds.map((r) => [r])

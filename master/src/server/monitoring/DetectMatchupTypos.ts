@@ -69,6 +69,28 @@ const getTeamFacingItself = (context: IContext) => {
   return removeDuplicates(teamFacingItself);
 };
 
+const getJudgeMultipleBallots = (context: IContext) => {
+  const judgesByRound = {};
+  const judgeMultipleBallots = [];
+  context.teamBallotResults.forEach((teamBallotResult) => {
+    const { round, judgeName } = teamBallotResult;
+    if (!(round in judgesByRound)) {
+      judgesByRound[round] = {};
+    }
+    if (!(judgeName in judgesByRound[round])) {
+      judgesByRound[round][judgeName] = teamBallotResult;
+    } else {
+      const otherBallot = judgesByRound[round][judgeName];
+      if (getMatchupKey(teamBallotResult) !== getMatchupKey(otherBallot)) {
+        judgeMultipleBallots.push(
+          `Judge ${judgeName} has multiple ballots in round ${round}: ${getMatchupKey(teamBallotResult)} (Courtroom ${teamBallotResult.courtroom}) and ${getMatchupKey(otherBallot)} (Courtroom ${otherBallot.courtroom})`
+        );
+      }
+    }
+  });
+  return removeDuplicates(judgeMultipleBallots);
+};
+
 function DetectMatchupTypos() {
   const context = new SSContext();
   const output = [
@@ -80,6 +102,9 @@ function DetectMatchupTypos() {
     "",
     "Teams facing themselves:",
     ...getTeamFacingItself(context),
+    "",
+    "Judges with multiple ballots in the same round:",
+    ...getJudgeMultipleBallots(context),
   ];
   return output;
 }

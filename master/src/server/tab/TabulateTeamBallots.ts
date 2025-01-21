@@ -25,9 +25,12 @@ function getRoundResult(
   // Sum up the ballots won and point differential, adjusting for the number of ballots per match
   return ballotResults.reduce(
     (acc, ballotResult) => {
-      acc.ballotsWon += ballotResult.won * normFactor;
-      acc.pointDifferential += ballotResult.pd * normFactor;
-      return acc;
+      return {
+        ballotsWon: acc.ballotsWon + ballotResult.won * normFactor,
+        pointDifferential: acc.pointDifferential + ballotResult.pd * normFactor,
+        side,
+        opponentTeamNumber,
+      };
     },
     {
       ballotsWon: 0,

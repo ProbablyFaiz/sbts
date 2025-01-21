@@ -152,7 +152,7 @@ const setUpGoogleFormBallot = (
       sheet.getMaxColumns()
     );
     // Add alternating-color formatting
-    range.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
+    // range.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
     sheet.setFrozenRows(1);
     // Set a constant row height so it doesn't expand when multi-line responses are added
     sheet.setRowHeightsForced(1, sheet.getLastRow(), 25);
