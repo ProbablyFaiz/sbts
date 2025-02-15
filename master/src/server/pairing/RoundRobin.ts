@@ -295,9 +295,13 @@ const isMatchupConflict =
 export { 
     RoundRobinPairTeamsWithMetadata, 
     RoundRobinPairTeams,
+    computeAllPairings,
     getInitialRoundState,
     getTeamGroupings,
+    getRoundPairer,
     getInitialPairings,
+    getNextPairings,
+    getSwappedPairings,
     updateRoundState,
     isMatchupConflict,
     RoundState,
