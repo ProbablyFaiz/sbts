@@ -3,6 +3,7 @@ import {
   SpreadsheetOutput,
   RoundRobinConfig,
   TeamInfo,
+  CourtroomInfo,
 } from "../../Types";
 import { SSContext } from "../context/Context";
 import { SeededRandom } from "../context/Helpers";
@@ -34,6 +35,40 @@ interface RoundState {
   teamStates: Map<string, TeamRoundState>;
 }
 
+function RoundRobinPairTeamsWithCourtrooms(): SpreadsheetOutput {
+  const context = new SSContext();
+  const pairingsByRound = computeAllPairings(
+    context.roundRobinConfig,
+    context.teamInfo
+  );
+  const output: Cell[][] = [];
+  pairingsByRound.forEach((pairings, round) => {
+    output.push(
+      ...formatPairings(
+        round,
+        pairings,
+        getCourtroomNames(context.courtroomRecords, pairings)
+      )
+    );
+    output.push(["", "", ""]);
+  });
+  return output;
+}
+
+const getCourtroomNames = (
+  courtroomRecords: CourtroomInfo[],
+  pairings: Pairing[]
+): string[] => {
+  const pairingCount = pairings.length;
+  const courtroomNames = courtroomRecords.map((rec) => rec.name);
+  if (courtroomNames.length < pairingCount) {
+    for (let i = courtroomNames.length; i < pairingCount; i++) {
+      courtroomNames.push(`Courtroom ${courtroomNames.length + 1}`);
+    }
+  }
+  return courtroomNames;
+};
+
 function RoundRobinPairTeamsWithMetadata(): SpreadsheetOutput {
   const pairingMetadata: PairingMetadata = [];
   RoundRobinPairTeams(pairingMetadata);
@@ -59,15 +94,27 @@ function RoundRobinPairTeams(
   return output;
 }
 
-const formatPairings = (round: string, pairings: Pairing[]): Cell[][] => {
-  const output = [
-    [`${round}:`, ""],
-    ["Petitioner", "Respondent"],
-  ];
-  pairings.forEach((pairing) => {
-    output.push([pairing[0], pairing[1]]);
+const formatPairings = (
+  round: string,
+  pairings: Pairing[],
+  courtrooms?: string[]
+): Cell[][] => {
+  const output: Cell[][] = [];
+  if (courtrooms === undefined) {
+    output.push([`${round}:`, ""], ["Petitioner", "Respondent"]);
+  } else {
+    output.push(
+      [`${round}:`, "", ""],
+      ["Courtroom", "Petitioner", "Respondent"]
+    );
+  }
+  pairings.forEach((pairing, i) => {
+    if (courtrooms === undefined) {
+      output.push([pairing[0], pairing[1]]);
+    } else {
+      output.push([courtrooms[i], pairing[0], pairing[1]]);
+    }
   });
-  output.push(["", ""]);
   return output;
 };
 
@@ -108,6 +155,22 @@ const getInitialRoundState = (
       pastOpponents: [],
     });
   });
+  if (teamStates.size % 2 !== 0) {
+    teamStates.set(BYE_TEAM_NUM, {
+      teamInfo: {
+        teamNumber: BYE_TEAM_NUM,
+        schoolName: "BYE",
+        teamName: "BYE",
+        competitorNames: [],
+        byeBust: true,
+        ballotFolderLink: "",
+        emails: "",
+      },
+      timesPlaintiff: 0,
+      timesDefense: 0,
+      pastOpponents: [],
+    });
+  }
   return { teamStates };
 };
 
@@ -411,6 +474,7 @@ const isMatchupConflict =
   };
 
 export {
+  RoundRobinPairTeamsWithCourtrooms,
   RoundRobinPairTeamsWithMetadata,
   RoundRobinPairTeams,
   computeAllPairings,

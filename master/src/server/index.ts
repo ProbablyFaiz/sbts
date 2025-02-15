@@ -24,7 +24,11 @@ import {
   PairTeamsWithCourtrooms,
   PairTeamsWithMetadata,
 } from "./pairing/Swiss";
-import { RoundRobinPairTeams,RoundRobinPairTeamsWithMetadata } from "./pairing/RoundRobin";
+import {
+  RoundRobinPairTeams,
+  RoundRobinPairTeamsWithMetadata,
+  RoundRobinPairTeamsWithCourtrooms,
+} from "./pairing/RoundRobin";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -82,6 +86,7 @@ export {
   PairTeamsWithMetadata,
   RoundRobinPairTeams,
   RoundRobinPairTeamsWithMetadata,
+  RoundRobinPairTeamsWithCourtrooms,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -150,6 +155,7 @@ global.PairTeamsWithCourtrooms = PairTeamsWithCourtrooms;
 
 global.RoundRobinPairTeams = RoundRobinPairTeams;
 global.RoundRobinPairTeamsWithMetadata = RoundRobinPairTeamsWithMetadata;
+global.RoundRobinPairTeamsWithCourtrooms = RoundRobinPairTeamsWithCourtrooms;
 
 global.PairTeamsWithMetadata = PairTeamsWithMetadata;
 global.getCourtrooms = getCourtrooms;
