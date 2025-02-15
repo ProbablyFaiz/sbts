@@ -76,7 +76,13 @@ function SimpleSetup(tabFolderLink: string) {
     masterSpreadsheet.getSheetByName("Swiss Pairings").hideSheet();
     masterSpreadsheet.getSheetByName("Swiss Pairing Process").hideSheet();
   }
-  
+
+  if (context.showRoundRobinPairings) {
+    masterSpreadsheet.getSheetByName("Round-Robin Pairings").showSheet();
+  } else {
+    masterSpreadsheet.getSheetByName("Round-Robin Pairings").hideSheet();
+  }
+
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.CourtroomInfo),
     context.courtrooms.map((c) => [c])
@@ -91,6 +97,10 @@ function SimpleSetup(tabFolderLink: string) {
   );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.IndividualIncludeRounds),
+    context.prelimRounds.map((r) => [r])
+  );
+  setAndBackfillRange(
+    masterSpreadsheet.getRangeByName(MasterRange.RoundRobinPrelimRounds),
     context.prelimRounds.map((r) => [r])
   );
 }

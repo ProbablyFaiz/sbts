@@ -71,9 +71,7 @@ function OnSetupMasterSpreadsheetClick() {
       );
       tabSetUp?.setValue(true);
       const htmlOutput = HtmlService.createHtmlOutput(
-        "<p>Master spreadsheet was successfully configured for use. " +
-          "Remember to set up the orchestrator as well (if this system isn't " +
-          "using exclusively Google Form ballots).</p>"
+        "<p>Master spreadsheet was successfully configured for use.</p>"
       )
         .setWidth(300)
         .setHeight(150);

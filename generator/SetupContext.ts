@@ -273,6 +273,7 @@ enum SimpleGeneratorRange {
   TournamentName = "TournamentName",
   TournamentContactEmail = "TournamentContactEmail",
   ShowSwissPairings = "ShowSwissPairings",
+  ShowRoundRobinPairings = "ShowRoundRobinPairings",
   ShowKnockoutBracket = "ShowKnockoutBracket",
   ByeStrategy = "ByeStrategy",
   PrelimRounds = "PrelimRounds",
@@ -328,6 +329,11 @@ class SimpleSetupContext {
   @memoize
   get showSwissPairings(): boolean {
     return this.getRangeValue(SimpleGeneratorRange.ShowSwissPairings) == "Yes";
+  }
+
+  @memoize
+  get showRoundRobinPairings(): boolean {
+    return this.getRangeValue(SimpleGeneratorRange.ShowRoundRobinPairings) == "Yes";
   }
 
   @memoize

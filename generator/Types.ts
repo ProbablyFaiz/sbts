@@ -32,6 +32,7 @@ enum MasterRange {
   TeamIncludeRounds = "TeamIncludeRoundsRange",
   IndividualIncludeRounds = "IndividualIncludeRoundsRange",
   KnockoutIncludeRounds = "KnockoutIncludeRoundsRange",
+  RoundRobinPrelimRounds = "RoundRobinPrelimRoundsRange",
   ByeStrategy = "ByeStrategyRange",
 }
 
