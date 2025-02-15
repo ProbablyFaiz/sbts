@@ -91,9 +91,9 @@ const getTeamGroupings = (
     const needsDefense: Set<string> = new Set();
     const flexible: Set<string> = new Set();
 
-    Object.entries(teamStates).forEach(([teamNumber, teamState]) => {
+    teamStates.forEach((teamState, teamNumber) => {
         if (teamState.timesPlaintiff === teamState.timesDefense) {
-            flexible.add(teamNumber);
+            flexible.add(teamState.teamInfo.teamNumber);
         } else if (teamState.timesPlaintiff > teamState.timesDefense) {
             needsDefense.add(teamNumber);
         } else {
