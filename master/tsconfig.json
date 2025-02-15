@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["gas-types-detailed", "node"],
+    "types": ["gas-types-detailed", "node", "jest"],
     "jsx": "react",
     "esModuleInterop": true,
     "lib": ["es2020", "dom"],

@@ -292,4 +292,15 @@ const isMatchupConflict =
             return ConflictType.None;
         };
 
-export { RoundRobinPairTeamsWithMetadata, RoundRobinPairTeams };
+export { 
+    RoundRobinPairTeamsWithMetadata, 
+    RoundRobinPairTeams,
+    getInitialRoundState,
+    getTeamGroupings,
+    getInitialPairings,
+    updateRoundState,
+    isMatchupConflict,
+    RoundState,
+    TeamRoundState,
+    TeamGrouping
+};
