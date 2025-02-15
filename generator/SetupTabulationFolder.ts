@@ -9,7 +9,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
   // }
   const tabFolder = setupContext.tabFolder;
 
-  let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_NAME);
+  let masterSheetFile = getFileByName(tabFolder, MASTER_SPREADSHEET_BASE_NAME);
   let createdMasterSheet = false;
   if (masterSheetFile) {
     SheetLogger.log(
@@ -18,7 +18,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
   } else {
     createdMasterSheet = true;
     masterSheetFile = setupContext.masterSheetTemplate.makeCopy(
-      MASTER_SPREADSHEET_NAME,
+      MASTER_SPREADSHEET_BASE_NAME,
       tabFolder
     );
   }

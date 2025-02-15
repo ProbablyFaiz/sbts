@@ -9,8 +9,9 @@ function SimpleSetup(tabFolderLink: string) {
     );
   }
 
+  const masterSheetName = `${MASTER_SPREADSHEET_BASE_NAME} - ${context.tournamentName}`;
   const masterSheetFile = context.masterSpreadsheetTemplate.makeCopy(
-    MASTER_SPREADSHEET_NAME,
+    masterSheetName,
     context.tabFolder
   );
   const rounds = context.prelimRounds.concat(context.elimRounds);

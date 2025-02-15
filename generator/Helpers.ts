@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Faiz Surani. All rights reserved.
 
-const MASTER_SPREADSHEET_NAME = "Tab Master Spreadsheet";
+const MASTER_SPREADSHEET_BASE_NAME = "Tab Master Spreadsheet";
 const ORCHESTRATOR_SPREADSHEET_NAME = "Tab Orchestrator";
 const AUTOCOMPLETE_SPREADSHEET_NAME = "Tab Autocomplete Engine";
 const EXPORT_FOLDER_NAME = "Team Ballots";
