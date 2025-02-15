@@ -83,7 +83,11 @@ const getJudgeMultipleBallots = (context: IContext) => {
       const otherBallot = judgesByRound[round][judgeName];
       if (getMatchupKey(teamBallotResult) !== getMatchupKey(otherBallot)) {
         judgeMultipleBallots.push(
-          `Judge ${judgeName} has multiple ballots in round ${round}: ${getMatchupKey(teamBallotResult)} (Courtroom ${teamBallotResult.courtroom}) and ${getMatchupKey(otherBallot)} (Courtroom ${otherBallot.courtroom})`
+          `Judge ${judgeName} has multiple ballots in round ${round}: ${getMatchupKey(
+            teamBallotResult
+          )} (Courtroom ${teamBallotResult.courtroom}) and ${getMatchupKey(
+            otherBallot
+          )} (Courtroom ${otherBallot.courtroom})`
         );
       }
     }

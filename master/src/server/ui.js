@@ -1,7 +1,10 @@
 export const onOpen = () => {
-  const tabSetUp = SpreadsheetApp.getActiveSpreadsheet()
-    .getRangeByName("TabSystemSetUpRange");
-  const menuName = tabSetUp?.getValue() ? "Tab System" : "Tab System (Setup Needed!)";
+  const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
+    "TabSystemSetUpRange"
+  );
+  const menuName = tabSetUp?.getValue()
+    ? "Tab System"
+    : "Tab System (Setup Needed!)";
   const menu = SpreadsheetApp.getUi()
     .createMenu(menuName)
     .addItem("Ballot Entry", "openBallotEntry")

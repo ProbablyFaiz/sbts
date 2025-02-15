@@ -113,9 +113,16 @@ const getIndividualResultsOutput = (
 
 function TabulateIndividualBallots(roundRange: any) {
   const rounds = flattenRange(roundRange);
-  const individualResults = getAllIndividualResults(rounds, new SSContext());
+  const context = new SSContext();
+  const individualResults = getAllIndividualResults(rounds, context);
   const output = getIndividualResultsOutput(individualResults);
-  return output.length > 0 ? output : [["No results to display"]];
+  if (output.length === 0) {
+    if (!context.tabSystemSetup) {
+      return [["The tab system is not set up! Until you run the setup (see the 'Tab System' menu), there will be no results to display."]];
+    }
+    return [["No results to display"]];
+  }
+  return output;
 }
 
 export { TabulateIndividualBallots };

@@ -46,9 +46,14 @@ enum MasterRange {
   SwissAllowRepeatMatchup = "SwissAllowRepeatMatchupRange",
   SwissRandomizeCourtrooms = "SwissRandomizeCourtroomsRange",
   SwissRandomSeed = "SwissRandomSeedRange",
+  RoundRobinPrelimRounds = "RoundRobinPrelimRoundsRange",
+  RoundRobinAllowSameSchool = "RoundRobinAllowSameSchoolRange",
+  RoundRobinRandomizeCourtrooms = "RoundRobinRandomizeCourtroomsRange",
+  RoundRobinRandomSeed = "RoundRobinRandomSeedRange",
   ByeStrategy = "ByeStrategyRange",
   PrelimRounds = "TeamIncludeRoundsRange",
   KnockoutRounds = "KnockoutIncludeRoundsRange",
+  TabSystemSetup = "TabSystemSetUpRange",
 }
 
 enum CaptainsFormRange {
@@ -198,7 +203,6 @@ interface NonSheetBallotResult {
   ballotPdfUrl?: string;
 }
 
-
 interface NonSheetBallotReadout {
   timestamp: Date;
   judgeName: string;
@@ -227,6 +231,12 @@ interface SwissConfig {
   allowSameSchool: boolean;
   allowRepeatMatchup: boolean;
   randomizeCourtrooms: boolean;
+  randomSeed: string;
+}
+
+interface RoundRobinConfig {
+  prelimRounds: string[];
+  allowSameSchool: boolean;
   randomSeed: string;
 }
 
@@ -262,4 +272,5 @@ export {
   NonSheetBallotReadout,
   SwissConfig,
   ByeStrategy,
+  RoundRobinConfig,
 };

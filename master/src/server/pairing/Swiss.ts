@@ -11,31 +11,15 @@ import {
   getAllTeamResults,
 } from "../tab/TabulateTeamBallots";
 import { SeededRandom } from "../context/Helpers";
-
-type Pairing = [team1: string, team2: string];
-type Swap = [team1: string, team2: string];
-
-type PairingMetadata = SwapMetadata[];
-
-type SwapMetadata =
-  | {
-      pairingSnapshot: Pairing[];
-      swapMade: Swap;
-      conflictResolved: Pairing;
-      swapReason: ConflictType;
-    }
-  | {
-      pairingSnapshot: Pairing[];
-      swapMade: undefined;
-      conflictResolved: undefined;
-      swapReason: undefined;
-    };
-
-enum ConflictType {
-  None = 0,
-  SameSchool = "same school",
-  AlreadyFaced = "already faced",
-}
+import {
+  PairingMetadata,
+  Pairing,
+  Swap,
+  ConflictType,
+  formatSwapMetadata,
+  deepCopyPairings,
+  swapKey,
+} from "./Helpers";
 
 const BYE_TEAM_NUM = "BYE";
 
@@ -53,7 +37,7 @@ function PairTeamsWithCourtrooms(): SpreadsheetOutput {
       return rng.nextFloat() - 0.5;
     });
   }
-    
+
   // If it's round 3, flip a coin to determine side
   if (context.roundsCompleted % 2 === 0 && rng.nextFloat() < 0.5) {
     pairings.forEach((pair) => pair.reverse());
@@ -436,37 +420,6 @@ const teamsConflict =
       return ConflictType.AlreadyFaced;
     return ConflictType.None;
   };
-
-const swapKey = (swap: Swap): string => {
-  return JSON.stringify(Array.from(swap).sort()); // We copy the swap array to avoid modifying it with the sort.
-};
-
-const deepCopyPairings = (pairings: Pairing[]): Pairing[] => {
-  return pairings.map((pairing) => [...pairing]);
-};
-
-const formatSwapMetadata = (swapMetadata: SwapMetadata): [string, string][] => {
-  const { swapMade, conflictResolved, swapReason, pairingSnapshot } =
-    swapMetadata;
-  const headerText =
-    conflictResolved == undefined
-      ? "Initial pairings, before conflict resolution:"
-      : `Swapping teams ${swapMade![0]} and ${
-          swapMade![1]
-        } to resolve impermissible matchup ${conflictResolved[0]} v. ${
-          conflictResolved[1]
-        } (${swapReason}):`;
-  return [
-    [headerText, ""],
-    ...pairingSnapshot.map((pairing) => {
-      return [
-        swapMade?.includes(pairing[0]) ? `>> ${pairing[0]}` : pairing[0],
-        swapMade?.includes(pairing[1]) ? `>> ${pairing[1]}` : pairing[1],
-      ] as Pairing;
-    }),
-    ["", ""],
-  ];
-};
 
 const createTeamResults = (
   teamInfo: Record<string, TeamInfo>

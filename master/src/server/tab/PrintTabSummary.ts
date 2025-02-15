@@ -167,7 +167,10 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
   if (output.length === 0) {
     output.push(["No results found."]);
   }
-  if (Array.from(allRounds).sort().join(", ") !== context.roundNames.sort().join(", ")) {
+  if (
+    Array.from(allRounds).sort().join(", ") !==
+    context.roundNames.sort().join(", ")
+  ) {
     output.push(
       ["WARNING: Not all rounds with results are being displayed."],
       [

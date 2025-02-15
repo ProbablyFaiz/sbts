@@ -10,19 +10,21 @@ import {
   NonSheetBallotReadout,
   NonSheetBallotResult,
   RequiredBallotState,
+  RoundRobinConfig,
   SwissConfig,
   TeamBallotResult,
   TeamInfo,
 } from "../../Types";
 import { memoize } from "./CacheHelper";
 import {
-  compactRange, flattenRange,
+  compactRange,
+  flattenRange,
   getByeStrategy,
   getIdFromUrl,
   getOrCreateChildFolder,
   GoogleFile,
   sheetForFile,
-  spreadsheetTruthy
+  spreadsheetTruthy,
 } from "./Helpers";
 import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
@@ -46,7 +48,9 @@ interface IContext {
   secondPartyName: string;
   tournamentName: string;
   swissConfig: SwissConfig;
+  roundRobinConfig: RoundRobinConfig;
   byeStrategy: ByeStrategy;
+  tabSystemSetup: boolean;
   addEnteredBallot: (ballotState: RequiredBallotState) => void;
 }
 
@@ -162,19 +166,19 @@ class SSContext implements IContext {
       return roundNames.indexOf(roundName) === index;
     });
   }
-  
+
   @memoize
   get prelimRounds(): string[] {
     return flattenRange(
       compactRange(this.getRangeValues(MasterRange.PrelimRounds) ?? [])
-    )
+    );
   }
-  
+
   @memoize
   get knockoutRounds(): string[] {
     return flattenRange(
       compactRange(this.getRangeValues(MasterRange.KnockoutRounds) ?? [])
-    )
+    );
   }
 
   @memoize
@@ -389,6 +393,30 @@ class SSContext implements IContext {
     };
   }
 
+  @memoize
+  get roundRobinConfig(): RoundRobinConfig {
+    const prelimRounds = compactRange(
+      this.getRangeValues(MasterRange.RoundRobinPrelimRounds) ?? []
+    ).map((row) => row[0]);
+    const allowSameSchool = spreadsheetTruthy(
+      this.getRangeValue(MasterRange.RoundRobinAllowSameSchool)
+    );
+    const randomSeed =
+      this.getRangeValue(MasterRange.RoundRobinRandomSeed) || "0";
+    return {
+      prelimRounds,
+      allowSameSchool,
+      randomSeed,
+    };
+  }
+
+  @memoize
+  get tabSystemSetup(): boolean {
+    return spreadsheetTruthy(
+      this.getRangeValue(MasterRange.TabSystemSetup)
+    );
+  }
+
   private formRowToReadout(
     response: any[],
     sourceSheet: string
@@ -485,10 +513,7 @@ class SSContext implements IContext {
     round: string,
     courtroom: string
   ): GoogleAppsScript.Drive.Folder {
-    const roundFolder = getOrCreateChildFolder(
-      this.tabFolder,
-      round
-    );
+    const roundFolder = getOrCreateChildFolder(this.tabFolder, round);
     const trialFolder = getOrCreateChildFolder(
       roundFolder,
       `${round} - ${courtroom}`

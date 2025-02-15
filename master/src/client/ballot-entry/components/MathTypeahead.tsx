@@ -11,7 +11,12 @@ interface MathTypeaheadProps {
   [key: string]: any;
 }
 
-const MathTypeahead = ({ query, setQuery, isInvalid, ...props }: MathTypeaheadProps) => {
+const MathTypeahead = ({
+  query,
+  setQuery,
+  isInvalid,
+  ...props
+}: MathTypeaheadProps) => {
   // Try to evaluate the query as a math expression
   let mathResult = null;
   try {

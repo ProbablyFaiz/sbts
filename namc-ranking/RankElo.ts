@@ -215,7 +215,7 @@ function processTournament(
       // Don't adjust elos for intra-school matchups or matchups with a dummy/hybrid team.
       if (
         school1 === school2 ||
-        [school1, school2].every((s) => EXCLUDED_PROGRAM_NAMES.includes(s))
+        [school1, school2].some((s) => EXCLUDED_PROGRAM_NAMES.includes(s))
       ) {
         return;
       }

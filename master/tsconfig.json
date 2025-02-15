@@ -6,6 +6,6 @@
     "lib": ["es2020", "dom"],
     "target": "ES6",
     "experimentalDecorators": true,
-    "moduleResolution": "node16"
+    "moduleResolution": "node"
   }
 }

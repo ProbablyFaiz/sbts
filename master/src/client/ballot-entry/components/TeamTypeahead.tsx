@@ -31,7 +31,8 @@ const TeamTypeahead = ({
         onChange={(teams) => {
           if (teams.length > 0) {
             setQuery((teams[0] as TeamInfo).teamNumber);
-        }}}
+          }
+        }}
         renderMenuItemChildren={(team) => (
           <>
             <Highlighter search={query}>

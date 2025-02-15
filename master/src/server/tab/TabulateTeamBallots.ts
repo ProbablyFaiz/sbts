@@ -262,7 +262,13 @@ function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
     context
   );
   const output = getTeamResultsOutput(teamResults);
-  return output.length > 0 ? output : [["No results to display"]];
+  if (output.length === 0) {
+    if (!context.tabSystemSetup) {
+      return [["The tab system is not set up! Until you run the setup (see the 'Tab System' menu), there will be no results to display."]];
+    }
+    return [["No results to display"]];
+  }
+  return output;
 }
 
 export { TabulateTeamBallots, getAllTeamResults, compareTeamSummaries };

@@ -74,10 +74,7 @@ const exportSheetBallots = (context: SSContext) => {
     for (let team of [plaintiffTeam, defenseTeam]) {
       if (team === "") continue;
       const teamFolder = context.teamBallotFolder(team)!;
-      const teamRoundFolder = getOrCreateChildFolder(
-        teamFolder,
-        round
-      );
+      const teamRoundFolder = getOrCreateChildFolder(teamFolder, round);
       let pdfBallot:
         | GoogleAppsScript.Drive.File
         | GoogleAppsScript.Base.Blob
@@ -122,10 +119,7 @@ const exportNonSheetBallots = (context: SSContext) => {
         );
         continue;
       }
-      const teamRoundFolder = getOrCreateChildFolder(
-        teamFolder,
-        readout.round
-      );
+      const teamRoundFolder = getOrCreateChildFolder(teamFolder, readout.round);
       const pdfName = ballotFile.getName();
       const pdfBallot = getFileByName(teamRoundFolder, pdfName);
       if (!pdfBallot) {
