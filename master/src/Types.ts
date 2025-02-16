@@ -27,8 +27,6 @@ enum BallotRange {
 }
 
 enum MasterRange {
-  TeamBallots = "TeamBallotsRange",
-  IndividualBallots = "IndividualBallotsRange",
   TeamInfo = "TeamInfoRange",
   OrchestratorLink = "OrchestratorLinkRange",
   ParentFolderLink = "ParentFolderLinkRange",
@@ -238,6 +236,22 @@ enum ByeStrategy {
 }
 
 
+enum CompetitorRole {
+  P_ISSUE_1 = "P_ISSUE_1",
+  P_ISSUE_2 = "P_ISSUE_2",
+  R_ISSUE_1 = "R_ISSUE_1",
+  R_ISSUE_2 = "R_ISSUE_2",
+}
+
+interface ScoreGroup {
+  role: CompetitorRole;
+  competitorName: string;
+  writtenFeedback: string;
+  contentOfArgument: number;
+  extempAbility: number;
+  forensicSkill: number;
+}
+
 export {
   BallotRange,
   MasterRange,
@@ -264,4 +278,6 @@ export {
   SwissConfig,
   ByeStrategy,
   RoundRobinConfig,
+  CompetitorRole,
+  ScoreGroup,
 };

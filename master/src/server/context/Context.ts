@@ -2,6 +2,7 @@ import {
   BallotSpreadsheet,
   ByeStrategy,
   Cell,
+  CompetitorRole,
   CourtroomInfo,
   IndividualBallotResult,
   MasterRange,
@@ -10,6 +11,7 @@ import {
   NonSheetBallotResult,
   RequiredBallotState,
   RoundRobinConfig,
+  ScoreGroup,
   SwissConfig,
   TeamBallotResult,
   TeamInfo,
@@ -55,6 +57,8 @@ interface IContext {
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
 
 const ENTERED_BALLOTS_SHEET = "Entered Ballots";
+
+
 
 
 class SSContext implements IContext {
@@ -114,9 +118,36 @@ class SSContext implements IContext {
 
   @memoize
   get teamBallotResults(): TeamBallotResult[] {
-    return compactRange(this.getRangeValues(MasterRange.TeamBallots) ?? []).map(
-      this.teamResultRowToResult
-    );
+    const results: TeamBallotResult[] = [];
+    for (const readout of this.allReadouts) {
+      const petitionerPd = readout.pIssue1Scores.reduce((a, b) => a + b, 0) - readout.rIssue1Scores.reduce((a, b) => a + b, 0);
+      const petitionerWon = petitionerPd === 0 ? 0.5 : petitionerPd > 0 ? 1 : 0;
+      const respondentPd = -petitionerPd;
+      const respondentWon = 1 - petitionerWon;
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.pTeam,
+        opponentTeamNumber: readout.rTeam,
+        side: this.firstPartyName,
+        pd: petitionerPd,
+        won: petitionerWon,
+        courtroom: readout.courtroom,
+        ballotLink: readout.ballotPdfUrl ?? "",
+      });
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.rTeam,
+        opponentTeamNumber: readout.pTeam,
+        side: this.secondPartyName,
+        pd: respondentPd,
+        won: respondentWon,
+        courtroom: readout.courtroom,
+        ballotLink: readout.ballotPdfUrl ?? "",
+      });
+    }
+    return results;
   }
 
   private teamResultRowToResult(row: string[]): TeamBallotResult {
@@ -135,19 +166,46 @@ class SSContext implements IContext {
 
   @memoize
   get individualBallotResults(): IndividualBallotResult[] {
-    return compactRange(
-      this.getRangeValues(MasterRange.IndividualBallots) ?? []
-    ).map((row) => {
-      return {
-        round: row[0],
-        judgeName: row[1].trim(),
-        teamNumber: row[2],
-        competitorName: row[3].trim(),
-        side: row[4],
-        score: parseFloat(row[6]),
-        courtroom: row[7],
-      };
-    });
+    const results: IndividualBallotResult[] = [];
+    for (const readout of this.allReadouts) {
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.pTeam,
+        competitorName: readout.pIssue1Name,
+        side: this.firstPartyName,
+        score: readout.pIssue1Scores.reduce((a, b) => a + b, 0),
+        courtroom: readout.courtroom,
+      });
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.pTeam,
+        competitorName: readout.pIssue2Name,
+        side: this.firstPartyName,
+        score: readout.pIssue2Scores.reduce((a, b) => a + b, 0),
+        courtroom: readout.courtroom,
+      });
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.rTeam,
+        competitorName: readout.rIssue1Name,
+        side: this.secondPartyName,
+        score: readout.rIssue1Scores.reduce((a, b) => a + b, 0),
+        courtroom: readout.courtroom,
+      });
+      results.push({
+        round: readout.round,
+        judgeName: readout.judgeName,
+        teamNumber: readout.rTeam,
+        competitorName: readout.rIssue2Name,
+        side: this.secondPartyName,
+        score: readout.rIssue2Scores.reduce((a, b) => a + b, 0),
+        courtroom: readout.courtroom,
+      });
+    }
+    return results;
   }
 
   @memoize
@@ -347,6 +405,11 @@ class SSContext implements IContext {
     return compactRange(
       enteredBallotSheets.getDataRange().getValues().slice(1)
     ).map((row) => this.formRowToReadout(row, ENTERED_BALLOTS_SHEET));
+  }
+
+  @memoize
+  get allReadouts(): NonSheetBallotReadout[] {
+    return [...this.formBallotReadouts, ...this.enteredBallotReadouts];
   }
 
   @memoize

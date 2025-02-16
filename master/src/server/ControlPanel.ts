@@ -61,8 +61,8 @@ function OnSetupMasterSpreadsheetClick() {
         "Detected existing setup configuration, aborting. Delete the existing triggers and try again."
       );
     } else {
-      SheetLogger.log("Creating triggers...");
-      SetupTriggers();
+      // SheetLogger.log("Creating triggers...");
+      // SetupTriggers();
       const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
         "TabSystemSetUpRange"
       );

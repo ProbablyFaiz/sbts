@@ -14,7 +14,7 @@ import DisplayMatchResults from "./tab/DisplayMatchResults";
 import {
   PopulateTeamBallots,
   PopulateIndividualBallots,
-} from "./actions/PopulateBallotSheets";
+} from "./context/BallotState";
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
 import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
