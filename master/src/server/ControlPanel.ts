@@ -2,7 +2,6 @@ import { EmailBallotFolderLinks } from "./actions/EmailBallotFolderLinks";
 import { PublishTeamBallots } from "./actions/PublishTeamBallots";
 import SheetLogger from "./context/SheetLogger";
 import { CreateTeamBallotFolders } from "./setup/CreateTeamBallotFolders";
-import { PopulateBallotLinks } from "./setup/PopulateBallotLinks";
 import { SetupTriggers } from "./setup/SetupTriggers";
 import { ShareTrialFolders } from "./setup/ShareTrialFolders";
 
@@ -62,8 +61,6 @@ function OnSetupMasterSpreadsheetClick() {
         "Detected existing setup configuration, aborting. Delete the existing triggers and try again."
       );
     } else {
-      SheetLogger.log("Adding ballot links...");
-      PopulateBallotLinks();
       SheetLogger.log("Creating triggers...");
       SetupTriggers();
       const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(

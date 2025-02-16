@@ -1,6 +1,5 @@
 import {
   IContext,
-  PAST_OPPONENTS_SEPARATOR,
   SSContext,
 } from "../context/Context";
 import { flattenRange } from "../context/Helpers";
@@ -10,6 +9,8 @@ import {
   TeamBallotResult,
   TeamSummary,
 } from "../../Types";
+
+const PAST_OPPONENTS_SEPARATOR = ", ";
 
 function getRoundResult(
   ballotResults: TeamBallotResult[],

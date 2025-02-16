@@ -1,5 +1,4 @@
 import {
-  BallotInfo,
   BallotSpreadsheet,
   ByeStrategy,
   Cell,
@@ -36,7 +35,6 @@ interface IContext {
   ) => boolean;
   tournamentEmail: string;
   courtroomRecords: CourtroomInfo[];
-  ballotRecords: BallotInfo[];
   teamBallotResults: TeamBallotResult[];
   individualBallotResults: IndividualBallotResult[];
   judgeNames: string[];
@@ -55,9 +53,9 @@ interface IContext {
 }
 
 const BYE_BUST_SCHOOL_NAME = "Bye Bust";
-const PAST_OPPONENTS_SEPARATOR = ", ";
 
 const ENTERED_BALLOTS_SHEET = "Entered Ballots";
+
 
 class SSContext implements IContext {
   @memoize
@@ -268,24 +266,6 @@ class SSContext implements IContext {
         roundFolderLinks: row[2].split(","),
       };
     });
-  }
-
-  @memoize
-  get ballotRecords(): BallotInfo[] {
-    return (this.getRangeValues(MasterRange.BallotLinks) ?? [])
-      .filter((row) =>
-        row.some((cell) => !["", null, undefined, "false"].includes(cell))
-      )
-      .map((row) => {
-        return {
-          link: row[0],
-          info: row[1],
-          captainsFormLink: row[2],
-          judgeName: row[4].trim(),
-          locked: row[5] === "true",
-          validated: row[6] === "true",
-        };
-      });
   }
 
   @memoize
@@ -597,4 +577,4 @@ class SSContext implements IContext {
   }
 }
 
-export { SSContext, IContext, PAST_OPPONENTS_SEPARATOR, BYE_BUST_SCHOOL_NAME };
+export { SSContext, IContext, BYE_BUST_SCHOOL_NAME };

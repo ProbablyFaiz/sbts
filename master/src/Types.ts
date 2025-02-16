@@ -27,7 +27,6 @@ enum BallotRange {
 }
 
 enum MasterRange {
-  BallotLinks = "BallotLinksRange",
   TeamBallots = "TeamBallotsRange",
   IndividualBallots = "IndividualBallotsRange",
   TeamInfo = "TeamInfoRange",
@@ -94,14 +93,6 @@ interface CompetitorInfo {
   teamNumber: string;
 }
 
-interface BallotInfo {
-  link: string;
-  info: string;
-  captainsFormLink: string;
-  judgeName: string;
-  locked: boolean;
-  validated: boolean;
-}
 
 interface TeamBallotResult {
   round: string;
@@ -246,6 +237,7 @@ enum ByeStrategy {
   AUTO_WIN,
 }
 
+
 export {
   BallotRange,
   MasterRange,
@@ -256,7 +248,6 @@ export {
   TeamInfo,
   CourtroomInfo,
   CompetitorInfo,
-  BallotInfo,
   TeamBallotResult,
   IndividualBallotResult,
   NonSheetBallotResult,

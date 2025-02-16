@@ -4,47 +4,20 @@ import { BallotRange, CaptainsFormRange, MasterRange } from "../../Types";
 import { SSContext } from "../context/Context";
 
 function PopulateTeamBallots() {
-  populateBallots(MasterRange.TeamBallots, BallotRange.TeamResults, 2);
+  populateBallots(MasterRange.TeamBallots);
 }
 
 function PopulateIndividualBallots() {
-  populateBallots(
-    MasterRange.IndividualBallots,
-    BallotRange.IndividualResults,
-    4
-  );
+  populateBallots(MasterRange.IndividualBallots);
 }
 
-function populateBallots(
-  outputRangeName: MasterRange,
-  resultsRangeName: string,
-  rowsPerBallot: number
-) {
+function populateBallots(outputRangeName: MasterRange) {
   const context = new SSContext();
-  const ballotLinksRange = context.masterSpreadsheet.getRangeByName(
-    MasterRange.BallotLinks
-  )!;
-  const outputRange =
-    context.masterSpreadsheet.getRangeByName(outputRangeName)!;
-  const ballotLinks = getValidatedBallotLinks(ballotLinksRange);
   const outputCells = [];
+  const outputRange = context.masterSpreadsheet.getRangeByName(
+    outputRangeName
+  )!;
   const emptyRow = ["", "", "", "", "", "", "", "", ""];
-  for (let link of ballotLinks) {
-    outputCells.push([
-      getResultImportFormula(link, resultsRangeName),
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      getCourtroomImportFormula(link),
-      link,
-    ]);
-    for (let i = 0; i < rowsPerBallot - 1; i++) {
-      outputCells.push(emptyRow);
-    }
-  }
 
   const formResults = [
     ...context.formBallotResults,
