@@ -11,10 +11,6 @@ import DetectNameTypos from "./monitoring/DetectNameTypos";
 import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
 import DisplayMatchResults from "./tab/DisplayMatchResults";
-import {
-  PopulateTeamBallots,
-  PopulateIndividualBallots,
-} from "./context/BallotState";
 import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
 import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
@@ -53,11 +49,6 @@ const getJudgeNames = () => {
 const submitBallot = (ballotState: RequiredBallotState) => {
   const context = new SSContext();
   context.addEnteredBallot(ballotState);
-  // appendRow doesn't trigger onEdit, so we have to manually update the ballot sheets
-  // TODO: Set the range values instead of using appendRow (if it can be done
-  //  safely/atomically) so that onEdit is triggered
-  PopulateTeamBallots();
-  PopulateIndividualBallots();
 };
 
 // Public functions must be exported as named exports
@@ -76,8 +67,6 @@ export {
   DetectNameTypos,
   TabulateIndividualBallots,
   TabulateTeamBallots,
-  PopulateIndividualBallots,
-  PopulateTeamBallots,
   DisplayMatchResults,
   PrintMatchupSummary,
   PrintTeamSummary,
@@ -128,8 +117,6 @@ global.TabulateTeamBallots = (
 ) => TabulateTeamBallots(roundRange, ballotsPerMatch);
 global.DetectNameTypos = DetectNameTypos;
 global.DetectMatchupTypos = DetectMatchupTypos;
-global.PopulateIndividualBallots = PopulateIndividualBallots;
-global.PopulateTeamBallots = PopulateTeamBallots;
 global.DisplayMatchResults = DisplayMatchResults;
 global.PrintMatchupSummary = PrintMatchupSummary;
 global.PrintTeamSummary = PrintTeamSummary;

@@ -13,7 +13,7 @@
     "setup:https": "mkdirp certs && mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localhost 127.0.0.1",
     "build:dev": "cross-env NODE_ENV=development webpack",
     "build": "cross-env NODE_ENV=production webpack",
-    "deploy:dev": "rimraf dist && npm run build:dev && npx clasp push",
+    "deploy:dev": "rimraf dist && npm run build && club push test",
     "deploy": "rimraf dist && npm run build && club push main",
     "serve": "cross-env NODE_ENV=development webpack serve",
     "start": "npm run deploy:dev && npm run serve",
