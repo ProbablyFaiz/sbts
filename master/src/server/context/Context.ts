@@ -527,9 +527,9 @@ class SSContext implements IContext {
           role,
           competitorName: name,
           writtenFeedback: readout[writtenFeedbackKey],
-          contentOfArgument: scores[SCORE_IDX_MAP["contentOfArgument"]],
-          extempAbility: scores[SCORE_IDX_MAP["extempAbility"]],
-          forensicSkill: scores[SCORE_IDX_MAP["forensicSkill"]],
+          contentOfArgument: scores[SCORE_IDX_MAP.get("contentOfArgument")],
+          extempAbility: scores[SCORE_IDX_MAP.get("extempAbility")],
+          forensicSkill: scores[SCORE_IDX_MAP.get("forensicSkill")],
         } as ScoreGroup;
         groupMap.set(role, group);
       },

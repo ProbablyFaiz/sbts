@@ -6,7 +6,7 @@ const PUBLISHER_API_KEY = process.env.PUBLISHER_API_KEY;
 
 type PublishBallotResponse = {
   request_id: string;
-  ballot_pdf_url: string;
+  bucket_url: string;
 }[];
 
 const PublishBallots = () => {
@@ -89,11 +89,9 @@ const PublishBallots = () => {
     response.getContentText(),
   );
   const publishedReadouts = responseBody.map(
-    ({ request_id }) => groupingsById.get(request_id)?.readout,
+    ({ request_id }) => groupingsById.get(request_id)!.readout,
   );
-  const publishedPdfUrls = responseBody.map(
-    ({ ballot_pdf_url }) => ballot_pdf_url,
-  );
+  const publishedPdfUrls = responseBody.map(({ bucket_url }) => bucket_url);
   context.setReadoutPdfUrls(publishedReadouts, publishedPdfUrls);
 };
 

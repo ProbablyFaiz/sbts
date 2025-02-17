@@ -29,7 +29,7 @@ publisher-deploy:
         --memory 3Gi \
         --cpu 2 \
         --min-instances 0 \
-        --max-instances 25 \
+        --max-instances 500 \
         --timeout 60s \
         --concurrency 1 \
         --ingress all \

@@ -53,7 +53,7 @@ def render_template(template: LatexTemplate, fields: dict[str, Any]) -> str:
     # TODO: Use jinja or something if we ever need more advanced templating
     template_str = get_template(template)
     replacements = [
-        (f"{{ {key} }}", escape_tex(value)) for key, value in fields.items()
+        (f"{{ {key} }}", escape_tex(str(value))) for key, value in fields.items()
     ]
     for old, new in replacements:
         template_str = template_str.replace(old, new)
