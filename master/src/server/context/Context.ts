@@ -2,7 +2,6 @@ import {
   BallotReadout,
   BallotResult,
   BallotScoreGrouping,
-  BallotSpreadsheet,
   ByeStrategy,
   Cell,
   CompetitorRole,
@@ -19,7 +18,6 @@ import {
   TeamBallotResult,
   TeamInfo,
 } from "../../Types";
-import { getBallotPdfName } from "../actions/PublishTeamBallots";
 import { memoize } from "./CacheHelper";
 import {
   GoogleFile,
@@ -28,15 +26,14 @@ import {
   getByeStrategy,
   getIdFromUrl,
   getOrCreateChildFolder,
-  sheetForFile,
   spreadsheetTruthy,
 } from "./Helpers";
 
 interface IContext {
   teamInfo: Record<string, TeamInfo>;
-  setTeamBallotFolderLink: (
+  setTeamBallotSheetLink: (
     teamNumber: string,
-    ballotFolderLink: string,
+    ballotSheetLink: string,
   ) => boolean;
   tournamentEmail: string;
   courtroomRecords: CourtroomInfo[];
@@ -113,7 +110,7 @@ class SSContext implements IContext {
           byeBust: row[2] === BYE_BUST_SCHOOL_NAME, // For now, we'll just use a special school name
           competitorNames: freqSortedNames,
           emails: row[4],
-          ballotFolderLink: row[5],
+          ballotListLink: row[5],
         };
       },
     );
@@ -251,16 +248,15 @@ class SSContext implements IContext {
   }
 
   @memoize
-  get ballotTemplateFile(): GoogleAppsScript.Drive.File {
-    const templateFileLink = this.getRangeValue(MasterRange.BallotTemplateLink);
+  get ballotListTemplateFile(): GoogleAppsScript.Drive.File {
+    const templateFileLink = this.getRangeValue(
+      MasterRange.BallotListTemplateLink,
+    );
     return DriveApp.getFileById(getIdFromUrl(templateFileLink));
   }
 
   // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.
-  setTeamBallotFolderLink(
-    teamNumber: string,
-    ballotFolderLink: string,
-  ): boolean {
+  setTeamBallotSheetLink(teamNumber: string, ballotSheetLink: string): boolean {
     const teamInfoRange = this.masterSpreadsheet.getRangeByName(
       MasterRange.TeamInfo,
     );
@@ -270,7 +266,7 @@ class SSContext implements IContext {
       (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber,
     );
     if (!teamRow) return false;
-    teamRow[5] = ballotFolderLink;
+    teamRow[5] = ballotSheetLink;
     teamInfoRange.setValues(teamInfoValues);
     return true;
   }
@@ -278,7 +274,7 @@ class SSContext implements IContext {
   teamBallotFolder(
     teamNumber: string,
   ): GoogleAppsScript.Drive.Folder | undefined {
-    const folderLink = this.teamInfo[teamNumber]?.ballotFolderLink;
+    const folderLink = this.teamInfo[teamNumber]?.ballotListLink;
     if (!folderLink) return undefined;
     return DriveApp.getFolderById(getIdFromUrl(folderLink));
   }
@@ -345,11 +341,6 @@ class SSContext implements IContext {
       (a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime(),
     );
     return ballots;
-  }
-
-  @memoize
-  get ballotSpreadsheets(): BallotSpreadsheet[] {
-    return this.ballotFiles.map((file) => sheetForFile(file));
   }
 
   @memoize
@@ -591,45 +582,10 @@ class SSContext implements IContext {
     }
   }
 
-  getOrCreateTrialFolder(
-    round: string,
-    courtroom: string,
-  ): GoogleAppsScript.Drive.Folder {
-    const roundFolder = getOrCreateChildFolder(this.tabFolder, round);
-    const trialFolder = getOrCreateChildFolder(
-      roundFolder,
-      `${round} - ${courtroom}`,
-    );
-    return trialFolder;
-  }
-
   addEnteredBallot(ballotState: RequiredBallotState) {
     const enteredBallotsSheet = this.masterSpreadsheet.getSheetByName(
       ENTERED_BALLOTS_SHEET,
     );
-    let pdfUrl = "";
-    if (ballotState.pdfData) {
-      const trialFolder = this.getOrCreateTrialFolder(
-        ballotState.round,
-        ballotState.courtroom,
-      );
-      const pdfName = getBallotPdfName(
-        ballotState.round,
-        ballotState.petitioner.teamNumber,
-        ballotState.respondent.teamNumber,
-        ballotState.judgeName,
-      );
-      const decodedPdfData = Utilities.base64Decode(
-        ballotState.pdfData,
-        Utilities.Charset.UTF_8,
-      );
-      const pdfBlob = Utilities.newBlob(
-        decodedPdfData,
-        "application/pdf",
-        pdfName,
-      );
-      pdfUrl = trialFolder.createFile(pdfBlob).getUrl();
-    }
     // There are lots of empty strings and 0s in the below array
     // to maintain the same interface as the form responses sheet
     const rowToAdd = [
@@ -659,7 +615,7 @@ class SSContext implements IContext {
       ballotState.respondent.issue2Score,
       0,
       0,
-      pdfUrl,
+      "",
     ];
     enteredBallotsSheet.appendRow(rowToAdd);
   }

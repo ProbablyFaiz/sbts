@@ -466,7 +466,7 @@ const createByeTeamInfo = (): TeamInfo => {
     teamName: BYE_BUST_SCHOOL_NAME,
     byeBust: true,
     competitorNames: [],
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   };
 };

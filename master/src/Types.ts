@@ -1,31 +1,6 @@
 type Cell = string | number | undefined;
 type SpreadsheetOutput = Cell | Cell[] | Cell[][];
 
-enum BallotRange {
-  CaptainsFormUrl = "CaptainsFormUrlRange",
-  PlaintiffTeam = "PlaintiffTeamRange",
-  DefenseTeam = "DefenseTeamRange",
-  Round = "RoundRange",
-  JudgeName = "JudgeNameRange",
-  Submitted = "SubmittedRange",
-  TeamResults = "TeamResults",
-  IndividualResults = "IndividualResults",
-
-  EndOfScores = "EndOfScores",
-  PIssue1Name = "PAttorney1",
-  PIssue1Comments = "CommentsRangeP1",
-  PIssue1Scores = "BallotRangeP1",
-  PIssue2Name = "PAttorney2",
-  PIssue2Comments = "CommentsRangeP2",
-  PIssue2Scores = "BallotRangeP2",
-  RIssue1Name = "DAttorney1",
-  RIssue1Comments = "CommentsRangeD1",
-  RIssue1Scores = "BallotRangeD1",
-  RIssue2Name = "DAttorney2",
-  RIssue2Comments = "CommentsRangeD2",
-  RIssue2Scores = "BallotRangeD2",
-}
-
 enum MasterRange {
   TeamInfo = "TeamInfoRange",
   OrchestratorLink = "OrchestratorLinkRange",
@@ -38,6 +13,7 @@ enum MasterRange {
   FirstPartyName = "FirstPartyNameRange",
   SecondPartyName = "SecondPartyNameRange",
   BallotTemplateLink = "BallotTemplateLinkRange",
+  BallotListTemplateLink = "BallotListTemplateLinkRange",
   SwissPreviousRounds = "SwissPreviousRoundsRange",
   SwissAllowSameSchool = "SwissAllowSameSchoolRange",
   SwissAllowRepeatMatchup = "SwissAllowRepeatMatchupRange",
@@ -53,17 +29,16 @@ enum MasterRange {
   TabSystemSetup = "TabSystemSetUpRange",
 }
 
-enum CaptainsFormRange {
-  Round = "RoundNum",
-  Courtroom = "CourtroomLetter",
+enum BallotListRange {
+  TournamentName = "TournamentName",
+  TournamentEmail = "TournamentEmail",
+  TeamNumber = "TeamNumber",
+  School = "School",
+  Competitors = "Competitors",
 }
 
 enum OrchestratorRange {
   MasterLink = "MasterSpreadsheetLinkRange",
-}
-
-interface BallotSpreadsheet extends GoogleAppsScript.Spreadsheet.Spreadsheet {
-  getRangeByName(name: BallotRange): GoogleAppsScript.Spreadsheet.Range | null;
 }
 
 interface MasterSpreadsheet extends GoogleAppsScript.Spreadsheet.Spreadsheet {
@@ -76,7 +51,7 @@ interface TeamInfo {
   schoolName: string;
   competitorNames: string[];
   byeBust: boolean;
-  ballotFolderLink: string;
+  ballotListLink: string;
   emails: string;
 }
 
@@ -310,11 +285,9 @@ enum ByeStrategy {
 }
 
 export {
-  BallotRange,
   MasterRange,
-  CaptainsFormRange,
+  BallotListRange,
   OrchestratorRange,
-  BallotSpreadsheet,
   MasterSpreadsheet,
   TeamInfo,
   CourtroomInfo,

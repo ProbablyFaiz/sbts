@@ -163,7 +163,7 @@ const getInitialRoundState = (
         teamName: "BYE",
         competitorNames: [],
         byeBust: true,
-        ballotFolderLink: "",
+        ballotListLink: "",
         emails: "",
       },
       timesPlaintiff: 0,

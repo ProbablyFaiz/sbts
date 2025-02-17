@@ -1,5 +1,5 @@
 const TEMPLATE_FOLDER_NAME = "Templates";
-const BALLOT_TEMPLATE_NAME = "Ballot Template";
+const BALLOT_LIST_TEMPLATE_NAME = "Ballot List Template";
 
 function SimpleSetup(tabFolderLink: string) {
   const context = new SimpleSetupContext(tabFolderLink);
@@ -30,14 +30,10 @@ function SimpleSetup(tabFolderLink: string) {
   );
 
   const templateFolder = context.tabFolder.createFolder(TEMPLATE_FOLDER_NAME);
-  const ballotTemplate = context.sheetBallotTemplate.makeCopy(
-    BALLOT_TEMPLATE_NAME,
+  const ballotListTemplate = context.ballotListTemplate.makeCopy(
+    BALLOT_LIST_TEMPLATE_NAME,
     templateFolder,
   );
-  const ballotTemplateSheet = sheetForFile(ballotTemplate);
-  ballotTemplateSheet
-    .getRangeByName(BallotRange.TournamentName)
-    .setValue(context.tournamentName);
 
   masterSpreadsheet
     .getRangeByName(MasterRange.ParentFolderLink)
@@ -52,8 +48,8 @@ function SimpleSetup(tabFolderLink: string) {
     .getRangeByName(MasterRange.TournamentEmail)
     .setValue(context.tournamentContactEmail);
   masterSpreadsheet
-    .getRangeByName(MasterRange.BallotTemplateLink)
-    .setValue(ballotTemplate.getUrl());
+    .getRangeByName(MasterRange.BallotListTemplateLink)
+    .setValue(ballotListTemplate.getUrl());
   masterSpreadsheet
     .getRangeByName(MasterRange.ByeStrategy)
     .setValue(context.byeStrategy);

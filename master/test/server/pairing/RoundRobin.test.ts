@@ -18,7 +18,7 @@ const mockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School A",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
   A2: {
@@ -27,7 +27,7 @@ const mockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School A",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
   B3: {
@@ -36,7 +36,7 @@ const mockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School B",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
   B4: {
@@ -45,7 +45,7 @@ const mockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School B",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
 };
@@ -58,7 +58,7 @@ const largerMockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School C",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
   C6: {
@@ -67,7 +67,7 @@ const largerMockTeamInfos: Record<string, TeamInfo> = {
     schoolName: "School C",
     competitorNames: [],
     byeBust: false,
-    ballotFolderLink: "",
+    ballotListLink: "",
     emails: "",
   },
 };
