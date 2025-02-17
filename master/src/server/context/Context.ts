@@ -150,20 +150,6 @@ class SSContext implements IContext {
     return results;
   }
 
-  private teamResultRowToResult(row: string[]): TeamBallotResult {
-    return {
-      round: row[0],
-      judgeName: row[1].trim(),
-      teamNumber: row[2],
-      opponentTeamNumber: row[3],
-      side: row[4],
-      pd: parseFloat(row[5]),
-      won: parseFloat(row[6]),
-      courtroom: row[7],
-      ballotLink: row[8],
-    };
-  }
-
   @memoize
   get individualBallotResults(): IndividualBallotResult[] {
     const results: IndividualBallotResult[] = [];
@@ -379,7 +365,7 @@ class SSContext implements IContext {
   get formBallotReadouts(): NonSheetBallotReadout[] {
     const formResponseSheets = this.masterSpreadsheet
       .getSheets()
-      .filter((sheet) => sheet.getFormUrl());
+      .filter((sheet) => sheet.getName().includes("Form Responses"));
     const formBallotReadouts: NonSheetBallotReadout[] = [];
 
     formResponseSheets.forEach((sheet) => {
@@ -474,24 +460,24 @@ class SSContext implements IContext {
     }
     return {
       timestamp: timestamp,
-      judgeName: response[1],
-      round: response[2],
-      courtroom: response[3],
-      pTeam: response[4],
-      pIssue1Name: response[5],
-      pIssue1WrittenFeedback: response[6],
+      judgeName: response[1].toString(),
+      round: response[2].toString(),
+      courtroom: response[3].toString(),
+      pTeam: response[4].toString(),
+      pIssue1Name: response[5].toString(),
+      pIssue1WrittenFeedback: response[6].toString(),
       pIssue1Scores: getScores(7, 9),
-      pIssue2Name: response[10],
-      pIssue2WrittenFeedback: response[11],
+      pIssue2Name: response[10].toString(),
+      pIssue2WrittenFeedback: response[11].toString(),
       pIssue2Scores: getScores(12, 14),
-      rTeam: response[15],
-      rIssue1Name: response[16],
-      rIssue1WrittenFeedback: response[17],
+      rTeam: response[15].toString(),
+      rIssue1Name: response[16].toString(),
+      rIssue1WrittenFeedback: response[17].toString(),
       rIssue1Scores: getScores(18, 20),
-      rIssue2Name: response[21],
-      rIssue2WrittenFeedback: response[22],
+      rIssue2Name: response[21].toString(),
+      rIssue2WrittenFeedback: response[22].toString(),
       rIssue2Scores: getScores(23, 25),
-      ballotPdfUrl: response.length > 26 ? response[26] : undefined,
+      ballotPdfUrl: response.length > 26 ? response[26].toString() : undefined,
       sourceSheet: sourceSheet,
     };
   }
