@@ -43,9 +43,7 @@ function exportBallots(context: SSContext) {
 
 const exportNonSheetBallots = (context: SSContext) => {
   let filesWritten = 0;
-  const readouts = context.formBallotReadouts.concat(
-    context.enteredBallotReadouts,
-  );
+  const readouts = context.allReadouts;
   for (let readout of readouts) {
     const ballotFile = readout.ballotPdfUrl
       ? DriveApp.getFileById(getIdFromUrl(readout.ballotPdfUrl))

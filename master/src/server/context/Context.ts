@@ -503,39 +503,61 @@ class SSContext implements IContext {
     };
   }
 
-  setReadoutPdfUrl(readout: NonSheetBallotReadout, ballotPdfUrl: string) {
-    const sourceSheet = this.masterSpreadsheet.getSheetByName(
-      readout.sourceSheet,
+  setReadoutPdfUrls(
+    readouts: NonSheetBallotReadout[],
+    ballotPdfUrls: string[],
+  ) {
+    // Group readouts by source sheet
+    const readoutsBySheet = readouts.reduce(
+      (acc, readout, index) => {
+        if (!acc[readout.sourceSheet]) {
+          acc[readout.sourceSheet] = [];
+        }
+        acc[readout.sourceSheet].push({
+          readout,
+          pdfUrl: ballotPdfUrls[index],
+        });
+        return acc;
+      },
+      {} as Record<
+        string,
+        { readout: NonSheetBallotReadout; pdfUrl: string }[]
+      >,
     );
-    if (!sourceSheet) {
-      Logger.log(
-        `Could not find sheet ${readout.sourceSheet} to update ballot PDF URL. This is really weird and scary.`,
-      );
-      return;
-    }
-    const row = sourceSheet
-      .getDataRange()
-      .getValues()
-      .slice(1)
-      .findIndex((row) => {
-        const rowReadout = this.formRowToReadout(row, readout.sourceSheet);
-        // This ought to be sufficient to conclude it's the same one
-        return (
-          rowReadout.timestamp.getTime() === readout.timestamp.getTime() &&
-          rowReadout.judgeName === readout.judgeName &&
-          rowReadout.round === readout.round &&
-          rowReadout.courtroom === readout.courtroom &&
-          rowReadout.pTeam === readout.pTeam &&
-          rowReadout.rTeam === readout.rTeam
+
+    // Process each sheet only once
+    for (const [sheetName, readoutGroup] of Object.entries(readoutsBySheet)) {
+      const sourceSheet = this.masterSpreadsheet.getSheetByName(sheetName);
+      if (!sourceSheet) {
+        Logger.log(
+          `Could not find sheet ${sheetName} to update ballot PDF URLs.`,
         );
+        continue;
+      }
+
+      const sheetValues = sourceSheet.getDataRange().getValues();
+      const headerRow = sheetValues[0];
+      const dataRows = sheetValues.slice(1);
+
+      // Update all matching rows for this sheet
+      readoutGroup.forEach(({ readout, pdfUrl }) => {
+        const row = dataRows.findIndex((row) => {
+          const rowReadout = this.formRowToReadout(row, sheetName);
+          return (
+            rowReadout.timestamp.getTime() === readout.timestamp.getTime() &&
+            rowReadout.judgeName === readout.judgeName &&
+            rowReadout.round === readout.round &&
+            rowReadout.courtroom === readout.courtroom &&
+            rowReadout.pTeam === readout.pTeam &&
+            rowReadout.rTeam === readout.rTeam
+          );
+        });
+
+        if (row !== -1) {
+          sourceSheet.getRange(row + 2, 27).setValue(pdfUrl);
+        }
       });
-    if (row === -1) {
-      Logger.log(`Could not find row to update ballot PDF URL. Giving up...`);
-      return;
     }
-    // We add 2 to the row because we cut off the header row before findIndex,
-    // and second because Google Sheets is 1-indexed
-    sourceSheet.getRange(row + 2, 27).setValue(ballotPdfUrl);
   }
 
   getOrCreateTrialFolder(

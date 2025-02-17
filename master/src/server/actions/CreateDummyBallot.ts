@@ -91,7 +91,7 @@ function createDummyBallot(
   const pdfBlob = ballotSpreadsheet.getAs("application/pdf");
   pdfBlob.setName(ballotPdfName);
   const ballotPdf = trialFolder.createFile(pdfBlob);
-  context.setReadoutPdfUrl(ballotReadout, ballotPdf.getUrl());
+  context.setReadoutPdfUrls([ballotReadout], [ballotPdf.getUrl()]);
   ballotFile.setTrashed(true);
 
   return ballotPdf;
