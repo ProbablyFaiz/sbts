@@ -25,6 +25,8 @@ FROM python:3.11-slim-bookworm
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         texlive-base \
+        texlive-latex-base \
+        texlive-latex-extra \
         texlive-fonts-recommended \
         texlive-fonts-extra && \
     rm -rf /var/lib/apt/lists/*
@@ -36,6 +38,9 @@ COPY templates/ /app/templates/
 
 # Copy only the venv from builder
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
+
+ARG GCP_BUCKET_NAME
+ARG GCP_PUBLIC_URL
 
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH"

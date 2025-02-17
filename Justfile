@@ -4,7 +4,7 @@ default:
     just --list
 
 publisher-build:
-    cd publisher && docker build -t $GCP_CONTAINER_TAG .
+    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg GCP_BUCKET_NAME=$GCP_BUCKET_NAME --build-arg GCP_PUBLIC_URL=$GCP_PUBLIC_URL
 
 publisher-push:
     cd publisher && docker push $GCP_CONTAINER_TAG

@@ -66,7 +66,7 @@ def compile_latex(latex_str: str) -> bytes:
         tex_file = temp_dir / "temp.tex"
         tex_file.write_text(latex_str)
         shutil.copy(_NAMC_LOGO_PATH, temp_dir / "namc_logo.pdf")
-        subprocess.run(["pdflatex", tex_file], cwd=temp_dir)
+        subprocess.run(["pdflatex", tex_file], cwd=temp_dir, check=True)
         return tex_file.with_suffix(".pdf").read_bytes()
 
 
