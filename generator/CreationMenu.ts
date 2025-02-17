@@ -21,7 +21,7 @@ function OnCreateSystemClick() {
     if (simpleMode) {
       SimpleSetup(tabFolderLinkResponse.getResponseText());
     } else {
-      SetupTabulationFolder(tabFolderLinkResponse.getResponseText());
+      throw new Error("Non-simple setup is no longer supported.");
     }
 
     const htmlOutput = HtmlService.createHtmlOutput(
