@@ -9,12 +9,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # Install dependencies first (for better caching)
-COPY backend/pyproject.toml backend/uv.lock ./
+COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # Copy and install the project
-COPY backend/ .
+COPY publisher/ publisher/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --compile-bytecode --no-editable
 
@@ -39,3 +39,5 @@ COPY --from=builder --chown=app:app /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
 WORKDIR /app
+
+CMD ["gunicorn", "publisher.main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:80"]
