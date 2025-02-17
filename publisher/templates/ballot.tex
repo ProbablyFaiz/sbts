@@ -16,6 +16,13 @@
 \usepackage{fancyhdr}
 \usepackage{newpxtext}
 
+% For PDF metadata
+\usepackage{hyperref}
+\hypersetup{
+    pdftitle={{{ round }} - {{ p_team }} v. {{ r_team }} (Judge {{ judge_name }}, {{ tournament_name }})},
+    pdfauthor={National Association of Moot Court},
+}
+
 % Setup header
 \pagestyle{fancy}
 \fancyhf{} % clear all header and footer fields

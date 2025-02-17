@@ -1,4 +1,10 @@
-import { HttpFunction } from "@google-cloud/functions-framework/build/src/functions";
+import {
+  HttpFunction,
+  Request,
+} from "@google-cloud/functions-framework/build/src/functions";
+
+const PUBLISHER_ENDPOINT = process.env.PUBLISHER_ENDPOINT;
+const API_KEY = process.env.FANOUT_API_KEY;
 
 interface PublishRequest {
   request_id: string;
@@ -11,13 +17,28 @@ interface PublishResponse {
   bucket_url: string;
 }
 
+const validAuth = (req: Request) => {
+  const authHeader = req.headers["authorization"];
+  return authHeader === `Bearer ${API_KEY}`;
+};
+
 export const handler: HttpFunction = async (req, res) => {
+  if (!process.env.FANOUT_API_KEY) {
+    throw new Error("FANOUT_API_KEY is not set");
+  }
+  if (!process.env.FANOUT_PUBLISHER_ENDPOINT) {
+    throw new Error("FANOUT_PUBLISHER_ENDPOINT is not set");
+  }
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
   }
+  if (!validAuth(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
 
-  const publisherUrl = `${process.env.FANOUT_PUBLISHER_ENDPOINT}/publish`;
+  const publisherUrl = `${PUBLISHER_ENDPOINT}/publish`;
   const requests: PublishRequest[] = req.body;
 
   try {
@@ -32,6 +53,7 @@ export const handler: HttpFunction = async (req, res) => {
     );
     res.json(responses);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to process publish requests" });
   }
 };

@@ -34,10 +34,10 @@ RUN apt-get update && \
 # Create non-root user
 RUN useradd -m -U app
 
-COPY templates/ /app/templates/
-
 # Copy only the venv from builder
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
+
+COPY templates/ /app/templates/
 
 ARG GCP_BUCKET_NAME
 ARG GCP_PUBLIC_URL
