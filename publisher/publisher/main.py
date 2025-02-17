@@ -27,11 +27,13 @@ app.add_middleware(
 
 
 class PublishRequest(BaseModel):
+    request_id: str
     template_name: str
     ballot_fields: dict[str, Any]
 
 
 class PublishResponse(BaseModel):
+    request_id: str
     bucket_url: str
 
 
@@ -46,4 +48,6 @@ def publish(request: PublishRequest) -> PublishResponse:
     pdf_hash = sha1_bytes(pdf)
     bucket_key = f"ballots/{pdf_hash[:2]}/{pdf_hash}.pdf"
     upload_to_gcs(GCP_BUCKET_NAME, bucket_key, pdf, "application/pdf")
-    return PublishResponse(bucket_url=f"{GCP_PUBLIC_URL}/{bucket_key}")
+    return PublishResponse(
+        request_id=request.request_id, bucket_url=f"{GCP_PUBLIC_URL}/{bucket_key}"
+    )

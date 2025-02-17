@@ -22,3 +22,17 @@ publisher-deploy:
         --timeout 60s \
         --concurrency 1 \
         --allow-unauthenticated
+
+fanout-build:
+    cd publisher/fanout && npm run build
+
+fanout-deploy:
+    cd publisher/fanout && gcloud functions deploy publisher_fanout \
+        --gen2 \
+        --runtime=nodejs22 \
+        --region=us-central1 \
+        --source=. \
+        --entry-point=handler \
+        --trigger-http \
+        --allow-unauthenticated \
+        --set-env-vars FANOUT_PUBLISHER_ENDPOINT=$GCP_PUBLISHER_ENDPOINT
