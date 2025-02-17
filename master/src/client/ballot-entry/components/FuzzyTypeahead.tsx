@@ -1,6 +1,6 @@
-import { Highlighter, Typeahead } from "react-bootstrap-typeahead";
-import React from "react";
 import FuzzySet from "fuzzyset.js";
+import React from "react";
+import { Highlighter, Typeahead } from "react-bootstrap-typeahead";
 
 interface FuzzyTypeaheadProps<T> {
   query: string;
@@ -29,10 +29,10 @@ const FuzzyTypeahead = <T extends {}>({
   }, [options]);
 
   const fuzzyResults = new Set(
-    fuzzySet?.get(query, [], fuzzyThreshold).map((match) => match[1]) ?? []
+    fuzzySet?.get(query, [], fuzzyThreshold).map((match) => match[1]) ?? [],
   );
   const results = options.filter((option) =>
-    fuzzyResults.has(labelKey(option))
+    fuzzyResults.has(labelKey(option)),
   );
   const match = results.find((option) => labelKey(option) === query);
 

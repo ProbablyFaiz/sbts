@@ -11,7 +11,7 @@ function OnPublishBallotsClick() {
   const result = ui.alert(
     "Please confirm",
     "Are you sure you want to publish PDF ballots to the team ballot folders?",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
 
   const lock = LockService.getDocumentLock();
@@ -19,7 +19,7 @@ function OnPublishBallotsClick() {
     ui.alert(
       "Please wait",
       "Another ballot publishing operation is in progress. Please wait for it to finish before trying again.",
-      ui.ButtonSet.OK
+      ui.ButtonSet.OK,
     );
     return;
   }
@@ -28,13 +28,13 @@ function OnPublishBallotsClick() {
     if (result == ui.Button.YES) {
       ui.showModelessDialog(
         HtmlService.createHtmlOutput(
-          "<p>This may take several minutes. You can close this window.</p>"
+          "<p>This may take several minutes. You can close this window.</p>",
         ),
-        "Publishing ballots..."
+        "Publishing ballots...",
       );
       PublishTeamBallots();
       const htmlOutput = HtmlService.createHtmlOutput(
-        "<p>Ballots were successfully published to team folders.</p>"
+        "<p>Ballots were successfully published to team folders.</p>",
       )
         .setWidth(250)
         .setHeight(100);
@@ -52,23 +52,23 @@ function OnSetupMasterSpreadsheetClick() {
   const result = ui.alert(
     "Please confirm",
     "Are you sure you want to setup the master spreadsheet? Only run this once, prior to the start of the tournament.",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
     if (ScriptApp.getProjectTriggers().length > 0) {
       ui.alert(
-        "Detected existing setup configuration, aborting. Delete the existing triggers and try again."
+        "Detected existing setup configuration, aborting. Delete the existing triggers and try again.",
       );
     } else {
       // SheetLogger.log("Creating triggers...");
       // SetupTriggers();
       const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
-        "TabSystemSetUpRange"
+        "TabSystemSetUpRange",
       );
       tabSetUp?.setValue(true);
       const htmlOutput = HtmlService.createHtmlOutput(
-        "<p>Master spreadsheet was successfully configured for use.</p>"
+        "<p>Master spreadsheet was successfully configured for use.</p>",
       )
         .setWidth(300)
         .setHeight(150);
@@ -84,14 +84,14 @@ function OnCreateTeamBallotFolderClick() {
     "Please confirm",
     "Are you sure you want to create team ballot folders? Only run this once, prior to the start of the tournament" +
       "and once you have added team numbers and names to the Teams sheet.",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
     SheetLogger.log("Creating team ballot folders...");
     CreateTeamBallotFolders();
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully created team ballot folders.</p>"
+      "<p>Successfully created team ballot folders.</p>",
     )
       .setWidth(250)
       .setHeight(100);
@@ -106,14 +106,14 @@ function OnEmailBallotFolderLinksClick() {
     "Please confirm",
     "Are you sure you want to email links to ballot folders? Be careful about running this so as to not spam " +
       "the competing teams.",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
     SheetLogger.log("Creating team ballot folders...");
     EmailBallotFolderLinks();
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully emailed ballot folder links.</p>"
+      "<p>Successfully emailed ballot folder links.</p>",
     )
       .setWidth(250)
       .setHeight(100);
@@ -127,14 +127,14 @@ function OnShareFoldersWithBailiffs() {
   const result = ui.alert(
     "Please confirm",
     "Are you sure you want to share trial folders with bailiffs? This will send email notifications.",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
     SheetLogger.log("Sharing trial folders with bailiffs...");
     ShareTrialFolders();
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully emailed ballot folder links.</p>"
+      "<p>Successfully emailed ballot folder links.</p>",
     )
       .setWidth(250)
       .setHeight(100);

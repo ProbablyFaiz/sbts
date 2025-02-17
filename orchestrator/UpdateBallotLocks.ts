@@ -5,7 +5,7 @@ function UpdateBallotLocks() {
   const context = new OrchestratorContext();
   const orchestratorSheet = SpreadsheetApp.getActiveSpreadsheet();
   const ballotInfo = compactRange(
-    orchestratorSheet.getRangeByName("BallotInfoRange").getValues()
+    orchestratorSheet.getRangeByName("BallotInfoRange").getValues(),
   );
   let numUpdated = 0;
   for (let i = 0; i < ballotInfo.length; i++) {
@@ -35,7 +35,7 @@ function updateBallot(ballotObject, context: OrchestratorContext) {
   const ballotSheet = SpreadsheetApp.openByUrl(ballotObject.url);
   const submittedRange = ballotSheet.getRangeByName("SubmittedRange");
   const failedSubmissionRange = ballotSheet.getRangeByName(
-    "FailedSubmissionRange"
+    "FailedSubmissionRange",
   );
   const submitCheckboxRange = ballotSheet.getRangeByName("SubmitCheckboxRange");
   if (ballotObject.notReady && ballotObject.submitCheckbox) {

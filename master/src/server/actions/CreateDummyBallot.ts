@@ -1,8 +1,8 @@
-import { sheetForFile } from "../context/Helpers";
 import { BallotRange, NonSheetBallotReadout } from "../../Types";
 import { SSContext } from "../context/Context";
-import { getBallotPdfName } from "./PublishTeamBallots";
+import { sheetForFile } from "../context/Helpers";
 import SheetLogger from "../context/SheetLogger";
+import { getBallotPdfName } from "./PublishTeamBallots";
 
 const COMMENT_ROW_NUMBERS = [7, 9, 13, 15];
 const COMMENT_TEXT_COLUMN_INDEX = 2;
@@ -11,23 +11,23 @@ const HEIGHT_PIXELS_PER_LINE = 21.0;
 
 function createDummyBallot(
   ballotReadout: NonSheetBallotReadout,
-  context: SSContext
+  context: SSContext,
 ) {
   const trialFolder = context.getOrCreateTrialFolder(
     ballotReadout.round,
-    ballotReadout.courtroom
+    ballotReadout.courtroom,
   );
   const ballotPdfName = getBallotPdfName(
     ballotReadout.round,
     ballotReadout.pTeam,
     ballotReadout.rTeam,
-    ballotReadout.judgeName
+    ballotReadout.judgeName,
   );
   const ballotSpreadsheetName = "(DUMMY) " + ballotPdfName;
   SheetLogger.log(`Creating dummy ballot '${ballotPdfName}'...`);
   const ballotFile = context.ballotTemplateFile.makeCopy(
     ballotSpreadsheetName,
-    trialFolder
+    trialFolder,
   );
   const ballotSpreadsheet = sheetForFile(ballotFile);
 
@@ -70,19 +70,19 @@ function createDummyBallot(
 
   setBallotField(
     BallotRange.PIssue1Comments,
-    ballotReadout.pIssue1WrittenFeedback
+    ballotReadout.pIssue1WrittenFeedback,
   );
   setBallotField(
     BallotRange.PIssue2Comments,
-    ballotReadout.pIssue2WrittenFeedback
+    ballotReadout.pIssue2WrittenFeedback,
   );
   setBallotField(
     BallotRange.RIssue1Comments,
-    ballotReadout.rIssue1WrittenFeedback
+    ballotReadout.rIssue1WrittenFeedback,
   );
   setBallotField(
     BallotRange.RIssue2Comments,
-    ballotReadout.rIssue2WrittenFeedback
+    ballotReadout.rIssue2WrittenFeedback,
   );
   fixCommentBoxHeights(ballotSpreadsheet);
   hideRowsBelowScores(ballotSpreadsheet);
@@ -98,10 +98,10 @@ function createDummyBallot(
 }
 
 const hideRowsBelowScores = (
-  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
+  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ) => {
   const endOfScoresRange = ballotSpreadsheet.getRangeByName(
-    BallotRange.EndOfScores
+    BallotRange.EndOfScores,
   );
   // We want to hide all rows below the end of the scores range.
   const scoresSheet = endOfScoresRange.getSheet();
@@ -112,7 +112,7 @@ const hideRowsBelowScores = (
 };
 
 const fixCommentBoxHeights = (
-  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
+  ballotSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
 ) => {
   const commentsSheet = ballotSpreadsheet.getSheetByName("Comments");
   COMMENT_ROW_NUMBERS.forEach((rowNumber) => {

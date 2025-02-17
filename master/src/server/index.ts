@@ -1,31 +1,31 @@
-import { onOpen, openBallotEntry, openAboutSidebar } from "./ui";
+import { onOpen, openAboutSidebar, openBallotEntry } from "./ui";
 
-import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from "./sheets";
+import { RequiredBallotState } from "../Types";
 import {
   OnCreateTeamBallotFolderClick,
   OnEmailBallotFolderLinksClick,
   OnPublishBallotsClick,
   OnSetupMasterSpreadsheetClick,
 } from "./ControlPanel";
-import DetectNameTypos from "./monitoring/DetectNameTypos";
-import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
-import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
-import DisplayMatchResults from "./tab/DisplayMatchResults";
 import { SSContext } from "./context/Context";
-import { RequiredBallotState } from "../Types";
-import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
-import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
 import { CurrentRoundNames } from "./monitoring/CurrentRoundNames";
+import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
+import DetectNameTypos from "./monitoring/DetectNameTypos";
+import {
+  RoundRobinPairTeams,
+  RoundRobinPairTeamsWithCourtrooms,
+  RoundRobinPairTeamsWithMetadata,
+} from "./pairing/RoundRobin";
 import {
   PairTeams,
   PairTeamsWithCourtrooms,
   PairTeamsWithMetadata,
 } from "./pairing/Swiss";
-import {
-  RoundRobinPairTeams,
-  RoundRobinPairTeamsWithMetadata,
-  RoundRobinPairTeamsWithCourtrooms,
-} from "./pairing/RoundRobin";
+import { addSheet, deleteSheet, getSheetsData, setActiveSheet } from "./sheets";
+import DisplayMatchResults from "./tab/DisplayMatchResults";
+import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
+import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
+import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
 
 const getCourtrooms = () => {
   const context = new SSContext();
@@ -120,7 +120,7 @@ global.TabulateIndividualBallots = (roundRange: string | string[]) =>
  */
 global.TabulateTeamBallots = (
   roundRange: string | string[],
-  ballotsPerMatch: number
+  ballotsPerMatch: number,
 ) => TabulateTeamBallots(roundRange, ballotsPerMatch);
 global.DetectNameTypos = DetectNameTypos;
 global.DetectMatchupTypos = DetectMatchupTypos;

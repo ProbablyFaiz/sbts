@@ -1,6 +1,6 @@
+import { TeamInfo } from "../../Types";
 import { IContext, SSContext } from "../context/Context";
 import SheetLogger from "../context/SheetLogger";
-import { TeamInfo } from "../../Types";
 
 function EmailBallotFolderLinks() {
   const context = new SSContext();
@@ -8,12 +8,12 @@ function EmailBallotFolderLinks() {
   Object.values(teamInfoMap).forEach((teamInfo) => {
     if (!teamInfo.emails.length) {
       SheetLogger.log(
-        `No emails listed for team ${teamInfo.teamNumber}, skipping...`
+        `No emails listed for team ${teamInfo.teamNumber}, skipping...`,
       );
       return;
     }
     SheetLogger.log(
-      `Emailing ballot folder link for team ${teamInfo.teamNumber}...`
+      `Emailing ballot folder link for team ${teamInfo.teamNumber}...`,
     );
     const fullEmail = ballotFolderEmail(context, teamInfo);
     GmailApp.sendEmail(fullEmail.to!, fullEmail.subject!, fullEmail.body!, {

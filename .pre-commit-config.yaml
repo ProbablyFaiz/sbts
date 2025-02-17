@@ -21,4 +21,3 @@ repos:
         additional_dependencies: ["@biomejs/biome@1.8.3"]
       - id: biome-format
         additional_dependencies: ["@biomejs/biome@1.8.3"]
-

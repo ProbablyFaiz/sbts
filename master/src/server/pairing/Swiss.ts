@@ -6,18 +6,18 @@ import {
   TeamSummary,
 } from "../../Types";
 import { BYE_BUST_SCHOOL_NAME, SSContext } from "../context/Context";
+import { SeededRandom } from "../context/Helpers";
 import {
   compareTeamSummaries,
   getAllTeamResults,
 } from "../tab/TabulateTeamBallots";
-import { SeededRandom } from "../context/Helpers";
 import {
-  PairingMetadata,
-  Pairing,
-  Swap,
   ConflictType,
-  formatSwapMetadata,
+  Pairing,
+  PairingMetadata,
+  Swap,
   deepCopyPairings,
+  formatSwapMetadata,
   swapKey,
 } from "./Helpers";
 
@@ -81,7 +81,7 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     context.swissConfig.previousRounds,
     1,
     context.byeStrategy,
-    context
+    context,
   );
   const teamInfo = context.teamInfo;
   // If there are no teams in the results, this is the first round.
@@ -94,7 +94,7 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     }
     // Find the teams that are in the team info but not in the team results.
     const missingTeams = Object.keys(teamInfo).filter(
-      (teamNumber) => !(teamNumber in teamResults)
+      (teamNumber) => !(teamNumber in teamResults),
     );
     if (missingTeams.length > 1) {
       return `There are ${missingTeams.length} teams in the team info but not in the team results. There should be at most one (the team that got a bye).`;
@@ -124,7 +124,7 @@ function PairTeams(pairingMetadata?: PairingMetadata): string | Cell[][] {
     context.teamInfo,
     teamResults,
     context.swissConfig,
-    pairingMetadata
+    pairingMetadata,
   );
 }
 
@@ -132,7 +132,7 @@ const pairTeamsOddRound = (
   teamInfo: Record<string, TeamInfo>,
   teamResults: Record<string, TeamSummary>,
   swissConfig: SwissConfig,
-  pairingMetadata?: PairingMetadata
+  pairingMetadata?: PairingMetadata,
 ): Cell[][] | string => {
   // Snake: 1 vs. 2, 4 vs. 3, 5 vs. 6 etc. Randomly decide whether 1,4,5 are P or D.
   const sortedTeams = sortedTeamResults(teamResults);
@@ -188,7 +188,7 @@ const pairTeamsOddRound = (
       }
       // Filter indices outside of pairing bounds
       possibleSwapIndexPairs = possibleSwapIndexPairs.filter(
-        ([x, _]) => x >= 0 && x < pairings.length
+        ([x, _]) => x >= 0 && x < pairings.length,
       );
       const swapToMake: Swap | undefined = possibleSwapIndexPairs
         .map(([x, y]) => [pairings[i][y], pairings[x][y]] as Swap)
@@ -197,7 +197,7 @@ const pairTeamsOddRound = (
         .sort(compareSwaps(teamResults))[0]; // Sort possible swaps by "least difference" metric, then select the best possible swap, undefined if no swaps are possible.
       if (swapToMake) {
         const [indexToSwap, positionToSwap] = possibleSwapIndexPairs.find(
-          ([x, y]) => pairings[x][y] === swapToMake[1]
+          ([x, y]) => pairings[x][y] === swapToMake[1],
         )!;
         pairings[i][positionToSwap] = swapToMake[1];
         pairings[indexToSwap][positionToSwap] = swapToMake[0];
@@ -224,7 +224,7 @@ const pairTeamsEvenRound = (
   teamInfo: Record<string, TeamInfo>,
   teamResults: Record<string, TeamSummary>,
   swissConfig: SwissConfig,
-  pairingMetadata?: PairingMetadata
+  pairingMetadata?: PairingMetadata,
 ): Cell[][] | string => {
   const sortedTeams = sortedTeamResults(teamResults);
   const [plaintiffTeams, defenseTeams] = balanceTeamSides(sortedTeams);
@@ -259,19 +259,19 @@ const pairTeamsEvenRound = (
         let possibleSwapIndices = [i - swapDistance, i + swapDistance];
         // Filter indices outside of pairings bounds
         possibleSwapIndices = possibleSwapIndices.filter(
-          (swapIndex) => swapIndex >= 0 && swapIndex < pairings.length
+          (swapIndex) => swapIndex >= 0 && swapIndex < pairings.length,
         );
         const swapToMake: Swap | undefined = possibleSwapIndices
           .map((swapIndex) => [team1, pairings[swapIndex][0]] as Swap) // Create possible swaps (always swap plaintiff, for consistency)
           .filter((swap) => !swaps.has(swapKey(swap))) // Exclude previously made swaps
           .filter(
-            (swap) => !conflictFunction(postSwapPairing(pairings[i])(swap))
+            (swap) => !conflictFunction(postSwapPairing(pairings[i])(swap)),
           )
           .sort(compareSwaps(teamResults))[0]; // Sort possible swaps by "least difference" metric // Select best possible swap, undefined if no swaps are possible
         if (swapToMake) {
           // If there is a swap that we can make, do it.
           const indexToSwap = possibleSwapIndices.find(
-            (swapIndex) => pairings[swapIndex][0] === swapToMake[1]
+            (swapIndex) => pairings[swapIndex][0] === swapToMake[1],
           )!;
           pairings[i][0] = swapToMake[1];
           pairings[indexToSwap][0] = swapToMake[0];
@@ -299,7 +299,7 @@ const pairTeamsEvenRound = (
 };
 
 function balanceTeamSides(
-  teams: [string, TeamSummary][]
+  teams: [string, TeamSummary][],
 ): [string[], string[]] {
   // If there are fewer flexible teams than the size of the disparity,
   // then it's impossible to resolve. Also, if the size of the disparity
@@ -310,19 +310,19 @@ function balanceTeamSides(
   const plaintiffTeams = teams
     .filter(
       ([_, teamSummary]) =>
-        teamSummary.timesDefense > teamSummary.timesPlaintiff
+        teamSummary.timesDefense > teamSummary.timesPlaintiff,
     )
     .map(([teamNumber, _]) => teamNumber);
   const defenseTeams = teams
     .filter(
       ([_, teamSummary]) =>
-        teamSummary.timesDefense < teamSummary.timesPlaintiff
+        teamSummary.timesDefense < teamSummary.timesPlaintiff,
     )
     .map(([teamNumber, _]) => teamNumber);
   const flexibleTeams = teams
     .filter(
       ([_, teamSummary]) =>
-        teamSummary.timesDefense === teamSummary.timesPlaintiff
+        teamSummary.timesDefense === teamSummary.timesPlaintiff,
     )
     .map(([teamNumber, _]) => teamNumber);
 
@@ -351,20 +351,20 @@ function balanceTeamSides(
   }
   plaintiffTeams.sort(
     (a, b) =>
-      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b)
+      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b),
   );
   defenseTeams.sort(
     (a, b) =>
-      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b)
+      teams.findIndex((x) => x[0] === a) - teams.findIndex((x) => x[0] === b),
   );
   return [plaintiffTeams, defenseTeams];
 }
 
 const sortedTeamResults = (
-  teamResults: Record<string, TeamSummary>
+  teamResults: Record<string, TeamSummary>,
 ): [string, TeamSummary][] => {
   return Object.entries(teamResults).sort(([_, aSummary], [__, bSummary]) =>
-    compareTeamSummaries(aSummary, bSummary)
+    compareTeamSummaries(aSummary, bSummary),
   );
 };
 
@@ -384,10 +384,10 @@ const compareSwaps =
     for (let key of sortKeys) {
       const diff =
         Math.abs(
-          <number>swap1TeamResults[key] - <number>swap1OldTeamResults[key]
+          <number>swap1TeamResults[key] - <number>swap1OldTeamResults[key],
         ) -
         Math.abs(
-          <number>swap2TeamResults[key] - <number>swap2OldTeamResults[key]
+          <number>swap2TeamResults[key] - <number>swap2OldTeamResults[key],
         );
       if (diff) return diff;
     }
@@ -405,7 +405,7 @@ const teamsConflict =
   (
     teamInfo: Record<string, TeamInfo>,
     teamResults: Record<string, TeamSummary>,
-    swissConfig: SwissConfig | undefined = undefined
+    swissConfig: SwissConfig | undefined = undefined,
   ) =>
   (pairing: Pairing): ConflictType => {
     if (
@@ -422,7 +422,7 @@ const teamsConflict =
   };
 
 const createTeamResults = (
-  teamInfo: Record<string, TeamInfo>
+  teamInfo: Record<string, TeamInfo>,
 ): Record<string, TeamSummary> => {
   const resultPairs = Object.entries(teamInfo).map(([teamId, teamInfo]) => {
     return [
@@ -442,10 +442,10 @@ const createTeamResults = (
 };
 
 const createByeTeamSummary = (
-  teamResults: Record<string, TeamSummary>
+  teamResults: Record<string, TeamSummary>,
 ): TeamSummary => {
   const pastOpponents = Object.keys(teamResults).filter((teamId) =>
-    teamResults[teamId].pastOpponents.includes(BYE_TEAM_NUM)
+    teamResults[teamId].pastOpponents.includes(BYE_TEAM_NUM),
   );
   return {
     teamNumber: BYE_TEAM_NUM,

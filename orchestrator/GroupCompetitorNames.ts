@@ -9,7 +9,7 @@ function GroupCompetitorNames() {
         competitorNamesByTeam[record.pTeamNum] = new Set();
       record.pNames.forEach(
         (name) =>
-          name?.length > 0 && competitorNamesByTeam[record.pTeamNum].add(name)
+          name?.length > 0 && competitorNamesByTeam[record.pTeamNum].add(name),
       );
     }
     if (record.dTeamNum?.length) {
@@ -17,7 +17,7 @@ function GroupCompetitorNames() {
         competitorNamesByTeam[record.dTeamNum] = new Set();
       record.dNames.forEach(
         (name) =>
-          name?.length > 0 && competitorNamesByTeam[record.dTeamNum].add(name)
+          name?.length > 0 && competitorNamesByTeam[record.dTeamNum].add(name),
       );
     }
   });
@@ -33,7 +33,7 @@ function GroupCompetitorNames() {
       // Just the numerical team name is considered an invalid name for a range, so we prefix it.
       context.autocompleteSpreadsheet.setNamedRange(
         `TEAM${teamNum}`,
-        namesRange
+        namesRange,
       );
     });
 }

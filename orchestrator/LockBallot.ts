@@ -1,7 +1,7 @@
 function setBallotLock(
   ballotSheet,
   enableBallotLock,
-  context: OrchestratorContext
+  context: OrchestratorContext,
 ) {
   const currentSheet = ballotSheet.getSheetByName("Scores");
   if (enableBallotLock === true) {
@@ -11,7 +11,7 @@ function setBallotLock(
     return "Locked";
   } else {
     const existingProtection = currentSheet.getProtections(
-      SpreadsheetApp.ProtectionType.SHEET
+      SpreadsheetApp.ProtectionType.SHEET,
     )[0];
     if (existingProtection) {
       existingProtection.remove();

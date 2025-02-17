@@ -1,15 +1,15 @@
-import { TeamInfo, RoundRobinConfig } from "../../../src/Types";
+import { RoundRobinConfig, TeamInfo } from "../../../src/Types";
+import { SeededRandom } from "../../../src/server/context/Helpers";
 import { ConflictType, Pairing } from "../../../src/server/pairing/Helpers";
 import {
-  getInitialRoundState,
-  getTeamGroupings,
-  getInitialPairings,
-  getNextRoundState,
-  isMatchupConflict,
   computeAllPairings,
+  getInitialPairings,
+  getInitialRoundState,
+  getNextRoundState,
   getRoundPairer,
+  getTeamGroupings,
+  isMatchupConflict,
 } from "../../../src/server/pairing/RoundRobin";
-import { SeededRandom } from "../../../src/server/context/Helpers";
 
 const mockTeamInfos: Record<string, TeamInfo> = {
   A1: {
@@ -151,7 +151,7 @@ describe("getInitialPairings", () => {
     const rng = new SeededRandom("test-seed");
 
     expect(() => getInitialPairings(groupings, rng)).toThrow(
-      "Not enough flexible teams"
+      "Not enough flexible teams",
     );
   });
 });
@@ -188,7 +188,7 @@ const getPairingKey = (pairing: Pairing): string => {
 
 // Helper functions to verify pairing properties
 const verifyNoRepeatMatchups = (
-  pairingsByRound: Map<string, Pairing[]>
+  pairingsByRound: Map<string, Pairing[]>,
 ): boolean => {
   const allMatchups = new Set<string>();
   for (const pairings of pairingsByRound.values()) {
@@ -203,7 +203,7 @@ const verifyNoRepeatMatchups = (
 
 const verifyNoSameSchoolMatchups = (
   pairingsByRound: Map<string, Pairing[]>,
-  teamInfos: Record<string, TeamInfo>
+  teamInfos: Record<string, TeamInfo>,
 ): boolean => {
   for (const pairings of pairingsByRound.values()) {
     for (const [team1, team2] of pairings) {
@@ -217,7 +217,7 @@ const verifyNoSameSchoolMatchups = (
 
 const verifyAllTeamsParticipate = (
   pairingsByRound: Map<string, Pairing[]>,
-  teamInfos: Record<string, TeamInfo>
+  teamInfos: Record<string, TeamInfo>,
 ): boolean => {
   for (const pairings of pairingsByRound.values()) {
     const teamsThisRound = new Set<string>();
@@ -242,16 +242,16 @@ describe("computeAllPairings", () => {
   it("generates valid pairings across multiple rounds", () => {
     const pairingsByRound = computeAllPairings(
       threeRoundConfig,
-      largerMockTeamInfos
+      largerMockTeamInfos,
     );
 
     expect(pairingsByRound.size).toBe(3);
     expect(verifyNoRepeatMatchups(pairingsByRound)).toBe(true);
     expect(
-      verifyNoSameSchoolMatchups(pairingsByRound, largerMockTeamInfos)
+      verifyNoSameSchoolMatchups(pairingsByRound, largerMockTeamInfos),
     ).toBe(true);
     expect(
-      verifyAllTeamsParticipate(pairingsByRound, largerMockTeamInfos)
+      verifyAllTeamsParticipate(pairingsByRound, largerMockTeamInfos),
     ).toBe(true);
   });
 
@@ -259,13 +259,13 @@ describe("computeAllPairings", () => {
     const sameSchoolConfig = { ...threeRoundConfig, allowSameSchool: true };
     const pairingsByRound = computeAllPairings(
       sameSchoolConfig,
-      largerMockTeamInfos
+      largerMockTeamInfos,
     );
 
     // We don't verify no same school matchups here since they're allowed
     expect(verifyNoRepeatMatchups(pairingsByRound)).toBe(true);
     expect(
-      verifyAllTeamsParticipate(pairingsByRound, largerMockTeamInfos)
+      verifyAllTeamsParticipate(pairingsByRound, largerMockTeamInfos),
     ).toBe(true);
   });
 
@@ -278,7 +278,7 @@ describe("computeAllPairings", () => {
     };
 
     expect(() => computeAllPairings(impossibleConfig, mockTeamInfos)).toThrow(
-      "Failed to pair teams"
+      "Failed to pair teams",
     );
   });
 });
@@ -294,7 +294,7 @@ describe("getRoundPairer", () => {
   const verifyPairingProperties = (
     pairings: Pairing[],
     teamInfos: Record<string, TeamInfo>,
-    previousMatchups: Set<string> = new Set()
+    previousMatchups: Set<string> = new Set(),
   ): void => {
     // Each team should appear exactly once
     const teamsInRound = new Set<string>();
@@ -335,7 +335,7 @@ describe("getRoundPairer", () => {
         ["B3", "A2"],
         ["C5", "B4"],
         ["C6", "A1"],
-      ].map(getPairingKey)
+      ].map(getPairingKey),
     );
     let state = {
       teamStates: new Map([
@@ -400,7 +400,7 @@ describe("getRoundPairer", () => {
     verifyPairingProperties(
       thirdRoundPairings,
       largerMockTeamInfos,
-      previousMatchups
+      previousMatchups,
     );
   });
 

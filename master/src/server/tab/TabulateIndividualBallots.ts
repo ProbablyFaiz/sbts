@@ -1,6 +1,6 @@
+import { IndividualBallotResult, IndividualSummary } from "../../Types";
 import { IContext, SSContext } from "../context/Context";
 import { flattenRange } from "../context/Helpers";
-import { IndividualBallotResult, IndividualSummary } from "../../Types";
 
 const getCompetitorKey = (teamNumber: string, competitor: string) =>
   JSON.stringify([teamNumber, competitor]);
@@ -10,35 +10,38 @@ const parseCompetitorKey = (competitorKey: string) => {
 };
 
 const getGroupedIndividualResults = (
-  individualBallots: IndividualBallotResult[]
+  individualBallots: IndividualBallotResult[],
 ) => {
   // Group by competitor key and within that group, group by round
-  const groupedIndividualBallots = individualBallots.reduce((acc, ballot) => {
-    const competitorKey = getCompetitorKey(
-      ballot.teamNumber,
-      ballot.competitorName
-    );
-    if (!(competitorKey in acc)) {
-      acc[competitorKey] = {};
-    }
-    if (!(ballot.round in acc[competitorKey])) {
-      acc[competitorKey][ballot.round] = [];
-    }
-    acc[competitorKey][ballot.round].push(ballot);
-    return acc;
-  }, {} as Record<string, Record<string, IndividualBallotResult[]>>);
+  const groupedIndividualBallots = individualBallots.reduce(
+    (acc, ballot) => {
+      const competitorKey = getCompetitorKey(
+        ballot.teamNumber,
+        ballot.competitorName,
+      );
+      if (!(competitorKey in acc)) {
+        acc[competitorKey] = {};
+      }
+      if (!(ballot.round in acc[competitorKey])) {
+        acc[competitorKey][ballot.round] = [];
+      }
+      acc[competitorKey][ballot.round].push(ballot);
+      return acc;
+    },
+    {} as Record<string, Record<string, IndividualBallotResult[]>>,
+  );
   return groupedIndividualBallots;
 };
 
 const getCompetitorResult = (
-  roundBallots: Record<string, IndividualBallotResult[]>
+  roundBallots: Record<string, IndividualBallotResult[]>,
 ) => {
   // Get the average score for each round
   const competitorResult = Object.values(roundBallots)
     .map((singleRoundBallots) => {
       const roundScoreSum = singleRoundBallots.reduce(
         (acc, ballot) => acc + ballot.score,
-        0
+        0,
       );
       return roundScoreSum / singleRoundBallots.length;
     })
@@ -51,18 +54,18 @@ const getCompetitorResult = (
       { totalScore: 0, numRounds: 0 } as {
         totalScore: number;
         numRounds: number;
-      }
+      },
     );
   return competitorResult;
 };
 
 const getAllIndividualResults = (
   rounds: string[],
-  context: IContext
+  context: IContext,
 ): Record<string, IndividualSummary> => {
   const roundSet = new Set(rounds);
   const individualBallots = context.individualBallotResults.filter((ballot) =>
-    roundSet.has(ballot.round)
+    roundSet.has(ballot.round),
   );
 
   const groupedIndividualBallots =
@@ -81,16 +84,16 @@ const getAllIndividualResults = (
       acc[competitorKey] = individualSummary;
       return acc;
     },
-    {} as Record<string, IndividualSummary>
+    {} as Record<string, IndividualSummary>,
   );
   return individualResults;
 };
 
 const getIndividualResultsOutput = (
-  individualResults: Record<string, IndividualSummary>
+  individualResults: Record<string, IndividualSummary>,
 ) => {
   const individualSummaries = Object.values(individualResults).sort(
-    (a, b) => b.score - a.score
+    (a, b) => b.score - a.score,
   );
   return individualSummaries.reduce(
     (acc, result, i) => [
@@ -107,7 +110,7 @@ const getIndividualResultsOutput = (
         Math.round(result.score * 100) / 100,
       ],
     ],
-    []
+    [],
   );
 };
 

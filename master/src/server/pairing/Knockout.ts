@@ -16,7 +16,7 @@ interface Matchup {
 function PairKnockoutRounds(
   seedingRounds: any,
   knockoutRounds: any,
-  numberOfTeams: number
+  numberOfTeams: number,
 ) {
   seedingRounds = flattenRange(seedingRounds);
   knockoutRounds = flattenRange(knockoutRounds);
@@ -27,13 +27,13 @@ function PairKnockoutRounds(
   const numberOfKnockoutRounds = Math.log2(numberOfTeams);
   if (numberOfKnockoutRounds !== knockoutRounds.length) {
     throw new Error(
-      `Number of knockout rounds (${knockoutRounds.length}) does not match rounds required to declare a winner for number of teams (${numberOfTeams})`
+      `Number of knockout rounds (${knockoutRounds.length}) does not match rounds required to declare a winner for number of teams (${numberOfTeams})`,
     );
   }
 
   const context = new SSContext();
   const seedingResults = Object.values(
-    getAllTeamResults(seedingRounds, 2, context.byeStrategy, context)
+    getAllTeamResults(seedingRounds, 2, context.byeStrategy, context),
   ).sort((a, b) => compareTeamSummaries(a, b));
   const teamsBySeed = seedingResults.map((teamResult) => teamResult.teamNumber);
 }

@@ -16,24 +16,24 @@ import {
   TeamBallotResult,
   TeamInfo,
 } from "../../Types";
+import { getBallotPdfName } from "../actions/PublishTeamBallots";
 import { memoize } from "./CacheHelper";
 import {
+  GoogleFile,
   compactRange,
   flattenRange,
   getByeStrategy,
   getIdFromUrl,
   getOrCreateChildFolder,
-  GoogleFile,
   sheetForFile,
   spreadsheetTruthy,
 } from "./Helpers";
-import { getBallotPdfName } from "../actions/PublishTeamBallots";
 
 interface IContext {
   teamInfo: Record<string, TeamInfo>;
   setTeamBallotFolderLink: (
     teamNumber: string,
-    ballotFolderLink: string
+    ballotFolderLink: string,
   ) => boolean;
   tournamentEmail: string;
   courtroomRecords: CourtroomInfo[];
@@ -58,9 +58,6 @@ const BYE_BUST_SCHOOL_NAME = "Bye Bust";
 
 const ENTERED_BALLOTS_SHEET = "Entered Ballots";
 
-
-
-
 class SSContext implements IContext {
   @memoize
   get teamInfo(): Record<string, TeamInfo> {
@@ -76,7 +73,7 @@ class SSContext implements IContext {
         }
         return acc;
       },
-      {} as Record<string, string[]>
+      {} as Record<string, string[]>,
     );
     compactRange(this.getRangeValues(MasterRange.TeamInfo) ?? []).forEach(
       (row) => {
@@ -85,16 +82,19 @@ class SSContext implements IContext {
           .concat(ballotCompetitorNames[row[0]] ?? [])
           .map((s) => s.trim());
         // Filter duplicates and empty strings and count freqs
-        const nameFreqs = competitorNames.reduce((acc, name) => {
-          if (!name) {
+        const nameFreqs = competitorNames.reduce(
+          (acc, name) => {
+            if (!name) {
+              return acc;
+            }
+            if (!acc[name]) {
+              acc[name] = 0;
+            }
+            acc[name]++;
             return acc;
-          }
-          if (!acc[name]) {
-            acc[name] = 0;
-          }
-          acc[name]++;
-          return acc;
-        }, {} as Record<string, number>);
+          },
+          {} as Record<string, number>,
+        );
         const freqSortedNames = Object.keys(nameFreqs).sort((a, b) => {
           if (nameFreqs[a] !== nameFreqs[b]) {
             return nameFreqs[b] - nameFreqs[a];
@@ -111,7 +111,7 @@ class SSContext implements IContext {
           emails: row[4],
           ballotFolderLink: row[5],
         };
-      }
+      },
     );
     return teamInfoMapping;
   }
@@ -120,7 +120,9 @@ class SSContext implements IContext {
   get teamBallotResults(): TeamBallotResult[] {
     const results: TeamBallotResult[] = [];
     for (const readout of this.allReadouts) {
-      const petitionerPd = readout.pIssue1Scores.reduce((a, b) => a + b, 0) - readout.rIssue1Scores.reduce((a, b) => a + b, 0);
+      const petitionerPd =
+        readout.pIssue1Scores.reduce((a, b) => a + b, 0) -
+        readout.rIssue1Scores.reduce((a, b) => a + b, 0);
       const petitionerWon = petitionerPd === 0 ? 0.5 : petitionerPd > 0 ? 1 : 0;
       const respondentPd = -petitionerPd;
       const respondentWon = 1 - petitionerWon;
@@ -197,7 +199,7 @@ class SSContext implements IContext {
   @memoize
   get judgeNames(): string[] {
     return Array.from(
-      new Set(this.teamBallotResults.map((ballot) => ballot.judgeName))
+      new Set(this.teamBallotResults.map((ballot) => ballot.judgeName)),
     );
   }
 
@@ -212,14 +214,14 @@ class SSContext implements IContext {
   @memoize
   get prelimRounds(): string[] {
     return flattenRange(
-      compactRange(this.getRangeValues(MasterRange.PrelimRounds) ?? [])
+      compactRange(this.getRangeValues(MasterRange.PrelimRounds) ?? []),
     );
   }
 
   @memoize
   get knockoutRounds(): string[] {
     return flattenRange(
-      compactRange(this.getRangeValues(MasterRange.KnockoutRounds) ?? [])
+      compactRange(this.getRangeValues(MasterRange.KnockoutRounds) ?? []),
     );
   }
 
@@ -253,15 +255,15 @@ class SSContext implements IContext {
   // This is inefficient but hassle free. Shouldn't be that hard to optimize if it becomes a bottleneck.
   setTeamBallotFolderLink(
     teamNumber: string,
-    ballotFolderLink: string
+    ballotFolderLink: string,
   ): boolean {
     const teamInfoRange = this.masterSpreadsheet.getRangeByName(
-      MasterRange.TeamInfo
+      MasterRange.TeamInfo,
     );
     if (!teamInfoRange) return false;
     const teamInfoValues = teamInfoRange.getValues();
     const teamRow = teamInfoValues.find(
-      (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber
+      (teamRow: Cell[]) => teamRow[0]?.toString() === teamNumber,
     );
     if (!teamRow) return false;
     teamRow[5] = ballotFolderLink;
@@ -270,7 +272,7 @@ class SSContext implements IContext {
   }
 
   teamBallotFolder(
-    teamNumber: string
+    teamNumber: string,
   ): GoogleAppsScript.Drive.Folder | undefined {
     const folderLink = this.teamInfo[teamNumber]?.ballotFolderLink;
     if (!folderLink) return undefined;
@@ -283,8 +285,8 @@ class SSContext implements IContext {
       getIdFromUrl(
         this.masterSpreadsheet
           .getRangeByName(MasterRange.ExportFolderLink)
-          ?.getValue()
-      )
+          ?.getValue(),
+      ),
     );
   }
 
@@ -294,15 +296,15 @@ class SSContext implements IContext {
       getIdFromUrl(
         this.masterSpreadsheet
           .getRangeByName(MasterRange.ParentFolderLink)
-          ?.getValue()
-      )
+          ?.getValue(),
+      ),
     );
   }
 
   @memoize
   get courtroomRecords(): CourtroomInfo[] {
     return compactRange(
-      this.getRangeValues(MasterRange.CourtroomInfo) ?? []
+      this.getRangeValues(MasterRange.CourtroomInfo) ?? [],
     ).map((row) => {
       return {
         name: row[0],
@@ -336,7 +338,7 @@ class SSContext implements IContext {
     }
     // Sorting ballots by date created should be sufficient to ensure that they're in the correct order
     ballots.sort(
-      (a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime()
+      (a, b) => a.getDateCreated().getTime() - b.getDateCreated().getTime(),
     );
     return ballots;
   }
@@ -370,7 +372,7 @@ class SSContext implements IContext {
 
     formResponseSheets.forEach((sheet) => {
       const formResponses = compactRange(
-        sheet.getDataRange().getValues().slice(1)
+        sheet.getDataRange().getValues().slice(1),
       ).map((row) => this.formRowToReadout(row, sheet.getName()));
       formBallotReadouts.push(...formResponses);
     });
@@ -385,11 +387,11 @@ class SSContext implements IContext {
   @memoize
   get enteredBallotReadouts(): NonSheetBallotReadout[] {
     const enteredBallotSheets = this.masterSpreadsheet.getSheetByName(
-      ENTERED_BALLOTS_SHEET
+      ENTERED_BALLOTS_SHEET,
     );
     if (!enteredBallotSheets) return [];
     return compactRange(
-      enteredBallotSheets.getDataRange().getValues().slice(1)
+      enteredBallotSheets.getDataRange().getValues().slice(1),
     ).map((row) => this.formRowToReadout(row, ENTERED_BALLOTS_SHEET));
   }
 
@@ -401,16 +403,16 @@ class SSContext implements IContext {
   @memoize
   get swissConfig(): SwissConfig {
     const previousRounds = compactRange(
-      this.getRangeValues(MasterRange.SwissPreviousRounds) ?? []
+      this.getRangeValues(MasterRange.SwissPreviousRounds) ?? [],
     ).map((row) => row[0]);
     const allowSameSchool = spreadsheetTruthy(
-      this.getRangeValue(MasterRange.SwissAllowSameSchool)
+      this.getRangeValue(MasterRange.SwissAllowSameSchool),
     );
     const allowRepeatMatchup = spreadsheetTruthy(
-      this.getRangeValue(MasterRange.SwissAllowRepeatMatchup)
+      this.getRangeValue(MasterRange.SwissAllowRepeatMatchup),
     );
     const randomizeCourtrooms = spreadsheetTruthy(
-      this.getRangeValue(MasterRange.SwissRandomizeCourtrooms)
+      this.getRangeValue(MasterRange.SwissRandomizeCourtrooms),
     );
     const randomSeed = this.getRangeValue(MasterRange.SwissRandomSeed) || "0";
     return {
@@ -425,10 +427,10 @@ class SSContext implements IContext {
   @memoize
   get roundRobinConfig(): RoundRobinConfig {
     const prelimRounds = compactRange(
-      this.getRangeValues(MasterRange.RoundRobinPrelimRounds) ?? []
+      this.getRangeValues(MasterRange.RoundRobinPrelimRounds) ?? [],
     ).map((row) => row[0]);
     const allowSameSchool = spreadsheetTruthy(
-      this.getRangeValue(MasterRange.RoundRobinAllowSameSchool)
+      this.getRangeValue(MasterRange.RoundRobinAllowSameSchool),
     );
     const randomSeed =
       this.getRangeValue(MasterRange.RoundRobinRandomSeed) || "0";
@@ -441,14 +443,12 @@ class SSContext implements IContext {
 
   @memoize
   get tabSystemSetup(): boolean {
-    return spreadsheetTruthy(
-      this.getRangeValue(MasterRange.TabSystemSetup)
-    );
+    return spreadsheetTruthy(this.getRangeValue(MasterRange.TabSystemSetup));
   }
 
   private formRowToReadout(
     response: any[],
-    sourceSheet: string
+    sourceSheet: string,
   ): NonSheetBallotReadout {
     const getScores = (start: number, end: number) =>
       response
@@ -483,7 +483,7 @@ class SSContext implements IContext {
   }
 
   private readoutToResult(
-    readout: NonSheetBallotReadout
+    readout: NonSheetBallotReadout,
   ): NonSheetBallotResult {
     return {
       judgeName: readout.judgeName,
@@ -505,11 +505,11 @@ class SSContext implements IContext {
 
   setReadoutPdfUrl(readout: NonSheetBallotReadout, ballotPdfUrl: string) {
     const sourceSheet = this.masterSpreadsheet.getSheetByName(
-      readout.sourceSheet
+      readout.sourceSheet,
     );
     if (!sourceSheet) {
       Logger.log(
-        `Could not find sheet ${readout.sourceSheet} to update ballot PDF URL. This is really weird and scary.`
+        `Could not find sheet ${readout.sourceSheet} to update ballot PDF URL. This is really weird and scary.`,
       );
       return;
     }
@@ -540,40 +540,40 @@ class SSContext implements IContext {
 
   getOrCreateTrialFolder(
     round: string,
-    courtroom: string
+    courtroom: string,
   ): GoogleAppsScript.Drive.Folder {
     const roundFolder = getOrCreateChildFolder(this.tabFolder, round);
     const trialFolder = getOrCreateChildFolder(
       roundFolder,
-      `${round} - ${courtroom}`
+      `${round} - ${courtroom}`,
     );
     return trialFolder;
   }
 
   addEnteredBallot(ballotState: RequiredBallotState) {
     const enteredBallotsSheet = this.masterSpreadsheet.getSheetByName(
-      ENTERED_BALLOTS_SHEET
+      ENTERED_BALLOTS_SHEET,
     );
     let pdfUrl = "";
     if (ballotState.pdfData) {
       const trialFolder = this.getOrCreateTrialFolder(
         ballotState.round,
-        ballotState.courtroom
+        ballotState.courtroom,
       );
       const pdfName = getBallotPdfName(
         ballotState.round,
         ballotState.petitioner.teamNumber,
         ballotState.respondent.teamNumber,
-        ballotState.judgeName
+        ballotState.judgeName,
       );
       const decodedPdfData = Utilities.base64Decode(
         ballotState.pdfData,
-        Utilities.Charset.UTF_8
+        Utilities.Charset.UTF_8,
       );
       const pdfBlob = Utilities.newBlob(
         decodedPdfData,
         "application/pdf",
-        pdfName
+        pdfName,
       );
       pdfUrl = trialFolder.createFile(pdfBlob).getUrl();
     }

@@ -63,7 +63,7 @@ class RankerContext implements IRankerContext {
   constructor() {
     this.rankerSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   }
-  
+
   @memoize
   get rankingConfig(): RankingConfig {
     const startingElo = this.rankerSpreadsheet
@@ -91,7 +91,7 @@ class RankerContext implements IRankerContext {
     const tabSummaryLinks = compactRange(
       this.rankerSpreadsheet
         .getRangeByName(RankerRange.TabSummaryLinks)
-        .getValues()
+        .getValues(),
     );
     return tabSummaryLinks
       .map((row) => {
@@ -102,7 +102,7 @@ class RankerContext implements IRankerContext {
         const tabSummarySpreadsheet = SpreadsheetApp.openByUrl(tabSummaryUrl);
         if (!tabSummarySpreadsheet) {
           console.log(
-            `Could not open tab summary spreadsheet at ${tabSummaryUrl}, skipping...`
+            `Could not open tab summary spreadsheet at ${tabSummaryUrl}, skipping...`,
           );
           return null;
         }
@@ -117,24 +117,24 @@ class RankerContext implements IRankerContext {
     const orderedRoundList = compactRange(
       this.getSummaryRangeValues(
         tabSummarySpreadsheet,
-        TabSummaryRange.OrderedRoundList
-      )
+        TabSummaryRange.OrderedRoundList,
+      ),
     ).map((row) => row[0].trim());
     const matchupResults = this.getMatchupResultsForSummary(
-      tabSummarySpreadsheet
+      tabSummarySpreadsheet,
     ).sort(
       (a, b) =>
-        orderedRoundList.indexOf(a.round) - orderedRoundList.indexOf(b.round)
+        orderedRoundList.indexOf(a.round) - orderedRoundList.indexOf(b.round),
     );
     return {
       url: tabSummarySpreadsheet.getUrl(),
       tournamentName: this.getSummaryRangeValue(
         tabSummarySpreadsheet,
-        TabSummaryRange.TournamentName
+        TabSummaryRange.TournamentName,
       ),
       tournamentType: this.getSummaryRangeValue(
         tabSummarySpreadsheet,
-        TabSummaryRange.TournamentType
+        TabSummaryRange.TournamentType,
       ),
       tournamentStartTimestamp: tabSummarySpreadsheet
         .getRangeByName(TabSummaryRange.TournamentStartDate)
@@ -150,8 +150,8 @@ class RankerContext implements IRankerContext {
     return compactRange(
       this.getSummaryRangeValues(
         tabSummarySpreadsheet,
-        TabSummaryRange.TeamRanking
-      )
+        TabSummaryRange.TeamRanking,
+      ),
     )
       .map((teamCells) => {
         return {
@@ -171,8 +171,8 @@ class RankerContext implements IRankerContext {
     return compactRange(
       this.getSummaryRangeValues(
         tabSummarySpreadsheet,
-        TabSummaryRange.MatchupResults
-      )
+        TabSummaryRange.MatchupResults,
+      ),
     )
       .map((matchupCells) => {
         let pBallotsWon = parseFloat(matchupCells[3]);
@@ -180,8 +180,10 @@ class RankerContext implements IRankerContext {
         if (isNaN(pBallotsWon) || isNaN(dBallotsWon)) {
           return null;
         }
-        pBallotsWon = pBallotsWon * BALLOTS_PER_ROUND / (pBallotsWon + dBallotsWon);
-        dBallotsWon = dBallotsWon * BALLOTS_PER_ROUND / (pBallotsWon + dBallotsWon);
+        pBallotsWon =
+          (pBallotsWon * BALLOTS_PER_ROUND) / (pBallotsWon + dBallotsWon);
+        dBallotsWon =
+          (dBallotsWon * BALLOTS_PER_ROUND) / (pBallotsWon + dBallotsWon);
         return {
           round: matchupCells[0].trim(),
           pTeamNumber: matchupCells[1].trim(),
@@ -203,7 +205,7 @@ class RankerContext implements IRankerContext {
 
   private getSummaryRangeValues(
     spreadsheet: Spreadsheet,
-    range: TabSummaryRange
+    range: TabSummaryRange,
   ): string[][] {
     return spreadsheet
       .getRangeByName(range)
@@ -213,7 +215,7 @@ class RankerContext implements IRankerContext {
 
   private getSummaryRangeValue(
     spreadsheet: Spreadsheet,
-    range: TabSummaryRange
+    range: TabSummaryRange,
   ): string {
     return spreadsheet.getRangeByName(range).getValue().toString();
   }

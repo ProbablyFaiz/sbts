@@ -54,13 +54,13 @@ class OrchestratorContext implements IAutocompleteContext {
           submitted: row[BallotRowIndex.Submitted] === "true",
           locked: row[BallotRowIndex.Locked] === "true",
         };
-      }
+      },
     );
   }
 
   get captainsFormData(): ICaptainsFormRecord[] {
     return compactRange(
-      this.getRangeValues(OrchestratorRange.CaptainsFormData)!
+      this.getRangeValues(OrchestratorRange.CaptainsFormData)!,
     ).map((row) => {
       return {
         captainsFormLink: row[CaptainsFormRowIndex.Link],
@@ -68,11 +68,11 @@ class OrchestratorContext implements IAutocompleteContext {
         dTeamNum: row[CaptainsFormRowIndex.DTeamNum].toString(),
         pNames: row.slice(
           CaptainsFormRowIndex.PNamesStart,
-          CaptainsFormRowIndex.PNamesEnd + 1
+          CaptainsFormRowIndex.PNamesEnd + 1,
         ),
         dNames: row.slice(
           CaptainsFormRowIndex.DNamesStart,
-          CaptainsFormRowIndex.DNamesEnd + 1
+          CaptainsFormRowIndex.DNamesEnd + 1,
         ),
       };
     });
@@ -84,7 +84,7 @@ class OrchestratorContext implements IAutocompleteContext {
       this.masterSpreadsheet
         .getRangeByName("AllBailiffEmailsRange")
         .getValue()
-        .split(",")
+        .split(","),
     );
   }
 
@@ -98,9 +98,9 @@ class OrchestratorContext implements IAutocompleteContext {
     return sheetForFile(
       DriveApp.getFileById(
         getIdFromUrl(
-          this.getRangeValue(OrchestratorRange.AutocompleteEngineLink)
-        )
-      )
+          this.getRangeValue(OrchestratorRange.AutocompleteEngineLink),
+        ),
+      ),
     );
   }
 
@@ -109,9 +109,9 @@ class OrchestratorContext implements IAutocompleteContext {
     return sheetForFile(
       DriveApp.getFileById(
         getIdFromUrl(
-          this.getRangeValue(OrchestratorRange.MasterSpreadsheetLink)
-        )
-      )
+          this.getRangeValue(OrchestratorRange.MasterSpreadsheetLink),
+        ),
+      ),
     );
   }
 

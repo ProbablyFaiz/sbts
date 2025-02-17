@@ -9,8 +9,8 @@ function ShareTrialFolders() {
       const folder = DriveApp.getFolderById(getIdFromUrl(link));
       SheetLogger.log(
         `Sharing ${folder.getName()} folder with emails: ${courtroom.bailiffEmails.join(
-          ", "
-        )}`
+          ", ",
+        )}`,
       );
       folder.addEditors(courtroom.bailiffEmails);
     });

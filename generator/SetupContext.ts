@@ -92,14 +92,14 @@ class SetupContext implements ISetupContext {
   saveCourtroomFolderLink(name: string, trialFolderLink: string) {
     // This is O(n) but I don't care because it's easy and n is ~12.
     const courtroomRecord = this.courtroomRecords.find(
-      (courtroom) => courtroom.name === name
+      (courtroom) => courtroom.name === name,
     );
     courtroomRecord.roundFolderLinks.push(trialFolderLink);
   }
 
   writeCourtroomsToMaster() {
     const courtroomsRange = this.masterSpreadsheet.getRangeByName(
-      MasterRange.CourtroomInfo
+      MasterRange.CourtroomInfo,
     );
     const output = this.courtroomRecords.map((record) => [
       record.name,
@@ -128,8 +128,8 @@ class SetupContext implements ISetupContext {
   get masterSheetTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(GeneratorRange.MasterSheetTemplate)
-      ).toString()
+        this.getRangeValue(GeneratorRange.MasterSheetTemplate),
+      ).toString(),
     );
   }
 
@@ -137,15 +137,17 @@ class SetupContext implements ISetupContext {
   get orchestratorTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(GeneratorRange.OrchestratorTemplate)
-      ).toString()
+        this.getRangeValue(GeneratorRange.OrchestratorTemplate),
+      ).toString(),
     );
   }
 
   @memoize
   get ballotBaseTemplate(): GoogleFile {
     return DriveApp.getFileById(
-      getIdFromUrl(this.getRangeValue(GeneratorRange.BallotTemplate)).toString()
+      getIdFromUrl(
+        this.getRangeValue(GeneratorRange.BallotTemplate),
+      ).toString(),
     );
   }
 
@@ -153,8 +155,8 @@ class SetupContext implements ISetupContext {
   get captainsFormBaseTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(GeneratorRange.CaptainsFormTemplate)
-      ).toString()
+        this.getRangeValue(GeneratorRange.CaptainsFormTemplate),
+      ).toString(),
     );
   }
 
@@ -162,8 +164,8 @@ class SetupContext implements ISetupContext {
   get autocompleteEngineTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(GeneratorRange.AutocompleteTemplate)
-      ).toString()
+        this.getRangeValue(GeneratorRange.AutocompleteTemplate),
+      ).toString(),
     );
   }
 
@@ -171,8 +173,8 @@ class SetupContext implements ISetupContext {
   get formBallotTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(GeneratorRange.FormBallotTemplate)
-      ).toString()
+        this.getRangeValue(GeneratorRange.FormBallotTemplate),
+      ).toString(),
     );
   }
 
@@ -224,7 +226,7 @@ class SetupContext implements ISetupContext {
           name: courtroomCells[0],
           bailiffEmails: courtroomCells[1].split(","),
         };
-      }
+      },
     );
   }
 
@@ -237,7 +239,7 @@ class SetupContext implements ISetupContext {
           numCourtrooms: parseInt(roundCells[1]),
           numBallots: parseInt(roundCells[2]),
         };
-      }
+      },
     );
   }
 
@@ -288,7 +290,7 @@ class SimpleSetupContext {
 
   constructor(tabFolderLink: string) {
     this.tabFolder = DriveApp.getFolderById(
-      getIdFromUrl(tabFolderLink).toString()
+      getIdFromUrl(tabFolderLink).toString(),
     );
     this.generatorSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   }
@@ -297,22 +299,24 @@ class SimpleSetupContext {
   get masterSpreadsheetTemplate(): GoogleFile {
     return DriveApp.getFileById(
       getIdFromUrl(
-        this.getRangeValue(SimpleGeneratorRange.MasterSpreadsheetTemplate)
-      )
+        this.getRangeValue(SimpleGeneratorRange.MasterSpreadsheetTemplate),
+      ),
     );
   }
 
   @memoize
   get sheetBallotTemplate(): GoogleFile {
     return DriveApp.getFileById(
-      getIdFromUrl(this.getRangeValue(SimpleGeneratorRange.SheetBallotTemplate))
+      getIdFromUrl(
+        this.getRangeValue(SimpleGeneratorRange.SheetBallotTemplate),
+      ),
     );
   }
 
   @memoize
   get formBallotTemplate(): GoogleFile {
     return DriveApp.getFileById(
-      getIdFromUrl(this.getRangeValue(SimpleGeneratorRange.FormBallotTemplate))
+      getIdFromUrl(this.getRangeValue(SimpleGeneratorRange.FormBallotTemplate)),
     );
   }
 
@@ -333,7 +337,9 @@ class SimpleSetupContext {
 
   @memoize
   get showRoundRobinPairings(): boolean {
-    return this.getRangeValue(SimpleGeneratorRange.ShowRoundRobinPairings) == "Yes";
+    return (
+      this.getRangeValue(SimpleGeneratorRange.ShowRoundRobinPairings) == "Yes"
+    );
   }
 
   @memoize
@@ -351,14 +357,14 @@ class SimpleSetupContext {
   @memoize
   get prelimRounds(): string[] {
     return flattenRange(
-      compactRange(this.getRangeValues(SimpleGeneratorRange.PrelimRounds))
+      compactRange(this.getRangeValues(SimpleGeneratorRange.PrelimRounds)),
     );
   }
 
   @memoize
   get elimRounds(): string[] {
     return flattenRange(
-      compactRange(this.getRangeValues(SimpleGeneratorRange.ElimRounds))
+      compactRange(this.getRangeValues(SimpleGeneratorRange.ElimRounds)),
     );
   }
 
@@ -366,7 +372,7 @@ class SimpleSetupContext {
   get courtrooms(): string[] {
     // courtrooms is two columns so we have to handle it column by column
     const courtroomCells = flattenByColumns(
-      this.getRangeValues(SimpleGeneratorRange.Courtrooms)
+      this.getRangeValues(SimpleGeneratorRange.Courtrooms),
     );
     return courtroomCells.filter((c) => !!c);
   }

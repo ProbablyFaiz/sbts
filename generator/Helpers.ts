@@ -7,7 +7,7 @@ const EXPORT_FOLDER_NAME = "Team Ballots";
 
 function compactRange(rangeArr: string[][]): string[][] {
   return rangeArr.filter((row) =>
-    row.some((cell) => !["", null, undefined].includes(cell))
+    row.some((cell) => !["", null, undefined].includes(cell)),
   );
 }
 
@@ -17,10 +17,10 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
 
 function getChildFolder(
   parentFolder: Folder,
-  childName: string
+  childName: string,
 ): Folder | undefined {
   const childFolderIterator = parentFolder.searchFolders(
-    `title = "${childName}"`
+    `title = "${childName}"`,
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -30,7 +30,7 @@ function getChildFolder(
 
 function getOrCreateChildFolder(
   parentFolder: Folder,
-  childName: string
+  childName: string,
 ): Folder {
   const childFolder = getChildFolder(parentFolder, childName);
   if (childFolder) {
@@ -41,7 +41,7 @@ function getOrCreateChildFolder(
 
 function getFileByName(
   parentFolder: Folder,
-  name: string
+  name: string,
 ): GoogleFile | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
@@ -83,7 +83,7 @@ function flattenByColumns(arr: string[][]): string[] {
 
 const setAndBackfillRange = (
   range: GoogleAppsScript.Spreadsheet.Range,
-  values: any[][]
+  values: any[][],
 ) => {
   // Set the given values into the top left corner of the given range, and backfill the rest of the range with empty strings
 

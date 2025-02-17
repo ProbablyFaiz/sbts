@@ -10,7 +10,7 @@ type SpreadsheetOutput = Cell | Cell[] | Cell[][];
 
 function compactRange(rangeArr: string[][]): string[][] {
   return rangeArr.filter((row) =>
-    row.some((cell) => !["", null, undefined].includes(cell))
+    row.some((cell) => !["", null, undefined].includes(cell)),
   );
 }
 
@@ -20,7 +20,7 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
 
 function getChildFolder(parentFolder: Folder, childName: string): Folder {
   const childFolderIterator = parentFolder.searchFolders(
-    `title contains "${childName}"`
+    `title contains "${childName}"`,
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -30,7 +30,7 @@ function getChildFolder(parentFolder: Folder, childName: string): Folder {
 
 function getFileByName(
   parentFolder: Folder,
-  name: string
+  name: string,
 ): GoogleFile | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
@@ -52,7 +52,7 @@ function rateLimit(functionName: string) {
   const freeExecSlot = availableKey(possibleKeys, currKeys);
   if (!freeExecSlot) {
     Logger.log(
-      "Detected more than 4 executions in the past 10 seconds, aborting..."
+      "Detected more than 4 executions in the past 10 seconds, aborting...",
     );
     return true;
   }

@@ -8,7 +8,7 @@ const NUM_BALLOTS = 2;
 
 function compactRange(rangeArr: string[][]): string[][] {
   return rangeArr.filter((row) =>
-    row.some((cell) => !["", null, undefined].includes(cell))
+    row.some((cell) => !["", null, undefined].includes(cell)),
   );
 }
 
@@ -35,10 +35,10 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
 
 function getOrCreateChildFolder(
   parentFolder: GoogleAppsScript.Drive.Folder,
-  childName: string
+  childName: string,
 ): GoogleAppsScript.Drive.Folder {
   const childFolderIterator = parentFolder.searchFolders(
-    `title = "${childName}"`
+    `title = "${childName}"`,
   );
   if (childFolderIterator.hasNext()) {
     return childFolderIterator.next();
@@ -48,7 +48,7 @@ function getOrCreateChildFolder(
 
 function getFileByName(
   parentFolder: GoogleAppsScript.Drive.Folder,
-  name: string
+  name: string,
 ): GoogleFile | undefined {
   const fileIterator = parentFolder.getFilesByName(name);
   if (fileIterator.hasNext()) {
@@ -96,7 +96,7 @@ const getByeStrategy = (byeStrategyInput: string): ByeStrategy => {
     }
   }
   throw new Error(
-    `Invalid bye strategy: ${byeStrategyInput}. Permitted values are "AUTO_WIN", "PROPORTIONAL", and "NO_ADJUSTMENT"`
+    `Invalid bye strategy: ${byeStrategyInput}. Permitted values are "AUTO_WIN", "PROPORTIONAL", and "NO_ADJUSTMENT"`,
   );
 };
 

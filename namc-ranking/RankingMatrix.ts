@@ -11,27 +11,27 @@ interface RankingHistoryEntry {
 }
 
 function OutputRankingMatrix(rankingHistoryRange: string[][]) {
-  let rankingHistory = rankingHistoryRange.map(row => {
+  let rankingHistory = rankingHistoryRange.map((row) => {
     return {
       date: new Date(row[0]),
-      ranking: JSON.parse(row[2])
-    }
+      ranking: JSON.parse(row[2]),
+    };
   });
   // Add a dummy entry with the date the day prior to the first entry
   rankingHistory = [
     {
       date: new Date(rankingHistory[0].date.getTime() - 24 * 60 * 60 * 1000),
-      ranking: []
+      ranking: [],
     },
-    ...rankingHistory
-  ]
-  
+    ...rankingHistory,
+  ];
+
   // We want to turn this list of rankings into a matrix of rankings
   // where school names are columns, dates are rows, and the values
   // is the elo of the school on that date.
   const schoolNames = new Set<string>();
-  rankingHistory.forEach(entry => {
-    entry.ranking.forEach(schoolElo => {
+  rankingHistory.forEach((entry) => {
+    entry.ranking.forEach((schoolElo) => {
       schoolNames.add(schoolElo.schoolName);
     });
   });
@@ -39,19 +39,19 @@ function OutputRankingMatrix(rankingHistoryRange: string[][]) {
   // Sort the school names by their most recent elo
   schoolNamesArray.sort((a, b) => {
     const aElo = rankingHistory[rankingHistory.length - 1].ranking.find(
-      schoolElo => schoolElo.schoolName === a
+      (schoolElo) => schoolElo.schoolName === a,
     ).elo;
     const bElo = rankingHistory[rankingHistory.length - 1].ranking.find(
-      schoolElo => schoolElo.schoolName === b
+      (schoolElo) => schoolElo.schoolName === b,
     ).elo;
     return bElo - aElo;
   });
-  const rankingMatrix: any[][] = rankingHistory.map(entry => {
+  const rankingMatrix: any[][] = rankingHistory.map((entry) => {
     const schoolEloMap = new Map<string, number>();
-    entry.ranking.forEach(schoolElo => {
+    entry.ranking.forEach((schoolElo) => {
       schoolEloMap.set(schoolElo.schoolName, schoolElo.elo);
     });
-    return schoolNamesArray.map(schoolName => {
+    return schoolNamesArray.map((schoolName) => {
       return schoolEloMap.get(schoolName);
     });
   });
@@ -66,6 +66,6 @@ function OutputRankingMatrix(rankingHistoryRange: string[][]) {
   });
   const context = new RankerContext();
   const baseElo = context.rankingConfig.startingElo;
-        
+
   return rankingMatrix;
 }

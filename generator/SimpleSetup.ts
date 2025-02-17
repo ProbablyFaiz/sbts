@@ -5,14 +5,14 @@ function SimpleSetup(tabFolderLink: string) {
   const context = new SimpleSetupContext(tabFolderLink);
   if (context.tabFolder.getFiles().hasNext()) {
     throw new Error(
-      "Provided tab folder is not empty. Aborting tabulation folder setup."
+      "Provided tab folder is not empty. Aborting tabulation folder setup.",
     );
   }
 
   const masterSheetName = `${MASTER_SPREADSHEET_BASE_NAME} - ${context.tournamentName}`;
   const masterSheetFile = context.masterSpreadsheetTemplate.makeCopy(
     masterSheetName,
-    context.tabFolder
+    context.tabFolder,
   );
   const rounds = context.prelimRounds.concat(context.elimRounds);
   const masterSpreadsheet = sheetForFile(masterSheetFile);
@@ -22,17 +22,17 @@ function SimpleSetup(tabFolderLink: string) {
     masterSpreadsheet,
     rounds,
     context.courtrooms,
-    context.tournamentName
+    context.tournamentName,
   );
   const exportFolder = getOrCreateChildFolder(
     context.tabFolder,
-    EXPORT_FOLDER_NAME
+    EXPORT_FOLDER_NAME,
   );
 
   const templateFolder = context.tabFolder.createFolder(TEMPLATE_FOLDER_NAME);
   const ballotTemplate = context.sheetBallotTemplate.makeCopy(
     BALLOT_TEMPLATE_NAME,
-    templateFolder
+    templateFolder,
   );
   const ballotTemplateSheet = sheetForFile(ballotTemplate);
   ballotTemplateSheet
@@ -86,22 +86,22 @@ function SimpleSetup(tabFolderLink: string) {
 
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.CourtroomInfo),
-    context.courtrooms.map((c) => [c])
+    context.courtrooms.map((c) => [c]),
   );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.KnockoutIncludeRounds),
-    context.elimRounds.map((r) => [r])
+    context.elimRounds.map((r) => [r]),
   );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.TeamIncludeRounds),
-    context.prelimRounds.map((r) => [r])
+    context.prelimRounds.map((r) => [r]),
   );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.IndividualIncludeRounds),
-    context.prelimRounds.map((r) => [r])
+    context.prelimRounds.map((r) => [r]),
   );
   setAndBackfillRange(
     masterSpreadsheet.getRangeByName(MasterRange.RoundRobinPrelimRounds),
-    context.prelimRounds.map((r) => [r])
+    context.prelimRounds.map((r) => [r]),
   );
 }

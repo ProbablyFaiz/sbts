@@ -91,7 +91,6 @@ interface CompetitorInfo {
   teamNumber: string;
 }
 
-
 interface TeamBallotResult {
   round: string;
   judgeName: string;
@@ -234,7 +233,6 @@ enum ByeStrategy {
   PROPORTIONAL,
   AUTO_WIN,
 }
-
 
 enum CompetitorRole {
   P_ISSUE_1 = "P_ISSUE_1",

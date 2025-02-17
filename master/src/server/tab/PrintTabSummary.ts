@@ -1,7 +1,7 @@
+import { ByeStrategy, TeamSummary } from "../../Types";
 import { IContext, SSContext } from "../context/Context";
 import { compactRange, flattenRange } from "../context/Helpers";
 import { compareTeamSummaries, getAllTeamResults } from "./TabulateTeamBallots";
-import { ByeStrategy, TeamSummary } from "../../Types";
 
 function getRoundSummaryRows(round: string, context: IContext) {
   const roundResults = getAllTeamResults([round], 2, undefined, context);
@@ -51,10 +51,10 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
   const context = new SSContext();
 
   let prelimRounds: string[] = flattenRange(
-    compactRange(prelimRoundRange || [])
+    compactRange(prelimRoundRange || []),
   );
   let knockoutRounds: string[] = flattenRange(
-    compactRange(knockoutRoundRange || [])
+    compactRange(knockoutRoundRange || []),
   );
 
   if (!prelimRounds.length) {
@@ -75,14 +75,14 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
   };
 
   const fullResults = Object.values(
-    getAllTeamResults(prelimRounds, 2, context.byeStrategy, context)
+    getAllTeamResults(prelimRounds, 2, context.byeStrategy, context),
   );
   const competedInKnockout = new Set();
   const knockoutResults = getAllTeamResults(
     knockoutRounds,
     2,
     ByeStrategy.NO_ADJUSTMENT,
-    context
+    context,
   );
   // add all the knockout results to the prelim results for the respective teams
   Object.values(fullResults).forEach((teamResult) => {
@@ -128,7 +128,7 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
           [aLatestRound],
           2,
           undefined,
-          context
+          context,
         );
         if (
           latestRoundResults[a.teamNumber].pastOpponents.includes(b.teamNumber)
@@ -136,7 +136,7 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
           // a and b did compete, use the winner as the better team
           return compareTeamSummaries(
             latestRoundResults[a.teamNumber],
-            latestRoundResults[b.teamNumber]
+            latestRoundResults[b.teamNumber],
           );
         } else {
           // They did not compete against each other in the latest round
@@ -177,7 +177,7 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
         "Make sure all rounds are specified on either the Prelim Results or Knockout Results sheets.",
       ],
       ["Included rounds: " + allRounds.join(", ")],
-      ["All rounds found: " + context.roundNames.join(", ")]
+      ["All rounds found: " + context.roundNames.join(", ")],
     );
   }
   return output;

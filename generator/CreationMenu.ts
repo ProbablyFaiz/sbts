@@ -3,13 +3,13 @@ function OnCreateSystemClick() {
   const result = ui.alert(
     "Please confirm",
     "Are you sure you want to generate the tab system?",
-    ui.ButtonSet.YES_NO
+    ui.ButtonSet.YES_NO,
   );
 
   // Process the user's response.
   if (result == ui.Button.YES) {
     const tabFolderLinkResponse = ui.prompt(
-      "Enter the link to the folder you want to generate the tab system in (must be empty):"
+      "Enter the link to the folder you want to generate the tab system in (must be empty):",
     );
     if (tabFolderLinkResponse.getSelectedButton() != ui.Button.OK) {
       return;
@@ -25,7 +25,7 @@ function OnCreateSystemClick() {
     }
 
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully generated tab system!</p>"
+      "<p>Successfully generated tab system!</p>",
     )
       .setWidth(250)
       .setHeight(100);

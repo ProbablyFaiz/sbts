@@ -1,5 +1,5 @@
-import { IContext, SSContext } from "../context/Context";
 import { TeamBallotResult } from "../../Types";
+import { IContext, SSContext } from "../context/Context";
 
 const getMultipleMatchupTypos = (context: IContext) => {
   const groupedMatchups = {};
@@ -18,7 +18,7 @@ const getMultipleMatchupTypos = (context: IContext) => {
       const otherMatchupKey = getMatchupKey(otherMatchup);
       if (matchupKey !== otherMatchupKey) {
         matchupTypoCandidates.push(
-          `Found two different matchups for round ${round}, courtroom ${courtroom}: ${matchupKey} (Judge ${teamBallotResult.judgeName}) and ${otherMatchupKey} (Judge ${otherMatchup.judgeName})`
+          `Found two different matchups for round ${round}, courtroom ${courtroom}: ${matchupKey} (Judge ${teamBallotResult.judgeName}) and ${otherMatchupKey} (Judge ${otherMatchup.judgeName})`,
         );
       }
     }
@@ -45,10 +45,10 @@ const getTeamHasMultipleMatchups = (context: IContext) => {
       ) {
         teamHasMultipleMatchups.push(
           `Team ${teamNumber} has multiple matchups in round ${round}: ${getMatchupKey(
-            teamBallotResult
+            teamBallotResult,
           )} (Judge ${teamBallotResult.judgeName}) and ${getMatchupKey(
-            otherMatchup
-          )} (Judge ${otherMatchup.judgeName})`
+            otherMatchup,
+          )} (Judge ${otherMatchup.judgeName})`,
         );
       }
     }
@@ -62,7 +62,7 @@ const getTeamFacingItself = (context: IContext) => {
     const { teamNumber, opponentTeamNumber } = teamBallotResult;
     if (teamNumber === opponentTeamNumber) {
       teamFacingItself.push(
-        `Team ${teamNumber} is facing itself in round ${teamBallotResult.round}, courtroom ${teamBallotResult.courtroom} (Judge ${teamBallotResult.judgeName})`
+        `Team ${teamNumber} is facing itself in round ${teamBallotResult.round}, courtroom ${teamBallotResult.courtroom} (Judge ${teamBallotResult.judgeName})`,
       );
     }
   });
@@ -84,10 +84,10 @@ const getJudgeMultipleBallots = (context: IContext) => {
       if (getMatchupKey(teamBallotResult) !== getMatchupKey(otherBallot)) {
         judgeMultipleBallots.push(
           `Judge ${judgeName} has multiple ballots in round ${round}: ${getMatchupKey(
-            teamBallotResult
+            teamBallotResult,
           )} (Courtroom ${teamBallotResult.courtroom}) and ${getMatchupKey(
-            otherBallot
-          )} (Courtroom ${otherBallot.courtroom})`
+            otherBallot,
+          )} (Courtroom ${otherBallot.courtroom})`,
         );
       }
     }

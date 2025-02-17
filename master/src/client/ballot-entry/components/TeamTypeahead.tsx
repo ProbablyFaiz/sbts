@@ -1,6 +1,6 @@
 import React from "react";
-import { Highlighter, Typeahead } from "react-bootstrap-typeahead";
 import { Form } from "react-bootstrap";
+import { Highlighter, Typeahead } from "react-bootstrap-typeahead";
 import { TeamInfo } from "../../../Types";
 
 interface TeamTypeaheadProps {

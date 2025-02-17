@@ -9,7 +9,7 @@ function RefreshFailoverNames() {
   ballotRecords.forEach((ballotInfo) => {
     const ballot = SpreadsheetApp.openByUrl(ballotInfo.ballotLink);
     const captainsForm = SpreadsheetApp.openByUrl(
-      ballot.getRangeByName("CaptainsFormUrlRange").getValue()
+      ballot.getRangeByName("CaptainsFormUrlRange").getValue(),
     );
     Logger.log(`Updating failover for ballot ${ballotInfo.ballotLink}`);
     Object.entries(FAILOVER_MAP).forEach(([cptRangeName, ballotRangeName]) => {

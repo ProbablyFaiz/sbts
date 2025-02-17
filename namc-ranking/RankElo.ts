@@ -28,18 +28,18 @@ function ComputeEloRankings() {
   const context = new RankerContext();
   const { eloProgression, eloResults } = calculateEloData(
     context.tabSummaries,
-    context.rankingConfig
+    context.rankingConfig,
   );
   writeEloResults(
     eloResults.slice(0, context.rankingConfig.topN),
-    context.rankerSpreadsheet
+    context.rankerSpreadsheet,
   );
   writeEloProgression(eloProgression, context.rankerSpreadsheet);
   addEloHistoryRow(
     eloResults,
     eloProgression,
     context.tabSummaries,
-    context.rankerSpreadsheet
+    context.rankerSpreadsheet,
   );
 }
 
@@ -48,7 +48,7 @@ function EloRankingDryRun() {
   const context = new RankerContext();
   const { eloProgression, eloResults } = calculateEloData(
     context.tabSummaries,
-    context.rankingConfig
+    context.rankingConfig,
   );
   const ui = SpreadsheetApp.getUi();
   // Create an html dialog that shows the ranked schools as a table with their elo (rounded to the nearest integer).
@@ -67,7 +67,7 @@ function EloRankingDryRun() {
               <td>${index + 1}</td>
               <td>${schoolElo.schoolName}</td>
               <td>${Math.round(schoolElo.elo)}</td>
-            </tr>`
+            </tr>`,
         )
         .join("")}
     </table>
@@ -97,7 +97,7 @@ function EloRankingDryRun() {
               <td>${Math.round(entry.initialElo2 * 10) / 10}</td>
               <td>${Math.round(entry.adjustment1 * 10) / 10}</td>
               <td>${Math.round(entry.adjustment2 * 10) / 10}</td>
-            </tr>`
+            </tr>`,
         )
         .join("")}
     </table>
@@ -115,7 +115,7 @@ function EloRankingDryRun() {
       tr:nth-child(odd) {
         background-color:#fff;
       }
-    </style>`
+    </style>`,
   )
     .setWidth(800)
     .setHeight(600);
@@ -126,7 +126,7 @@ const EXCLUDED_PROGRAM_NAMES = ["Dummy", "Hybrid"];
 
 const calculateEloData = (
   tournaments: TabSummary[],
-  config: RankingConfig
+  config: RankingConfig,
 ): EloData => {
   const schools = tournaments
     .flatMap((tournament) => tournament.teams.map((team) => team.teamSchool))
@@ -150,7 +150,7 @@ const calculateEloData = (
         (1000 * 60 * 60 * 24);
       if (dayGap > halveElosAfterDays) {
         Logger.log(
-          `Regressing elos halfway to baseline before ${t.tournamentName}...`
+          `Regressing elos halfway to baseline before ${t.tournamentName}...`,
         );
         eloMap.forEach((elo, school) => {
           const adjustment = (startElo - elo) / 2;
@@ -187,7 +187,7 @@ function processTournament(
   tournament: TabSummary,
   eloMap: Map<string, number>,
   eloProgression: EloProgressionEntry[],
-  kFactor: number
+  kFactor: number,
 ) {
   const teamNumberSchoolMap = tournament.teams.reduce((acc, team) => {
     acc.set(team.teamNumber, team.teamSchool);
@@ -207,8 +207,8 @@ function processTournament(
         const missingSide = school1 == null ? "Petitioner" : "Respondent";
         throw new Error(
           `${missingSide}'s school not found for matchup: ${JSON.stringify(
-            matchup
-          )}. Please check the team list in the tab summary.`
+            matchup,
+          )}. Please check the team list in the tab summary.`,
         );
       }
 
@@ -242,14 +242,14 @@ function processTournament(
       }
       schoolAdjustments.set(
         school1,
-        schoolAdjustments.get(school1) + eloChange1
+        schoolAdjustments.get(school1) + eloChange1,
       );
       if (!schoolAdjustments.has(school2)) {
         schoolAdjustments.set(school2, 0);
       }
       schoolAdjustments.set(
         school2,
-        schoolAdjustments.get(school2) - eloChange1
+        schoolAdjustments.get(school2) - eloChange1,
       );
     });
 
@@ -269,11 +269,11 @@ const matchupsByRound = (tournament: TabSummary) => {
         acc.get(matchup.round).push(matchup);
         return acc;
       }, new Map<string, MatchupResult[]>())
-      .entries()
+      .entries(),
   ).sort(
     (a, b) =>
       tournament.orderedRoundList.indexOf(a[0]) -
-      tournament.orderedRoundList.indexOf(b[0])
+      tournament.orderedRoundList.indexOf(b[0]),
   );
   return roundMatchups;
 };
@@ -293,14 +293,14 @@ const expectedOutcome = (elo1: number, elo2: number) => {
 const eloChange = (
   expectedOutcome: number,
   actualOutcome: number,
-  kFactor: number
+  kFactor: number,
 ) => {
   return K_FACTOR * (actualOutcome - expectedOutcome);
 };
 
 const writeEloResults = (
   eloResults: SchoolElo[],
-  rankerSpreadsheet: Spreadsheet
+  rankerSpreadsheet: Spreadsheet,
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Elo Ranking");
   sheet.clear({ contentsOnly: true });
@@ -329,7 +329,7 @@ const writeEloResults = (
 
 const writeEloProgression = (
   eloProgression: EloProgressionEntry[],
-  rankerSpreadsheet: Spreadsheet
+  rankerSpreadsheet: Spreadsheet,
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Elo Progression");
   sheet.clear({ contentsOnly: true });
@@ -366,7 +366,7 @@ const addEloHistoryRow = (
   eloResults: SchoolElo[],
   eloProgression: EloProgressionEntry[],
   tournaments: TabSummary[],
-  rankerSpreadsheet: Spreadsheet
+  rankerSpreadsheet: Spreadsheet,
 ) => {
   const sheet = rankerSpreadsheet.getSheetByName("Ranking History");
   // Date Generated |	Tournaments Included Dump |	Ranking Dump |	Progression Dump
@@ -379,7 +379,7 @@ const addEloHistoryRow = (
           startTimestamp: t.tournamentStartTimestamp,
           url: t.url,
         };
-      })
+      }),
     ),
     JSON.stringify(eloResults),
     JSON.stringify(eloProgression),

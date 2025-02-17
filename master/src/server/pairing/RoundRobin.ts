@@ -1,19 +1,19 @@
 import {
   Cell,
-  SpreadsheetOutput,
-  RoundRobinConfig,
-  TeamInfo,
   CourtroomInfo,
+  RoundRobinConfig,
+  SpreadsheetOutput,
+  TeamInfo,
 } from "../../Types";
 import { SSContext } from "../context/Context";
 import { SeededRandom } from "../context/Helpers";
 import {
   ConflictType,
+  Pairing,
+  PairingMetadata,
   deepCopyPairings,
   formatSwapMetadata,
   numericalRange,
-  Pairing,
-  PairingMetadata,
 } from "./Helpers";
 
 const BYE_TEAM_NUM = "BYE";
@@ -39,7 +39,7 @@ function RoundRobinPairTeamsWithCourtrooms(): SpreadsheetOutput {
   const context = new SSContext();
   const pairingsByRound = computeAllPairings(
     context.roundRobinConfig,
-    context.teamInfo
+    context.teamInfo,
   );
   const output: Cell[][] = [];
   pairingsByRound.forEach((pairings, round) => {
@@ -47,8 +47,8 @@ function RoundRobinPairTeamsWithCourtrooms(): SpreadsheetOutput {
       ...formatPairings(
         round,
         pairings,
-        getCourtroomNames(context.courtroomRecords, pairings)
-      )
+        getCourtroomNames(context.courtroomRecords, pairings),
+      ),
     );
     output.push(["", "", ""]);
   });
@@ -57,7 +57,7 @@ function RoundRobinPairTeamsWithCourtrooms(): SpreadsheetOutput {
 
 const getCourtroomNames = (
   courtroomRecords: CourtroomInfo[],
-  pairings: Pairing[]
+  pairings: Pairing[],
 ): string[] => {
   const pairingCount = pairings.length;
   const courtroomNames = courtroomRecords.map((rec) => rec.name);
@@ -79,12 +79,12 @@ function RoundRobinPairTeamsWithMetadata(): SpreadsheetOutput {
 }
 
 function RoundRobinPairTeams(
-  pairingMetadata?: PairingMetadata
+  pairingMetadata?: PairingMetadata,
 ): string | Cell[][] {
   const context = new SSContext();
   const pairingsByRound = computeAllPairings(
     context.roundRobinConfig,
-    context.teamInfo
+    context.teamInfo,
   );
 
   const output: Cell[][] = [];
@@ -97,7 +97,7 @@ function RoundRobinPairTeams(
 const formatPairings = (
   round: string,
   pairings: Pairing[],
-  courtrooms?: string[]
+  courtrooms?: string[],
 ): Cell[][] => {
   const output: Cell[][] = [];
   if (courtrooms === undefined) {
@@ -105,7 +105,7 @@ const formatPairings = (
   } else {
     output.push(
       [`${round}:`, "", ""],
-      ["Courtroom", "Petitioner", "Respondent"]
+      ["Courtroom", "Petitioner", "Respondent"],
     );
   }
   pairings.forEach((pairing, i) => {
@@ -120,7 +120,7 @@ const formatPairings = (
 
 const computeAllPairings = (
   roundRobinConfig: RoundRobinConfig,
-  teamInfos: Record<string, TeamInfo>
+  teamInfos: Record<string, TeamInfo>,
 ): Map<string, Pairing[]> => {
   const rng = new SeededRandom(`${roundRobinConfig.randomSeed}-pairings`);
   const roundPairer = getRoundPairer(roundRobinConfig, rng);
@@ -144,7 +144,7 @@ const computeAllPairings = (
 };
 
 const getInitialRoundState = (
-  teamInfos: Record<string, TeamInfo>
+  teamInfos: Record<string, TeamInfo>,
 ): RoundState => {
   const teamStates = new Map<string, TeamRoundState>();
   Object.entries(teamInfos).forEach(([teamNumber, teamInfo]) => {
@@ -175,7 +175,7 @@ const getInitialRoundState = (
 };
 
 const getTeamGroupings = (
-  teamStates: Map<string, TeamRoundState>
+  teamStates: Map<string, TeamRoundState>,
 ): TeamGrouping => {
   const needsPlaintiff: Set<string> = new Set();
   const needsDefense: Set<string> = new Set();
@@ -210,7 +210,7 @@ const getRoundPairer =
 
     if (anyConflicts(pairings, conflictCheck)) {
       throw new Error(
-        `Failed to resolve conflicts after ${maxIterations} iterations`
+        `Failed to resolve conflicts after ${maxIterations} iterations`,
       );
     }
     return pairings;
@@ -222,7 +222,7 @@ const getMaxPairingIterations = (numTeams: number): number => {
 
 const anyConflicts = (
   pairings: Pairing[],
-  conflictCheck: (pairing: Pairing) => ConflictType
+  conflictCheck: (pairing: Pairing) => ConflictType,
 ): boolean => {
   return pairings.some((pairing) => {
     const conflict = conflictCheck(pairing);
@@ -232,7 +232,7 @@ const anyConflicts = (
 
 const getInitialPairings = (
   teamGroupings: TeamGrouping,
-  rng: SeededRandom
+  rng: SeededRandom,
 ): Pairing[] => {
   const plaintiffs = Array.from(teamGroupings.needsPlaintiff);
   const defenses = Array.from(teamGroupings.needsDefense);
@@ -244,7 +244,7 @@ const getInitialPairings = (
   }
   if (gap % 2 !== flexible.length % 2) {
     throw new Error(
-      `Gap is ${gap} and flexible is ${flexible.length}, which are not both even or both odd`
+      `Gap is ${gap} and flexible is ${flexible.length}, which are not both even or both odd`,
     );
   }
 
@@ -261,7 +261,7 @@ const getInitialPairings = (
   plaintiffs.sort(() => rng.nextFloat() - 0.5);
   defenses.sort(() => rng.nextFloat() - 0.5);
   const pairings = numericalRange(0, plaintiffs.length).map(
-    (i) => [plaintiffs[i], defenses[i]] as Pairing
+    (i) => [plaintiffs[i], defenses[i]] as Pairing,
   );
   return pairings;
 };
@@ -269,7 +269,7 @@ const getInitialPairings = (
 const getPairingStepper =
   (
     teamGroupings: TeamGrouping,
-    conflictCheck: (pairing: Pairing) => ConflictType
+    conflictCheck: (pairing: Pairing) => ConflictType,
   ) =>
   (pairings: Pairing[]): Pairing[] => {
     const swapper = getPairingSwapper(teamGroupings, conflictCheck);
@@ -320,7 +320,7 @@ const getPairingStepper =
           const threeWaySwap = threeWaySwapper(
             newPairings[i],
             newPairings[j],
-            newPairings[k]
+            newPairings[k],
           );
           if (threeWaySwap) {
             newPairings[i] = threeWaySwap[0];
@@ -342,7 +342,7 @@ const getPairingStepper =
 const getPairingSwapper =
   (
     teamGroupings: TeamGrouping,
-    conflictCheck: (pairing: Pairing) => ConflictType
+    conflictCheck: (pairing: Pairing) => ConflictType,
   ) =>
   (pairing1: Pairing, pairing2: Pairing): [Pairing, Pairing] | undefined => {
     const [team1, team2] = pairing1;
@@ -390,12 +390,12 @@ const getPairingSwapper =
 const getThreeWaySwapper =
   (
     teamGroupings: TeamGrouping,
-    conflictCheck: (pairing: Pairing) => ConflictType
+    conflictCheck: (pairing: Pairing) => ConflictType,
   ) =>
   (
     pairing1: Pairing,
     pairing2: Pairing,
-    pairing3: Pairing
+    pairing3: Pairing,
   ): [Pairing, Pairing, Pairing] | undefined => {
     const [team1, team2] = pairing1;
     const [team3, team4] = pairing2;
@@ -434,13 +434,13 @@ const getThreeWaySwapper =
 
 const getNextRoundState = (
   roundState: RoundState,
-  newPairings: Pairing[]
+  newPairings: Pairing[],
 ): RoundState => {
   const newTeamStates = new Map<string, TeamRoundState>();
   roundState.teamStates.forEach((teamState) => {
     newTeamStates.set(
       teamState.teamInfo.teamNumber,
-      JSON.parse(JSON.stringify(teamState))
+      JSON.parse(JSON.stringify(teamState)),
     );
   });
   newPairings.forEach((pairing) => {

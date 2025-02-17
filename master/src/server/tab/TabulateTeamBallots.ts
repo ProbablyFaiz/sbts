@@ -1,20 +1,17 @@
 import {
-  IContext,
-  SSContext,
-} from "../context/Context";
-import { flattenRange } from "../context/Helpers";
-import {
   ByeStrategy,
   RoundResult,
   TeamBallotResult,
   TeamSummary,
 } from "../../Types";
+import { IContext, SSContext } from "../context/Context";
+import { flattenRange } from "../context/Helpers";
 
 const PAST_OPPONENTS_SEPARATOR = ", ";
 
 function getRoundResult(
   ballotResults: TeamBallotResult[],
-  ballotsPerMatch: number | undefined
+  ballotsPerMatch: number | undefined,
 ): RoundResult {
   // If ballotsPerMatch is undefined, we don't do any normalization
   const normFactor =
@@ -38,14 +35,14 @@ function getRoundResult(
       pointDifferential: 0,
       side,
       opponentTeamNumber,
-    } as RoundResult
+    } as RoundResult,
   );
 }
 
 function getTeamResult(
   teamBallots: Record<string, TeamBallotResult[]>,
   ballotsPerMatch: number | undefined,
-  firstPartyName: string
+  firstPartyName: string,
 ): TeamSummary {
   const teamResult = Object.values(teamBallots).reduce(
     (acc, roundBallots) => {
@@ -72,46 +69,49 @@ function getTeamResult(
       timesDefense: 0,
       pastOpponents: [],
       roundsCompeted: [],
-    } as TeamSummary
+    } as TeamSummary,
   );
   return teamResult;
 }
 
 function getGroupedResults(ballotResults: TeamBallotResult[]) {
-  return ballotResults.reduce((acc, br) => {
-    if (!(br.teamNumber in acc)) {
-      acc[br.teamNumber] = {};
-    }
-    if (!(br.round in acc[br.teamNumber])) {
-      acc[br.teamNumber][br.round] = [];
-    }
-    acc[br.teamNumber][br.round].push(br);
-    return acc;
-  }, {} as Record<string, Record<string, TeamBallotResult[]>>);
+  return ballotResults.reduce(
+    (acc, br) => {
+      if (!(br.teamNumber in acc)) {
+        acc[br.teamNumber] = {};
+      }
+      if (!(br.round in acc[br.teamNumber])) {
+        acc[br.teamNumber][br.round] = [];
+      }
+      acc[br.teamNumber][br.round].push(br);
+      return acc;
+    },
+    {} as Record<string, Record<string, TeamBallotResult[]>>,
+  );
 }
 
 function getCombinedStrength(
   teamNumber: string,
-  teamResults: Record<string, TeamSummary>
+  teamResults: Record<string, TeamSummary>,
 ) {
   // Combined strength is the sum of the ballots won of the team's opponents
   return teamResults[teamNumber].pastOpponents!.reduce(
     (acc, opponentTeamNumber) => {
       return acc + teamResults[opponentTeamNumber].ballotsWon;
     },
-    0
+    0,
   );
 }
 
 function getMaxNumBallots(
-  groupedResults: Record<string, Record<string, TeamBallotResult[]>>
+  groupedResults: Record<string, Record<string, TeamBallotResult[]>>,
 ) {
   return Object.values(groupedResults).reduce((max, teamBallots) => {
     return Math.max(
       max,
       Object.values(teamBallots).reduce((max, roundBallots) => {
         return Math.max(max, roundBallots.length);
-      }, 1)
+      }, 1),
     );
   }, 1);
 }
@@ -120,12 +120,12 @@ function getAllTeamResults(
   rounds: string[],
   ballotsPerMatch: number | undefined,
   byeStrategy: ByeStrategy | undefined,
-  context: IContext
+  context: IContext,
 ): Record<string, Required<TeamSummary>> {
   const roundSet = new Set(rounds);
   // Filter out ballots that are not in the allowed rounds
   const ballotResults = context.teamBallotResults.filter((br) =>
-    roundSet.has(br.round)
+    roundSet.has(br.round),
   );
   // Group ballotResults by teamNumber, and within that by round
   const groupedResults = getGroupedResults(ballotResults);
@@ -139,7 +139,7 @@ function getAllTeamResults(
       const teamResult = getTeamResult(
         teamBallots,
         ballotsPerMatch,
-        context.firstPartyName
+        context.firstPartyName,
       );
       teamResult.teamNumber = teamNumber;
       teamResult.teamName = context.teamInfo[teamNumber]?.teamName ?? "Unknown";
@@ -147,25 +147,25 @@ function getAllTeamResults(
       acc[teamNumber] = teamResult;
       return acc;
     },
-    {} as Record<string, TeamSummary>
+    {} as Record<string, TeamSummary>,
   );
   // Add combined strength to teamResults
   Object.values(teamResults).forEach((teamResult) => {
     teamResult.combinedStrength = getCombinedStrength(
       teamResult.teamNumber!,
-      teamResults
+      teamResults,
     );
   });
   if (byeStrategy != undefined) {
     if (ballotsPerMatch == undefined) {
       throw new Error(
-        "Cannot adjust for bye round without knowing the number of ballots per match"
+        "Cannot adjust for bye round without knowing the number of ballots per match",
       );
     }
     return adjustForByeRound(
       teamResults as Record<string, Required<TeamSummary>>,
       byeStrategy,
-      ballotsPerMatch!
+      ballotsPerMatch!,
     );
   }
   return teamResults as Record<string, Required<TeamSummary>>;
@@ -174,7 +174,7 @@ function getAllTeamResults(
 function compareTeamSummaries(
   a: TeamSummary,
   b: TeamSummary,
-  considerByeBust: boolean = false
+  considerByeBust: boolean = false,
 ) {
   // A positive return value means a is better than b, and vice versa for a negative return value
   // Sort order: byeBust, ballotsWon, combinedStrength, pointDifferential
@@ -192,10 +192,10 @@ function compareTeamSummaries(
 }
 
 function getTeamResultsOutput(
-  teamResults: Record<string, Required<TeamSummary>>
+  teamResults: Record<string, Required<TeamSummary>>,
 ) {
   const results = Object.values(teamResults).sort((a, b) =>
-    compareTeamSummaries(a, b, true)
+    compareTeamSummaries(a, b, true),
   );
   return results.reduce(
     (acc, teamResult, i) => [
@@ -215,42 +215,45 @@ function getTeamResultsOutput(
         teamResult.pastOpponents.join(PAST_OPPONENTS_SEPARATOR),
       ],
     ],
-    []
+    [],
   );
 }
 
 function adjustForByeRound(
   teamResults: Record<string, Required<TeamSummary>>,
   strategy: ByeStrategy,
-  ballotsPerMatch: number
+  ballotsPerMatch: number,
 ): Record<string, Required<TeamSummary>> {
   // Adjust for bye rounds by adjusting totals of teams with fewer than the maximum number of opponents
   const maxOpponents = Math.max(
     ...Object.values(teamResults).map(
-      (teamResult) => teamResult.pastOpponents.length
-    )
+      (teamResult) => teamResult.pastOpponents.length,
+    ),
   );
-  return Object.entries(teamResults).reduce((acc, [teamNumber, teamResult]) => {
-    const newResult = { ...teamResult };
-    if (teamResult.pastOpponents.length < maxOpponents) {
-      const adjustmentFactor = maxOpponents / teamResult.pastOpponents.length;
-      if (strategy === ByeStrategy.PROPORTIONAL) {
-        // Multiply the totals by the factor of the number of opponents
-        newResult.ballotsWon *= adjustmentFactor;
-        newResult.combinedStrength *= adjustmentFactor;
-        newResult.pointDifferential *= adjustmentFactor;
-        newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
-      } else if (strategy === ByeStrategy.AUTO_WIN) {
-        // Give a free win to the team, and adjust CS and PD proportionally
-        newResult.ballotsWon += ballotsPerMatch;
-        newResult.combinedStrength *= adjustmentFactor;
-        newResult.pointDifferential *= adjustmentFactor;
-        newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+  return Object.entries(teamResults).reduce(
+    (acc, [teamNumber, teamResult]) => {
+      const newResult = { ...teamResult };
+      if (teamResult.pastOpponents.length < maxOpponents) {
+        const adjustmentFactor = maxOpponents / teamResult.pastOpponents.length;
+        if (strategy === ByeStrategy.PROPORTIONAL) {
+          // Multiply the totals by the factor of the number of opponents
+          newResult.ballotsWon *= adjustmentFactor;
+          newResult.combinedStrength *= adjustmentFactor;
+          newResult.pointDifferential *= adjustmentFactor;
+          newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+        } else if (strategy === ByeStrategy.AUTO_WIN) {
+          // Give a free win to the team, and adjust CS and PD proportionally
+          newResult.ballotsWon += ballotsPerMatch;
+          newResult.combinedStrength *= adjustmentFactor;
+          newResult.pointDifferential *= adjustmentFactor;
+          newResult.pastOpponents = [...newResult.pastOpponents, "BYE"];
+        }
       }
-    }
-    acc[teamNumber] = newResult;
-    return acc;
-  }, {} as Record<string, Required<TeamSummary>>);
+      acc[teamNumber] = newResult;
+      return acc;
+    },
+    {} as Record<string, Required<TeamSummary>>,
+  );
 }
 
 function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
@@ -260,7 +263,7 @@ function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
     rounds,
     ballotsPerMatch,
     context.byeStrategy,
-    context
+    context,
   );
   const output = getTeamResultsOutput(teamResults);
   if (output.length === 0) {

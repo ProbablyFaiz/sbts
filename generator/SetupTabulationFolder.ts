@@ -13,37 +13,37 @@ function SetupTabulationFolder(tabFolderLink: string) {
   let createdMasterSheet = false;
   if (masterSheetFile) {
     SheetLogger.log(
-      "Existing master spreadsheet found, not creating a new one..."
+      "Existing master spreadsheet found, not creating a new one...",
     );
   } else {
     createdMasterSheet = true;
     masterSheetFile = setupContext.masterSheetTemplate.makeCopy(
       MASTER_SPREADSHEET_BASE_NAME,
-      tabFolder
+      tabFolder,
     );
   }
   let autocompleteEngineFile = getFileByName(
     tabFolder,
-    AUTOCOMPLETE_SPREADSHEET_NAME
+    AUTOCOMPLETE_SPREADSHEET_NAME,
   );
   if (autocompleteEngineFile || !setupContext.generateCompetitorForms) {
     SheetLogger.log(
-      "Not creating an autocomplete engine spreadsheet, one already exists or it is disabled."
+      "Not creating an autocomplete engine spreadsheet, one already exists or it is disabled.",
     );
   } else {
     autocompleteEngineFile = setupContext.autocompleteEngineTemplate.makeCopy(
       AUTOCOMPLETE_SPREADSHEET_NAME,
-      tabFolder
+      tabFolder,
     );
     autocompleteEngineFile.setSharing(
       DriveApp.Access.ANYONE_WITH_LINK,
-      DriveApp.Permission.VIEW
+      DriveApp.Permission.VIEW,
     );
   }
   setupContext.autocompleteEngine = autocompleteEngineFile;
   let orchestratorFile = getFileByName(
     tabFolder,
-    ORCHESTRATOR_SPREADSHEET_NAME
+    ORCHESTRATOR_SPREADSHEET_NAME,
   );
   if (
     orchestratorFile ||
@@ -54,7 +54,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
   } else {
     orchestratorFile = setupContext.orchestratorTemplate.makeCopy(
       ORCHESTRATOR_SPREADSHEET_NAME,
-      tabFolder
+      tabFolder,
     );
     const orchestratorSheet = sheetForFile(orchestratorFile);
     orchestratorSheet
@@ -76,7 +76,7 @@ function SetupTabulationFolder(tabFolderLink: string) {
       setupContext,
       orchestratorFile,
       tabFolder,
-      exportFolder
+      exportFolder,
     );
   }
 
@@ -89,13 +89,13 @@ function SetupTabulationFolder(tabFolderLink: string) {
       setupContext.masterSpreadsheet,
       setupContext.roundsInfo.map((round) => round.name),
       setupContext.courtroomsInfo.map((courtroom) => courtroom.name),
-      setupContext.tournamentName
+      setupContext.tournamentName,
     );
   }
   createTrialFolders(setupContext, tabFolder);
   setupContext.writeCourtroomsToMaster();
   SheetLogger.log(
-    `Created ballots for ${setupContext.roundsInfo.length} round(s).`
+    `Created ballots for ${setupContext.roundsInfo.length} round(s).`,
   );
 }
 
@@ -105,13 +105,13 @@ const setUpGoogleFormBallot = (
   masterSpreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
   rounds: string[],
   courtrooms: string[],
-  tournamentName: string
+  tournamentName: string,
 ) => {
   Logger.log("Setting up Google Form ballot...");
   // Copy into tab folder
   const formFile = formBallotTemplate.makeCopy(
     `${tournamentName} Ballot`,
-    tabFolder
+    tabFolder,
   );
   const form = FormApp.openById(formFile.getId());
   form.setTitle(`${tournamentName} Ballot`);
@@ -133,7 +133,7 @@ const setUpGoogleFormBallot = (
 
   form.setDestination(
     FormApp.DestinationType.SPREADSHEET,
-    masterSpreadsheet.getId()
+    masterSpreadsheet.getId(),
   );
   masterSpreadsheet
     .getRangeByName(MasterRange.GoogleFormBallotLink)
@@ -149,7 +149,7 @@ const setUpGoogleFormBallot = (
       1,
       1,
       sheet.getMaxRows(),
-      sheet.getMaxColumns()
+      sheet.getMaxColumns(),
     );
     // Add alternating-color formatting
     // range.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
@@ -168,7 +168,7 @@ const setUpGoogleFormBallot = (
       firstRow
         .getValues()[0]
         .map((cell) =>
-          cell.toString().replace("Petitioner", "P").replace("Respondent", "R")
+          cell.toString().replace("Petitioner", "P").replace("Respondent", "R"),
         ),
     ]);
     firstRow.setFontWeight("bold");
@@ -177,7 +177,7 @@ const setUpGoogleFormBallot = (
 
 const createTrialFolders = (
   setupContext: SetupContext,
-  tabFolder: GoogleAppsScript.Drive.Folder
+  tabFolder: GoogleAppsScript.Drive.Folder,
 ) => {
   for (let round of setupContext.roundsInfo.slice(0, setupContext.numRounds)) {
     const roundFolderName = round.name;
@@ -189,7 +189,7 @@ const createTrialFolders = (
       roundFolder.addEditor("damiansheehy.mc@gmail.com");
     } else {
       SheetLogger.log(
-        `${round.name} round folder already exists, not creating a new one...`
+        `${round.name} round folder already exists, not creating a new one...`,
       );
     }
     setupContext.courtroomsInfo
@@ -198,7 +198,7 @@ const createTrialFolders = (
       // Per-round limiter
       .slice(0, round.numCourtrooms)
       .forEach((info) =>
-        createTrialFolder(setupContext, roundFolder, round, info)
+        createTrialFolder(setupContext, roundFolder, round, info),
       );
   }
 };
@@ -207,7 +207,7 @@ const populateMasterSpreadsheet = (
   setupContext: SetupContext,
   orchestratorFile: GoogleAppsScript.Drive.File,
   tabFolder: GoogleAppsScript.Drive.Folder,
-  exportFolder: GoogleAppsScript.Drive.Folder
+  exportFolder: GoogleAppsScript.Drive.Folder,
 ) => {
   if (orchestratorFile) {
     setupContext.masterSpreadsheet
@@ -244,19 +244,19 @@ const createTemplatesFolder = (setupContext: SetupContext) => {
   const captainsFormTemplateName = "Captains' Form Template";
   let templateFolder = getChildFolder(
     setupContext.tabFolder,
-    templateFolderName
+    templateFolderName,
   );
   if (templateFolder) {
     SheetLogger.log(
-      "Templates folder already exists, not creating a new one..."
+      "Templates folder already exists, not creating a new one...",
     );
     setupContext.ballotTemplate = getFileByName(
       templateFolder,
-      ballotTemplateName
+      ballotTemplateName,
     );
     setupContext.captainsFormTemplate = getFileByName(
       templateFolder,
-      captainsFormTemplateName
+      captainsFormTemplateName,
     );
     return;
   }
@@ -266,7 +266,7 @@ const createTemplatesFolder = (setupContext: SetupContext) => {
   SheetLogger.log("Creating ballot template...");
   setupContext.ballotTemplate = setupContext.ballotBaseTemplate.makeCopy(
     ballotTemplateName,
-    templateFolder
+    templateFolder,
   );
   const ballotTemplateSheet = sheetForFile(setupContext.ballotTemplate);
   ballotTemplateSheet
@@ -284,10 +284,10 @@ const createTemplatesFolder = (setupContext: SetupContext) => {
     setupContext.captainsFormTemplate =
       setupContext.captainsFormBaseTemplate.makeCopy(
         captainsFormTemplateName,
-        templateFolder
+        templateFolder,
       );
     const captainsFormTemplateSheet = sheetForFile(
-      setupContext.captainsFormTemplate
+      setupContext.captainsFormTemplate,
     );
     captainsFormTemplateSheet
       .getRangeByName(CaptainsFormRange.TournamentName)
@@ -314,7 +314,7 @@ const createTrialFolder = (
   setupContext: ISetupContext,
   roundFolder: Folder,
   round: IRoundInfo,
-  courtroomInfo: ICourtroomInfo
+  courtroomInfo: ICourtroomInfo,
 ) => {
   const trialFolderName = `${round.name} - ${courtroomInfo.name}`;
   const trialPrefix = `${round.name} ${courtroomInfo.name}`;
@@ -322,11 +322,11 @@ const createTrialFolder = (
   let trialFolder = getChildFolder(roundFolder, trialFolderName);
   if (trialFolder) {
     SheetLogger.log(
-      `${trialPrefix} folder already exists, not creating a new one...`
+      `${trialPrefix} folder already exists, not creating a new one...`,
     );
     setupContext.saveCourtroomFolderLink(
       courtroomInfo.name,
-      trialFolder.getUrl()
+      trialFolder.getUrl(),
     );
     // Enforce idempotency only at the trial level, not the ballot/captains form level.
     return;
@@ -334,7 +334,7 @@ const createTrialFolder = (
   trialFolder = roundFolder.createFolder(trialFolderName);
   setupContext.saveCourtroomFolderLink(
     courtroomInfo.name,
-    trialFolder.getUrl()
+    trialFolder.getUrl(),
   );
 
   let trialCaptainsForm;
@@ -344,11 +344,11 @@ const createTrialFolder = (
       trialFolder,
       trialPrefix,
       round,
-      courtroomInfo
+      courtroomInfo,
     );
     trialCaptainsForm.setSharing(
       DriveApp.Access.ANYONE_WITH_LINK,
-      DriveApp.Permission.EDIT
+      DriveApp.Permission.EDIT,
     );
   }
   const trialBallots = [];
@@ -356,11 +356,11 @@ const createTrialFolder = (
     for (let i = 1; i <= round.numBallots; i++) {
       const createdBallot = setupContext.ballotTemplate.makeCopy(
         `${trialPrefix} - Judge ${i} Ballot`,
-        trialFolder
+        trialFolder,
       );
       createdBallot.setSharing(
         DriveApp.Access.ANYONE_WITH_LINK,
-        DriveApp.Permission.EDIT
+        DriveApp.Permission.EDIT,
       );
       trialBallots.push(createdBallot);
     }
@@ -379,11 +379,11 @@ const prepareCaptainsForm = (
   trialFolder: Folder,
   trialPrefix: string,
   round: IRoundInfo,
-  courtroomInfo: ICourtroomInfo
+  courtroomInfo: ICourtroomInfo,
 ) => {
   const captainsForm = setupContext.captainsFormTemplate.makeCopy(
     `${trialPrefix} - Competitor Info Form`,
-    trialFolder
+    trialFolder,
   );
   const captainsFormSheet = sheetForFile(captainsForm);
   captainsFormSheet

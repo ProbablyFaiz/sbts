@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Typeahead } from "react-bootstrap-typeahead";
 import {
   Alert,
   Button,
@@ -9,9 +8,9 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
+import { Typeahead } from "react-bootstrap-typeahead";
 
-// This is a wrapper for google.script.run that lets us use promises.
-import { serverFunctions } from "../../utils/serverFunctions";
+import { Option } from "react-bootstrap-typeahead/types/types";
 import {
   BallotState,
   CourtroomInfo,
@@ -20,10 +19,11 @@ import {
   TeamInfo,
   TeamState,
 } from "../../../Types";
+// This is a wrapper for google.script.run that lets us use promises.
+import { serverFunctions } from "../../utils/serverFunctions";
 import FuzzyTypeahead from "./FuzzyTypeahead";
-import TeamTypeahead from "./TeamTypeahead";
 import MathTypeahead from "./MathTypeahead";
-import { Option } from "react-bootstrap-typeahead/types/types";
+import TeamTypeahead from "./TeamTypeahead";
 
 const mathjs = require("mathjs");
 const Buffer = require("buffer/").Buffer;
@@ -65,7 +65,7 @@ const BallotEntry = () => {
     message: "",
   });
   const [possibleCourtrooms, setPossibleCourtrooms] = useState<CourtroomInfo[]>(
-    []
+    [],
   );
   const [possibleTeams, setPossibleTeams] = useState<TeamInfo[]>([]);
   const [possibleRoundNames, setPossibleRoundNames] = useState<string[]>([]);
@@ -146,7 +146,7 @@ const BallotEntry = () => {
 
   const tryUpdateNames = (teamState: TeamState) => {
     const team = possibleTeams.find(
-      (team) => team.teamNumber === teamState.teamNumber
+      (team) => team.teamNumber === teamState.teamNumber,
     );
     if (team && team.competitorNames.length >= 2) {
       teamState.issue1Name = team.competitorNames[0];
@@ -244,11 +244,11 @@ const BallotEntry = () => {
 
   const petitionerNames =
     possibleTeams.find(
-      (team) => team.teamNumber === ballot.petitioner.teamNumber
+      (team) => team.teamNumber === ballot.petitioner.teamNumber,
     )?.competitorNames ?? [];
   const respondentNames =
     possibleTeams.find(
-      (team) => team.teamNumber === ballot.respondent.teamNumber
+      (team) => team.teamNumber === ballot.respondent.teamNumber,
     )?.competitorNames ?? [];
   return (
     <div>

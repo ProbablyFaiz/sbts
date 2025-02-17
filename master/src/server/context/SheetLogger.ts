@@ -5,7 +5,7 @@ class SheetLogger {
     Logger.log(data);
     const logs = Logger.getLog();
     const logOutputRange = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
-      MasterRange.ExecutionLog
+      MasterRange.ExecutionLog,
     );
     logOutputRange.setValue(logs);
   }

@@ -22,7 +22,7 @@ function DetectNameTypos(rankingRange: string[][]): string[][] {
         nameSearchResults
           .filter((result) => result[1] !== name)
           .filter(
-            (result) => !existingMatchSet.has(serializedMatch(name, result[1]))
+            (result) => !existingMatchSet.has(serializedMatch(name, result[1])),
           )
           .forEach((potentialDuplicate) => {
             potentialDuplicateResults.push([

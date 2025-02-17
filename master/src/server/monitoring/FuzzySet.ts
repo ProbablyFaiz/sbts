@@ -4,7 +4,7 @@ interface FuzzySet {
   get<DEFAULT>(
     candidate: string,
     def?: DEFAULT,
-    minScore?: number
+    minScore?: number,
   ): Array<[number, string]> | DEFAULT;
 
   add(value: string): false | undefined;
@@ -20,7 +20,7 @@ const FuzzySet = function (
   arr?,
   useLevenshtein?,
   gramSizeLower?,
-  gramSizeUpper?
+  gramSizeUpper?,
 ): FuzzySet {
   const fuzzyset: any = {};
 
@@ -214,7 +214,7 @@ const FuzzySet = function (
         if (scoreWordPair[0] >= minMatchScore) {
           newResults.push([scoreWordPair[0], this.exactSet[scoreWordPair[1]]]);
         }
-      }.bind(this)
+      }.bind(this),
     );
     return newResults;
   };

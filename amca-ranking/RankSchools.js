@@ -115,7 +115,7 @@ function getSchoolResults(teamResults, teamLookupMap) {
 
   const ballotSum = Object.values(schoolResults).reduce(
     (acc, curr) => acc + curr.ballotsWon,
-    0
+    0,
   );
   console.log(`Sanity check: total ballots: ${ballotSum}`);
 

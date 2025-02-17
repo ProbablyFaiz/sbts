@@ -31,7 +31,7 @@ export const deepCopyPairings = (pairings: Pairing[]): Pairing[] => {
 };
 
 export const formatSwapMetadata = (
-  swapMetadata: SwapMetadata
+  swapMetadata: SwapMetadata,
 ): [string, string][] => {
   const { swapMade, conflictResolved, swapReason, pairingSnapshot } =
     swapMetadata;
@@ -58,6 +58,6 @@ export const formatSwapMetadata = (
 export const numericalRange = (
   start: number,
   stop: number,
-  step: number = 1
+  step: number = 1,
 ): number[] =>
   Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);

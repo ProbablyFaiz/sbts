@@ -7,7 +7,7 @@ const displayRoundMatchResults = (round: string, context: IContext) => {
     [round],
     undefined,
     undefined,
-    context
+    context,
   );
   const seenTeams = new Set();
   const outputCells = [`${round} Summary`];
@@ -24,11 +24,11 @@ const displayRoundMatchResults = (round: string, context: IContext) => {
     // Add a string of the form Team X (2-1) defeats Team Y (1-2)
     if (teamResult.ballotsWon > opponentResult.ballotsWon) {
       outputCells.push(
-        `Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon})`
+        `Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon}) defeats Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon})`,
       );
     } else if (teamResult.ballotsWon < opponentResult.ballotsWon) {
       outputCells.push(
-        `Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon})`
+        `Team ${opponentNumber} (${opponentResult.ballotsWon}–${teamResult.ballotsWon}) defeats Team ${teamNumber} (${teamResult.ballotsWon}–${opponentResult.ballotsWon})`,
       );
     } else {
       const teamMargin = teamResult.pointDifferential;
@@ -37,30 +37,30 @@ const displayRoundMatchResults = (round: string, context: IContext) => {
           `Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
           }, PD ${formatPd(
-            teamResult.pointDifferential
+            teamResult.pointDifferential,
           )}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
-          }, PD ${formatPd(opponentResult.pointDifferential)})`
+          }, PD ${formatPd(opponentResult.pointDifferential)})`,
         );
       } else if (teamMargin < 0) {
         outputCells.push(
           `Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
           }, PD ${formatPd(
-            opponentResult.pointDifferential
+            opponentResult.pointDifferential,
           )}) ties Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
-          }, PD ${formatPd(teamResult.pointDifferential)})`
+          }, PD ${formatPd(teamResult.pointDifferential)})`,
         );
       } else {
         outputCells.push(
           `Team ${teamNumber} (${teamResult.ballotsWon}–${
             opponentResult.ballotsWon
           }, PD ${formatPd(
-            teamResult.pointDifferential
+            teamResult.pointDifferential,
           )}) ties Team ${opponentNumber} (${opponentResult.ballotsWon}–${
             teamResult.ballotsWon
-          }, PD ${formatPd(opponentResult.pointDifferential)})`
+          }, PD ${formatPd(opponentResult.pointDifferential)})`,
         );
       }
     }

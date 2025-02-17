@@ -5,11 +5,11 @@ export const onOpen = () => {
     .addItem("Publish Ballots to Teams", "OnPublishBallotsClick")
     .addItem(
       "Create Team Ballot Folders (One-Time)",
-      "OnCreateTeamBallotFolderClick"
+      "OnCreateTeamBallotFolderClick",
     )
     .addItem(
       "Email Team Ballot Folder Links (One-Time)",
-      "OnEmailBallotFolderLinksClick"
+      "OnEmailBallotFolderLinksClick",
     );
   menu.addToUi();
 };
