@@ -32,7 +32,7 @@ RUN apt-get update && \
 # Create non-root user
 RUN useradd -m -U app
 
-COPY templates/ templates/
+COPY templates/ /app/templates/
 
 # Copy only the venv from builder
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
