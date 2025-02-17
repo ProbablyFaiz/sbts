@@ -39,6 +39,8 @@ COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH"
+ENV GCP_BUCKET_NAME=${GCP_BUCKET_NAME}
+ENV GCP_PUBLIC_URL=${GCP_PUBLIC_URL}
 USER app
 WORKDIR /app
 

@@ -1,6 +1,7 @@
 import os
 from typing import Any
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,6 +9,8 @@ from pydantic import BaseModel
 from publisher.bucket import upload_to_gcs
 from publisher.latex import create_pdf_from_template
 from publisher.utils import sha1_bytes
+
+load_dotenv()
 
 GCP_BUCKET_NAME = os.getenv("GCP_BUCKET_NAME")
 GCP_PUBLIC_URL = os.getenv("GCP_PUBLIC_URL")
@@ -23,12 +26,12 @@ app.add_middleware(
 )
 
 
-class PublishBallotRequest(BaseModel):
+class PublishRequest(BaseModel):
     template_name: str
     ballot_fields: dict[str, Any]
 
 
-class PublishBallotResponse(BaseModel):
+class PublishResponse(BaseModel):
     bucket_url: str
 
 
@@ -37,10 +40,10 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/publish_ballot", operation_id="publishBallot")
-def publish_ballot(request: PublishBallotRequest) -> PublishBallotResponse:
+@app.post("/publish", operation_id="publish")
+def publish(request: PublishRequest) -> PublishResponse:
     pdf = create_pdf_from_template(request.template_name, request.ballot_fields)
     pdf_hash = sha1_bytes(pdf)
     bucket_key = f"ballots/{pdf_hash[:2]}/{pdf_hash}.pdf"
-    upload_to_gcs(GCP_BUCKET_NAME, bucket_key, pdf)
-    return PublishBallotResponse(bucket_url=f"{GCP_PUBLIC_URL}/{bucket_key}")
+    upload_to_gcs(GCP_BUCKET_NAME, bucket_key, pdf, "application/pdf")
+    return PublishResponse(bucket_url=f"{GCP_PUBLIC_URL}/{bucket_key}")

@@ -1,4 +1,5 @@
 import re
+import shutil
 import subprocess
 import tempfile
 from enum import StrEnum
@@ -10,6 +11,7 @@ class LatexTemplate(StrEnum):
     BALLOT = "ballot"
 
 
+_NAMC_LOGO_PATH = Path("templates/namc_logo.pdf")
 _TEMPLATE_PATHS: dict[LatexTemplate, Path] = {
     LatexTemplate.BALLOT: Path("templates/ballot.tex"),
 }
@@ -63,7 +65,8 @@ def compile_latex(latex_str: str) -> bytes:
         temp_dir = Path(temp_dir)
         tex_file = temp_dir / "temp.tex"
         tex_file.write_text(latex_str)
-        subprocess.run(["pdflatex", tex_file])
+        shutil.copy(_NAMC_LOGO_PATH, temp_dir / "namc_logo.pdf")
+        subprocess.run(["pdflatex", tex_file], cwd=temp_dir)
         return tex_file.with_suffix(".pdf").read_bytes()
 
 
