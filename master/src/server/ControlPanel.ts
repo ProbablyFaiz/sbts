@@ -1,9 +1,7 @@
-import { CreateTeamBallotFolders } from "./actions/CreateTeamBallotSheets";
+import { CreateTeamBallotSheets } from "./actions/CreateTeamBallotSheets";
 import { EmailBallotFolderLinks } from "./actions/EmailBallotFolderLinks";
-import { PublishTeamBallots } from "./actions/PublishTeamBallots";
+import { PublishBallots } from "./actions/PublishBallots";
 import SheetLogger from "./context/SheetLogger";
-import { SetupTriggers } from "./setup/SetupTriggers";
-import { ShareTrialFolders } from "./setup/ShareTrialFolders";
 
 function OnPublishBallotsClick() {
   const ui = SpreadsheetApp.getUi();
@@ -28,13 +26,13 @@ function OnPublishBallotsClick() {
     if (result == ui.Button.YES) {
       ui.showModelessDialog(
         HtmlService.createHtmlOutput(
-          "<p>This may take several minutes. You can close this window.</p>",
+          "<p>This may take a minute. You can close this window.</p>",
         ),
         "Publishing ballots...",
       );
-      PublishTeamBallots();
+      PublishBallots();
       const htmlOutput = HtmlService.createHtmlOutput(
-        "<p>Ballots were successfully published to team folders.</p>",
+        "<p>Ballots were successfully published.</p>",
       )
         .setWidth(250)
         .setHeight(100);
@@ -47,38 +45,7 @@ function OnPublishBallotsClick() {
   }
 }
 
-function OnSetupMasterSpreadsheetClick() {
-  const ui = SpreadsheetApp.getUi();
-  const result = ui.alert(
-    "Please confirm",
-    "Are you sure you want to setup the master spreadsheet? Only run this once, prior to the start of the tournament.",
-    ui.ButtonSet.YES_NO,
-  );
-  // Process the user's response.
-  if (result == ui.Button.YES) {
-    if (ScriptApp.getProjectTriggers().length > 0) {
-      ui.alert(
-        "Detected existing setup configuration, aborting. Delete the existing triggers and try again.",
-      );
-    } else {
-      // SheetLogger.log("Creating triggers...");
-      // SetupTriggers();
-      const tabSetUp = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(
-        "TabSystemSetUpRange",
-      );
-      tabSetUp?.setValue(true);
-      const htmlOutput = HtmlService.createHtmlOutput(
-        "<p>Master spreadsheet was successfully configured for use.</p>",
-      )
-        .setWidth(300)
-        .setHeight(150);
-      ui.showModelessDialog(htmlOutput, "Success!");
-    }
-  } else {
-  }
-}
-
-function OnCreateTeamBallotFolderClick() {
+function OnCreateTeamBallotSheetsClick() {
   const ui = SpreadsheetApp.getUi();
   const result = ui.alert(
     "Please confirm",
@@ -88,10 +55,10 @@ function OnCreateTeamBallotFolderClick() {
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
-    SheetLogger.log("Creating team ballot folders...");
-    CreateTeamBallotFolders();
+    SheetLogger.log("Creating team ballot sheets...");
+    CreateTeamBallotSheets();
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully created team ballot folders.</p>",
+      "<p>Successfully created team ballot sheets.</p>",
     )
       .setWidth(250)
       .setHeight(100);
@@ -100,39 +67,18 @@ function OnCreateTeamBallotFolderClick() {
   }
 }
 
-function OnEmailBallotFolderLinksClick() {
+function OnEmailBallotSheetsLinksClick() {
   const ui = SpreadsheetApp.getUi();
   const result = ui.alert(
     "Please confirm",
-    "Are you sure you want to email links to ballot folders? Be careful about running this so as to not spam " +
+    "Are you sure you want to email links to ballot sheets? Be careful about running this so as to not spam " +
       "the competing teams.",
     ui.ButtonSet.YES_NO,
   );
   // Process the user's response.
   if (result == ui.Button.YES) {
-    SheetLogger.log("Creating team ballot folders...");
+    SheetLogger.log("Emailing ballot sheet links...");
     EmailBallotFolderLinks();
-    const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully emailed ballot folder links.</p>",
-    )
-      .setWidth(250)
-      .setHeight(100);
-    ui.showModelessDialog(htmlOutput, "Success!");
-  } else {
-  }
-}
-
-function OnShareFoldersWithBailiffs() {
-  const ui = SpreadsheetApp.getUi();
-  const result = ui.alert(
-    "Please confirm",
-    "Are you sure you want to share trial folders with bailiffs? This will send email notifications.",
-    ui.ButtonSet.YES_NO,
-  );
-  // Process the user's response.
-  if (result == ui.Button.YES) {
-    SheetLogger.log("Sharing trial folders with bailiffs...");
-    ShareTrialFolders();
     const htmlOutput = HtmlService.createHtmlOutput(
       "<p>Successfully emailed ballot folder links.</p>",
     )
@@ -145,8 +91,6 @@ function OnShareFoldersWithBailiffs() {
 
 export {
   OnPublishBallotsClick,
-  OnSetupMasterSpreadsheetClick,
-  OnCreateTeamBallotFolderClick,
-  OnEmailBallotFolderLinksClick,
-  OnShareFoldersWithBailiffs,
+  OnCreateTeamBallotSheetsClick,
+  OnEmailBallotSheetsLinksClick,
 };

@@ -4,12 +4,12 @@ export const onOpen = () => {
     .addItem("Ballot Entry", "openBallotEntry")
     .addItem("Publish Ballots to Teams", "OnPublishBallotsClick")
     .addItem(
-      "Create Team Ballot Folders (One-Time)",
-      "OnCreateTeamBallotFolderClick",
+      "Create Team Ballot Sheets (One-Time)",
+      "OnCreateTeamBallotSheetsClick",
     )
     .addItem(
-      "Email Team Ballot Folder Links (One-Time)",
-      "OnEmailBallotFolderLinksClick",
+      "Email Team Ballot Sheet Links (One-Time)",
+      "OnEmailBallotSheetsLinksClick",
     );
   menu.addToUi();
 };

@@ -2,10 +2,9 @@ import { onOpen, openAboutSidebar, openBallotEntry } from "./ui";
 
 import { RequiredBallotState } from "../Types";
 import {
-  OnCreateTeamBallotFolderClick,
-  OnEmailBallotFolderLinksClick,
+  OnCreateTeamBallotSheetsClick,
+  OnEmailBallotSheetsLinksClick,
   OnPublishBallotsClick,
-  OnSetupMasterSpreadsheetClick,
 } from "./ControlPanel";
 import { PublishBallots } from "./actions/PublishBallots";
 import { SSContext } from "./context/Context";
@@ -65,10 +64,9 @@ export {
   addSheet,
   deleteSheet,
   setActiveSheet,
-  OnCreateTeamBallotFolderClick,
-  OnEmailBallotFolderLinksClick,
+  OnCreateTeamBallotSheetsClick,
+  OnEmailBallotSheetsLinksClick,
   OnPublishBallotsClick,
-  OnSetupMasterSpreadsheetClick,
   DetectNameTypos,
   TabulateIndividualBallots,
   TabulateTeamBallots,
@@ -97,10 +95,9 @@ export {
 global.onOpen = onOpen;
 global.openBallotEntry = openBallotEntry;
 global.openAboutSidebar = openAboutSidebar;
-global.OnCreateTeamBallotFolderClick = OnCreateTeamBallotFolderClick;
-global.OnEmailBallotFolderLinksClick = OnEmailBallotFolderLinksClick;
+global.OnCreateTeamBallotSheetsClick = OnCreateTeamBallotSheetsClick;
+global.OnEmailBallotSheetsLinksClick = OnEmailBallotSheetsLinksClick;
 global.OnPublishBallotsClick = OnPublishBallotsClick;
-global.OnSetupMasterSpreadsheetClick = OnSetupMasterSpreadsheetClick;
 /**
  * Tabulate individual results for the given rounds. Arguments provided after the below-listed argument are
  * solely for telling the custom function when to recalculate.
