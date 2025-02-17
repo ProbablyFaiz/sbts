@@ -1,4 +1,4 @@
-import { BallotRange, NonSheetBallotReadout } from "../../Types";
+import { BallotRange, BallotReadout } from "../../Types";
 import { SSContext } from "../context/Context";
 import { sheetForFile } from "../context/Helpers";
 import SheetLogger from "../context/SheetLogger";
@@ -9,10 +9,7 @@ const COMMENT_TEXT_COLUMN_INDEX = 2;
 const CHARACTERS_PER_HEIGHT_PIXEL = 5.4; // Computed based on a column width of 700 and Times New Roman 12 pt. font.
 const HEIGHT_PIXELS_PER_LINE = 21.0;
 
-function createDummyBallot(
-  ballotReadout: NonSheetBallotReadout,
-  context: SSContext,
-) {
+function createDummyBallot(ballotReadout: BallotReadout, context: SSContext) {
   const trialFolder = context.getOrCreateTrialFolder(
     ballotReadout.round,
     ballotReadout.courtroom,

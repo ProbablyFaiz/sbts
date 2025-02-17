@@ -4,17 +4,11 @@
 // It is safe to run this after every round without making any manual change to the Team Ballots folder.
 // The script is smart enough to see existing ballot PDFs and not recreate or overwrite them.
 
-import {
-  BallotRange,
-  BallotSpreadsheet,
-  NonSheetBallotReadout,
-} from "../../Types";
 import { SSContext } from "../context/Context";
 import {
   getFileByName,
   getIdFromUrl,
   getOrCreateChildFolder,
-  sheetForFile,
 } from "../context/Helpers";
 import SheetLogger from "../context/SheetLogger";
 import { createDummyBallot } from "./CreateDummyBallot";

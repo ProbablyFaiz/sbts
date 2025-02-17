@@ -1,4 +1,7 @@
 import {
+  BallotReadout,
+  BallotResult,
+  BallotScoreGrouping,
   BallotSpreadsheet,
   ByeStrategy,
   Cell,
@@ -7,10 +10,10 @@ import {
   IndividualBallotResult,
   MasterRange,
   MasterSpreadsheet,
-  NonSheetBallotReadout,
-  NonSheetBallotResult,
   RequiredBallotState,
   RoundRobinConfig,
+  SCORE_GROUP_KEYS,
+  SCORE_IDX_MAP,
   ScoreGroup,
   SwissConfig,
   TeamBallotResult,
@@ -39,6 +42,7 @@ interface IContext {
   courtroomRecords: CourtroomInfo[];
   teamBallotResults: TeamBallotResult[];
   individualBallotResults: IndividualBallotResult[];
+  ballotScoreGroupings: BallotScoreGrouping[];
   judgeNames: string[];
   roundNames: string[];
   prelimRounds: string[];
@@ -359,16 +363,16 @@ class SSContext implements IContext {
   }
 
   @memoize
-  get formBallotResults(): NonSheetBallotResult[] {
+  get formBallotResults(): BallotResult[] {
     return this.formBallotReadouts.map(this.readoutToResult);
   }
 
   @memoize
-  get formBallotReadouts(): NonSheetBallotReadout[] {
+  get formBallotReadouts(): BallotReadout[] {
     const formResponseSheets = this.masterSpreadsheet
       .getSheets()
       .filter((sheet) => sheet.getName().includes("Form Responses"));
-    const formBallotReadouts: NonSheetBallotReadout[] = [];
+    const formBallotReadouts: BallotReadout[] = [];
 
     formResponseSheets.forEach((sheet) => {
       const formResponses = compactRange(
@@ -380,12 +384,12 @@ class SSContext implements IContext {
   }
 
   @memoize
-  get enteredBallotResults(): NonSheetBallotResult[] {
+  get enteredBallotResults(): BallotResult[] {
     return this.enteredBallotReadouts.map(this.readoutToResult);
   }
 
   @memoize
-  get enteredBallotReadouts(): NonSheetBallotReadout[] {
+  get enteredBallotReadouts(): BallotReadout[] {
     const enteredBallotSheets = this.masterSpreadsheet.getSheetByName(
       ENTERED_BALLOTS_SHEET,
     );
@@ -396,8 +400,13 @@ class SSContext implements IContext {
   }
 
   @memoize
-  get allReadouts(): NonSheetBallotReadout[] {
+  get allReadouts(): BallotReadout[] {
     return [...this.formBallotReadouts, ...this.enteredBallotReadouts];
+  }
+
+  @memoize
+  get ballotScoreGroupings(): BallotScoreGrouping[] {
+    return this.allReadouts.map(this.readoutToScoreGrouping);
   }
 
   @memoize
@@ -449,7 +458,7 @@ class SSContext implements IContext {
   private formRowToReadout(
     response: any[],
     sourceSheet: string,
-  ): NonSheetBallotReadout {
+  ): BallotReadout {
     const getScores = (start: number, end: number) =>
       response
         .slice(start, end + 1)
@@ -482,9 +491,7 @@ class SSContext implements IContext {
     };
   }
 
-  private readoutToResult(
-    readout: NonSheetBallotReadout,
-  ): NonSheetBallotResult {
+  private readoutToResult(readout: BallotReadout): BallotResult {
     return {
       judgeName: readout.judgeName,
       round: readout.round,
@@ -503,10 +510,37 @@ class SSContext implements IContext {
     };
   }
 
-  setReadoutPdfUrls(
-    readouts: NonSheetBallotReadout[],
-    ballotPdfUrls: string[],
-  ) {
+  private readoutToScoreGrouping(readout: BallotReadout): BallotScoreGrouping {
+    const groupMap: Map<CompetitorRole, ScoreGroup> = new Map();
+    SCORE_GROUP_KEYS.forEach(
+      (
+        {
+          scoreArr: scoreArrKey,
+          name: nameKey,
+          writtenFeedback: writtenFeedbackKey,
+        },
+        role,
+      ) => {
+        const scores = readout[scoreArrKey];
+        const name = readout[nameKey];
+        const group = {
+          role,
+          competitorName: name,
+          writtenFeedback: readout[writtenFeedbackKey],
+          contentOfArgument: scores[SCORE_IDX_MAP["contentOfArgument"]],
+          extempAbility: scores[SCORE_IDX_MAP["extempAbility"]],
+          forensicSkill: scores[SCORE_IDX_MAP["forensicSkill"]],
+        } as ScoreGroup;
+        groupMap.set(role, group);
+      },
+    );
+    return {
+      groups: groupMap,
+      readout,
+    };
+  }
+
+  setReadoutPdfUrls(readouts: BallotReadout[], ballotPdfUrls: string[]) {
     // Group readouts by source sheet
     const readoutsBySheet = readouts.reduce(
       (acc, readout, index) => {
@@ -519,10 +553,7 @@ class SSContext implements IContext {
         });
         return acc;
       },
-      {} as Record<
-        string,
-        { readout: NonSheetBallotReadout; pdfUrl: string }[]
-      >,
+      {} as Record<string, { readout: BallotReadout; pdfUrl: string }[]>,
     );
 
     // Process each sheet only once

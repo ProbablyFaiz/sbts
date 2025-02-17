@@ -360,6 +360,14 @@ const serverConfig = {
       // removes need for assigning public server functions to "global"
       autoGlobalExportsFiles: [serverEntry],
     }),
+    new webpack.DefinePlugin({
+      "process.env.PUBLISHER_FANOUT_ENDPOINT": JSON.stringify(
+        process.env.PUBLISHER_FANOUT_ENDPOINT,
+      ),
+      "process.env.PUBLISHER_API_KEY": JSON.stringify(
+        process.env.PUBLISHER_API_KEY,
+      ),
+    }),
   ],
 };
 

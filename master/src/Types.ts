@@ -174,7 +174,7 @@ type RequiredBallotState = Omit<
   ballotPdf?: undefined;
 };
 
-interface NonSheetBallotResult {
+interface BallotResult {
   judgeName: string;
   round: string;
   courtroom: string;
@@ -191,7 +191,7 @@ interface NonSheetBallotResult {
   ballotPdfUrl?: string;
 }
 
-interface NonSheetBallotReadout {
+interface BallotReadout {
   timestamp: Date;
   judgeName: string;
   round: string;
@@ -214,6 +214,81 @@ interface NonSheetBallotReadout {
   sourceSheet: string;
 }
 
+enum CompetitorRole {
+  P_ISSUE_1 = "P_ISSUE_1",
+  P_ISSUE_2 = "P_ISSUE_2",
+  R_ISSUE_1 = "R_ISSUE_1",
+  R_ISSUE_2 = "R_ISSUE_2",
+}
+
+interface ScoreGroup {
+  role: CompetitorRole;
+  competitorName: string;
+  writtenFeedback: string;
+  contentOfArgument: number;
+  extempAbility: number;
+  forensicSkill: number;
+}
+
+interface BallotScoreGrouping {
+  groups: Map<CompetitorRole, ScoreGroup>;
+  readout: BallotReadout;
+}
+
+const SCORE_GROUP_KEYS: Map<
+  CompetitorRole,
+  {
+    name: keyof BallotReadout;
+    scoreArr: keyof BallotReadout;
+    writtenFeedback: keyof BallotReadout;
+  }
+> = new Map([
+  [
+    CompetitorRole.P_ISSUE_1,
+    {
+      name: "pIssue1Name",
+      scoreArr: "pIssue1Scores",
+      writtenFeedback: "pIssue1WrittenFeedback",
+    },
+  ],
+  [
+    CompetitorRole.P_ISSUE_2,
+    {
+      name: "pIssue2Name",
+      scoreArr: "pIssue2Scores",
+      writtenFeedback: "pIssue2WrittenFeedback",
+    },
+  ],
+  [
+    CompetitorRole.R_ISSUE_1,
+    {
+      name: "rIssue1Name",
+      scoreArr: "rIssue1Scores",
+      writtenFeedback: "rIssue1WrittenFeedback",
+    },
+  ],
+  [
+    CompetitorRole.R_ISSUE_2,
+    {
+      name: "rIssue2Name",
+      scoreArr: "rIssue2Scores",
+      writtenFeedback: "rIssue2WrittenFeedback",
+    },
+  ],
+]);
+
+const SCORE_IDX_MAP: Map<keyof ScoreGroup, number> = new Map([
+  ["contentOfArgument", 0],
+  ["extempAbility", 1],
+  ["forensicSkill", 2],
+]);
+
+const SCORE_CATEGORY_NAMES: Map<keyof ScoreGroup, string> = new Map([
+  ["contentOfArgument", "Content of Argument"],
+  ["extempAbility", "Extemporaneous Ability"],
+  ["forensicSkill", "Forensic Skill & Courtroom Demeanor"],
+]);
+
 interface SwissConfig {
   previousRounds: string[];
   allowSameSchool: boolean;
@@ -234,22 +309,6 @@ enum ByeStrategy {
   AUTO_WIN,
 }
 
-enum CompetitorRole {
-  P_ISSUE_1 = "P_ISSUE_1",
-  P_ISSUE_2 = "P_ISSUE_2",
-  R_ISSUE_1 = "R_ISSUE_1",
-  R_ISSUE_2 = "R_ISSUE_2",
-}
-
-interface ScoreGroup {
-  role: CompetitorRole;
-  competitorName: string;
-  writtenFeedback: string;
-  contentOfArgument: number;
-  extempAbility: number;
-  forensicSkill: number;
-}
-
 export {
   BallotRange,
   MasterRange,
@@ -262,7 +321,7 @@ export {
   CompetitorInfo,
   TeamBallotResult,
   IndividualBallotResult,
-  NonSheetBallotResult,
+  BallotResult,
   TeamSummary,
   IndividualSummary,
   RoundResult,
@@ -272,10 +331,14 @@ export {
   BallotState,
   RequiredTeamState,
   RequiredBallotState,
-  NonSheetBallotReadout,
+  BallotReadout,
+  BallotScoreGrouping,
   SwissConfig,
   ByeStrategy,
   RoundRobinConfig,
   CompetitorRole,
   ScoreGroup,
+  SCORE_GROUP_KEYS,
+  SCORE_IDX_MAP,
+  SCORE_CATEGORY_NAMES,
 };

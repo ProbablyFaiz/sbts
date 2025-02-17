@@ -7,6 +7,7 @@ import {
   OnPublishBallotsClick,
   OnSetupMasterSpreadsheetClick,
 } from "./ControlPanel";
+import { PublishBallots } from "./actions/PublishBallots";
 import { SSContext } from "./context/Context";
 import { CurrentRoundNames } from "./monitoring/CurrentRoundNames";
 import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
@@ -26,7 +27,6 @@ import DisplayMatchResults from "./tab/DisplayMatchResults";
 import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
 import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
-
 const getCourtrooms = () => {
   const context = new SSContext();
   return context.courtroomRecords;
@@ -83,6 +83,7 @@ export {
   RoundRobinPairTeamsWithCourtrooms,
   CurrentRoundNames,
   NoOp,
+  PublishBallots,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -162,3 +163,4 @@ global.getRoundNames = getRoundNames;
 global.getJudgeNames = getJudgeNames;
 global.submitBallot = submitBallot;
 global.NoOp = NoOp;
+global.PublishBallots = PublishBallots;
