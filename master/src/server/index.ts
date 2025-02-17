@@ -15,6 +15,7 @@ import { SSContext } from "./context/Context";
 import { RequiredBallotState } from "../Types";
 import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
 import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
+import { CurrentRoundNames } from "./monitoring/CurrentRoundNames";
 import {
   PairTeams,
   PairTeamsWithCourtrooms,
@@ -51,6 +52,10 @@ const submitBallot = (ballotState: RequiredBallotState) => {
   context.addEnteredBallot(ballotState);
 };
 
+const NoOp = () => {
+  return;
+};
+
 // Public functions must be exported as named exports
 export {
   onOpen,
@@ -76,6 +81,8 @@ export {
   RoundRobinPairTeams,
   RoundRobinPairTeamsWithMetadata,
   RoundRobinPairTeamsWithCourtrooms,
+  CurrentRoundNames,
+  NoOp,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -140,14 +147,18 @@ global.PairTeamsWithCourtrooms = PairTeamsWithCourtrooms;
  * @customfunction
  */
 
+global.PairTeamsWithMetadata = PairTeamsWithMetadata;
+
 global.RoundRobinPairTeams = RoundRobinPairTeams;
 global.RoundRobinPairTeamsWithMetadata = RoundRobinPairTeamsWithMetadata;
 global.RoundRobinPairTeamsWithCourtrooms = RoundRobinPairTeamsWithCourtrooms;
 
-global.PairTeamsWithMetadata = PairTeamsWithMetadata;
+global.CurrentRoundNames = CurrentRoundNames;
+
 global.getCourtrooms = getCourtrooms;
 global.getTeams = getTeams;
 global.getTeamBallotResults = getTeamBallotResults;
 global.getRoundNames = getRoundNames;
 global.getJudgeNames = getJudgeNames;
 global.submitBallot = submitBallot;
+global.NoOp = NoOp;
