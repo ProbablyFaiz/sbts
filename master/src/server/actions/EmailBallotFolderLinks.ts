@@ -24,13 +24,13 @@ function EmailBallotFolderLinks() {
 
 const ballotFolderEmail = (context: IContext, teamInfo: TeamInfo) => {
   return {
-    name: `${context.tournamentName} Tournament`,
-    subject: `Team ${teamInfo.teamNumber} Ballot Folder`,
+    name: `NAMC - ${context.tournamentName}`,
+    subject: `Team ${teamInfo.teamNumber} Ballots`,
     to: teamInfo.emails,
     replyTo: context.tournamentEmail,
     body: `Hello,
 
-Thank you for participating in the ${context.tournamentName}. At the conclusion of each round of the tournament, your team's ballots will be accessible in the following folder:
+Thank you for participating in the ${context.tournamentName}. At the conclusion of each round of the tournament, your team's ballots will be accessible in the following spreadsheet:
 ${teamInfo.ballotListLink}
 
 During the tournament, no formal ballot verification will take place. However, you will have access to your team's ballots after each round and are welcome to contact the tabulation director (via ${context.tournamentEmail}) with any questions or concerns you may have.

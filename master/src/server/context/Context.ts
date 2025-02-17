@@ -271,12 +271,12 @@ class SSContext implements IContext {
     return true;
   }
 
-  teamBallotFolder(
+  teamBallotSheet(
     teamNumber: string,
-  ): GoogleAppsScript.Drive.Folder | undefined {
-    const folderLink = this.teamInfo[teamNumber]?.ballotListLink;
-    if (!folderLink) return undefined;
-    return DriveApp.getFolderById(getIdFromUrl(folderLink));
+  ): GoogleAppsScript.Spreadsheet.Spreadsheet | undefined {
+    const sheetLink = this.teamInfo[teamNumber]?.ballotListLink;
+    if (!sheetLink) return undefined;
+    return SpreadsheetApp.openById(getIdFromUrl(sheetLink));
   }
 
   @memoize
@@ -525,26 +525,38 @@ class SSContext implements IContext {
         groupMap.set(role, group);
       },
     );
+
+    const groupTotal = (role: CompetitorRole) => {
+      const group = groupMap.get(role);
+      if (!group) return 0;
+      return (
+        group.contentOfArgument + group.extempAbility + group.forensicSkill
+      );
+    };
+
     return {
       groups: groupMap,
       readout,
+      pTotal:
+        groupTotal(CompetitorRole.P_ISSUE_1) +
+        groupTotal(CompetitorRole.P_ISSUE_2),
+      rTotal:
+        groupTotal(CompetitorRole.R_ISSUE_1) +
+        groupTotal(CompetitorRole.R_ISSUE_2),
     };
   }
 
-  setReadoutPdfUrls(readouts: BallotReadout[], ballotPdfUrls: string[]) {
+  setReadoutPdfUrls(readouts: BallotReadout[]) {
     // Group readouts by source sheet
     const readoutsBySheet = readouts.reduce(
-      (acc, readout, index) => {
+      (acc, readout) => {
         if (!acc[readout.sourceSheet]) {
           acc[readout.sourceSheet] = [];
         }
-        acc[readout.sourceSheet].push({
-          readout,
-          pdfUrl: ballotPdfUrls[index],
-        });
+        acc[readout.sourceSheet].push(readout);
         return acc;
       },
-      {} as Record<string, { readout: BallotReadout; pdfUrl: string }[]>,
+      {} as Record<string, BallotReadout[]>,
     );
 
     // Process each sheet only once
@@ -562,7 +574,7 @@ class SSContext implements IContext {
       const dataRows = sheetValues.slice(1);
 
       // Update all matching rows for this sheet
-      readoutGroup.forEach(({ readout, pdfUrl }) => {
+      readoutGroup.forEach((readout) => {
         const row = dataRows.findIndex((row) => {
           const rowReadout = this.formRowToReadout(row, sheetName);
           return (
@@ -576,7 +588,7 @@ class SSContext implements IContext {
         });
 
         if (row !== -1) {
-          sourceSheet.getRange(row + 2, 27).setValue(pdfUrl);
+          sourceSheet.getRange(row + 2, 27).setValue(readout.ballotPdfUrl);
         }
       });
     }

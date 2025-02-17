@@ -1,5 +1,12 @@
-import { CompetitorRole } from "../../Types";
+import {
+  BallotListRange,
+  BallotReadout,
+  BallotScoreGrouping,
+  Cell,
+  CompetitorRole,
+} from "../../Types";
 import { SSContext } from "../context/Context";
+import { Spreadsheet, setAndBackfillRange } from "../context/Helpers";
 
 const PUBLISHER_FANOUT_ENDPOINT = process.env.PUBLISHER_FANOUT_ENDPOINT;
 const PUBLISHER_API_KEY = process.env.PUBLISHER_API_KEY;
@@ -9,9 +16,11 @@ type PublishBallotResponse = {
   bucket_url: string;
 }[];
 
-const PublishBallots = () => {
-  const context = new SSContext();
-  const groupingsToPublish = context.ballotScoreGroupings.filter(
+const createBallotPdfs = (
+  ballotScoreGroupings: BallotScoreGrouping[],
+  tournamentName: string,
+) => {
+  const groupingsToPublish = ballotScoreGroupings.filter(
     (grouping) => !grouping.readout.ballotPdfUrl,
   );
   const groupingsById = new Map(
@@ -35,7 +44,7 @@ const PublishBallots = () => {
           p_team: readout.pTeam,
           r_team: readout.rTeam,
           judge_name: readout.judgeName,
-          tournament_name: context.tournamentName,
+          tournament_name: tournamentName,
           courtroom: readout.courtroom,
           p1_name: p1.competitorName,
           p2_name: p2.competitorName,
@@ -57,20 +66,8 @@ const PublishBallots = () => {
           p2_comments: p2.writtenFeedback,
           r1_comments: r1.writtenFeedback,
           r2_comments: r2.writtenFeedback,
-          p_total:
-            p1.contentOfArgument +
-            p1.extempAbility +
-            p1.forensicSkill +
-            p2.contentOfArgument +
-            p2.extempAbility +
-            p2.forensicSkill,
-          r_total:
-            r1.contentOfArgument +
-            r1.extempAbility +
-            r1.forensicSkill +
-            r2.contentOfArgument +
-            r2.extempAbility +
-            r2.forensicSkill,
+          p_total: grouping.pTotal,
+          r_total: grouping.rTotal,
         },
       };
     },
@@ -88,11 +85,80 @@ const PublishBallots = () => {
   const responseBody: PublishBallotResponse = JSON.parse(
     response.getContentText(),
   );
-  const publishedReadouts = responseBody.map(
-    ({ request_id }) => groupingsById.get(request_id)!.readout,
+  const publishedReadouts: BallotReadout[] = responseBody.map(
+    ({ request_id }) => {
+      const grouping = groupingsById.get(request_id)!;
+      grouping.readout.ballotPdfUrl = responseBody[request_id].bucket_url;
+      return grouping.readout;
+    },
   );
-  const publishedPdfUrls = responseBody.map(({ bucket_url }) => bucket_url);
-  context.setReadoutPdfUrls(publishedReadouts, publishedPdfUrls);
+  return publishedReadouts;
 };
+
+const updateTeamBallotSheet = (
+  teamScoreGroupings: BallotScoreGrouping[],
+  teamNumber: string,
+  ballotListSpreadsheet: Spreadsheet,
+) => {
+  const rows = teamScoreGroupings.map((grouping) =>
+    getBallotRow(grouping, teamNumber),
+  );
+  const listRange = ballotListSpreadsheet.getRangeByName(
+    BallotListRange.BallotList,
+  );
+  listRange.clearContent();
+  setAndBackfillRange(listRange, rows);
+};
+
+const getBallotRow = (
+  teamScoreGrouping: BallotScoreGrouping,
+  teamNumber: string,
+): Cell[] => {
+  const pMargin = teamScoreGrouping.pTotal - teamScoreGrouping.rTotal;
+  const isPTeam = teamScoreGrouping.readout.pTeam === teamNumber;
+  let outcome: string;
+  if (pMargin === 0) {
+    outcome = "Draw";
+  } else if (pMargin > 0) {
+    outcome = isPTeam ? "Win" : "Loss";
+  } else {
+    outcome = isPTeam ? "Loss" : "Win";
+  }
+  return [
+    teamScoreGrouping.readout.round,
+    teamScoreGrouping.readout.judgeName,
+    isPTeam ? teamScoreGrouping.readout.rTeam : teamScoreGrouping.readout.pTeam,
+    outcome,
+    teamScoreGrouping.readout.ballotPdfUrl,
+  ];
+};
+
+function PublishBallots() {
+  const context = new SSContext();
+  const ballotScoreGroupings = context.ballotScoreGroupings;
+  const groupingsToPublish = ballotScoreGroupings.filter(
+    (grouping) => !grouping.readout.ballotPdfUrl,
+  );
+  const publishedReadouts = createBallotPdfs(
+    groupingsToPublish,
+    context.tournamentName,
+  );
+  context.setReadoutPdfUrls(publishedReadouts);
+
+  const teamsWithNewBallots = new Set<string>();
+  publishedReadouts.forEach((readout) => {
+    teamsWithNewBallots.add(readout.pTeam);
+    teamsWithNewBallots.add(readout.rTeam);
+  });
+  teamsWithNewBallots.forEach((teamNumber) => {
+    const teamScoreGroupings = ballotScoreGroupings.filter(
+      (grouping) =>
+        grouping.readout.pTeam === teamNumber ||
+        grouping.readout.rTeam === teamNumber,
+    );
+    const teamBallotSheet = context.teamBallotSheet(teamNumber);
+    updateTeamBallotSheet(teamScoreGroupings, teamNumber, teamBallotSheet);
+  });
+}
 
 export { PublishBallots };

@@ -35,6 +35,7 @@ enum BallotListRange {
   TeamNumber = "TeamNumber",
   School = "School",
   Competitors = "Competitors",
+  BallotList = "BallotList",
 }
 
 enum OrchestratorRange {
@@ -207,6 +208,8 @@ interface ScoreGroup {
 
 interface BallotScoreGrouping {
   groups: Map<CompetitorRole, ScoreGroup>;
+  pTotal: number;
+  rTotal: number;
   readout: BallotReadout;
 }
 
