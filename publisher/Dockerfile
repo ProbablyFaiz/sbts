@@ -11,7 +11,7 @@ WORKDIR /app
 # Install dependencies first (for better caching)
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project
+    uv sync --frozen --compile-bytecode --no-install-project
 
 # Copy and install the project
 COPY publisher/ publisher/
@@ -39,13 +39,8 @@ COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 COPY templates/ /app/templates/
 
-ARG GCP_BUCKET_NAME
-ARG GCP_PUBLIC_URL
-
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH"
-ENV GCP_BUCKET_NAME=${GCP_BUCKET_NAME}
-ENV GCP_PUBLIC_URL=${GCP_PUBLIC_URL}
 USER app
 WORKDIR /app
 

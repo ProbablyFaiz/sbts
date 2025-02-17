@@ -3,7 +3,7 @@ import {
   Request,
 } from "@google-cloud/functions-framework/build/src/functions";
 
-const PUBLISHER_ENDPOINT = process.env.PUBLISHER_ENDPOINT;
+const PUBLISHER_ENDPOINT = process.env.FANOUT_PUBLISHER_ENDPOINT;
 const API_KEY = process.env.FANOUT_API_KEY;
 
 interface PublishRequest {
@@ -46,14 +46,25 @@ export const handler: HttpFunction = async (req, res) => {
       requests.map((request) =>
         fetch(publisherUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
           body: JSON.stringify(request),
-        }).then((r) => r.json()),
+        }).then((r) => {
+          try {
+            return r.json();
+          } catch (error) {
+            console.error("Error parsing response:", error);
+            console.log("Response:", r);
+            throw error;
+          }
+        }),
       ),
     );
     res.json(responses);
   } catch (error) {
-    console.error(error);
+    console.error("Error processing publish requests:", error);
     res.status(500).json({ error: "Failed to process publish requests" });
   }
 };

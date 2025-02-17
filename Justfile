@@ -15,7 +15,7 @@ master-deploy remote="main":
     cd master && just master-build && just master-push {{remote}}
 
 publisher-build:
-    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg GCP_BUCKET_NAME=$GCP_BUCKET_NAME --build-arg GCP_PUBLIC_URL=$GCP_PUBLIC_URL
+    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg GCP_BUCKET_NAME=$GCP_BUCKET_NAME --build-arg GCP_PUBLIC_URL=$GCP_PUBLIC_URL --build-arg PUBLISHER_API_KEY=$PUBLISHER_API_KEY
 
 publisher-push:
     cd publisher && docker push $GCP_CONTAINER_TAG
@@ -29,12 +29,13 @@ publisher-deploy:
         --memory 3Gi \
         --cpu 2 \
         --min-instances 0 \
-        --max-instances 20 \
+        --max-instances 25 \
         --timeout 60s \
         --concurrency 1 \
-        --ingress internal-and-cloud-load-balancing \
-        --no-allow-unauthenticated
-
+        --ingress all \
+        --allow-unauthenticated \
+        --service-account=sbts-publisher@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+        --set-env-vars "PUBLISHER_API_KEY=$PUBLISHER_API_KEY,GCP_BUCKET_NAME=$GCP_BUCKET_NAME,GCP_PUBLIC_URL=$GCP_PUBLIC_URL"
 publisher-logs:
     gcloud run services logs read publisher --gen2 --region=us-central1 --stream
 
@@ -50,7 +51,8 @@ fanout-deploy:
         --entry-point=handler \
         --trigger-http \
         --allow-unauthenticated \
-        --set-env-vars "FANOUT_PUBLISHER_ENDPOINT=$PUBLISHER_ENDPOINT,FANOUT_API_KEY=$PUBLISHER_FANOUT_API_KEY"
+        --service-account=publisher-fanout@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+        --set-env-vars "FANOUT_PUBLISHER_ENDPOINT=$PUBLISHER_ENDPOINT,FANOUT_API_KEY=$PUBLISHER_API_KEY"
 
 fanout-logs:
     gcloud functions logs read publisher_fanout --gen2 --region=us-central1
