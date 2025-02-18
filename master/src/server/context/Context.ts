@@ -26,7 +26,6 @@ import {
   flattenRange,
   getByeStrategy,
   getIdFromUrl,
-  getOrCreateChildFolder,
   spreadsheetTruthy,
 } from "./Helpers";
 
@@ -272,7 +271,7 @@ class SSContext implements IContext {
     return true;
   }
 
-  teamBallotSheet(
+  getTeamBallotSheet(
     teamNumber: string,
   ): GoogleAppsScript.Spreadsheet.Spreadsheet | undefined {
     const sheetLink = this.teamInfo[teamNumber]?.ballotListLink;

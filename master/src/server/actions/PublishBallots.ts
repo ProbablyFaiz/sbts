@@ -158,7 +158,7 @@ function PublishBallots() {
         grouping.readout.pTeam === teamNumber ||
         grouping.readout.rTeam === teamNumber,
     );
-    const teamBallotSheet = context.teamBallotSheet(teamNumber);
+    const teamBallotSheet = context.getTeamBallotSheet(teamNumber);
     if (teamBallotSheet) {
       updateTeamBallotSheet(teamScoreGroupings, teamNumber, teamBallotSheet);
     } else {
