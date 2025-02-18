@@ -9,7 +9,7 @@ export const onOpen = () => {
     )
     .addItem(
       "Email Team Ballot Sheet Links (One-Time)",
-      "OnEmailBallotSheetsLinksClick",
+      "OnEmailBallotSheetLinksClick",
     );
   menu.addToUi();
 };

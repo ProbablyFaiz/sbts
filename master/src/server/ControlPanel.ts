@@ -1,5 +1,5 @@
 import { CreateTeamBallotSheets } from "./actions/CreateTeamBallotSheets";
-import { EmailBallotFolderLinks } from "./actions/EmailBallotFolderLinks";
+import { EmailBallotSheetLinks } from "./actions/EmailBallotSheetLinks";
 import { PublishBallots } from "./actions/PublishBallots";
 import SheetLogger from "./context/SheetLogger";
 
@@ -67,7 +67,7 @@ function OnCreateTeamBallotSheetsClick() {
   }
 }
 
-function OnEmailBallotSheetsLinksClick() {
+function OnEmailBallotSheetLinksClick() {
   const ui = SpreadsheetApp.getUi();
   const result = ui.alert(
     "Please confirm",
@@ -78,9 +78,9 @@ function OnEmailBallotSheetsLinksClick() {
   // Process the user's response.
   if (result == ui.Button.YES) {
     SheetLogger.log("Emailing ballot sheet links...");
-    EmailBallotFolderLinks();
+    EmailBallotSheetLinks();
     const htmlOutput = HtmlService.createHtmlOutput(
-      "<p>Successfully emailed ballot folder links.</p>",
+      "<p>Successfully emailed ballot sheet links.</p>",
     )
       .setWidth(250)
       .setHeight(100);
@@ -92,5 +92,5 @@ function OnEmailBallotSheetsLinksClick() {
 export {
   OnPublishBallotsClick,
   OnCreateTeamBallotSheetsClick,
-  OnEmailBallotSheetsLinksClick,
+  OnEmailBallotSheetLinksClick,
 };

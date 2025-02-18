@@ -2,7 +2,7 @@ import { TeamInfo } from "../../Types";
 import { IContext, SSContext } from "../context/Context";
 import SheetLogger from "../context/SheetLogger";
 
-function EmailBallotFolderLinks() {
+function EmailBallotSheetLinks() {
   const context = new SSContext();
   const teamInfoMap = context.teamInfo;
   Object.values(teamInfoMap).forEach((teamInfo) => {
@@ -40,4 +40,4 @@ ${context.tournamentName}`,
   };
 };
 
-export { EmailBallotFolderLinks };
+export { EmailBallotSheetLinks };

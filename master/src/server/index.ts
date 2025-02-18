@@ -3,7 +3,7 @@ import { onOpen, openAboutSidebar, openBallotEntry } from "./ui";
 import { RequiredBallotState } from "../Types";
 import {
   OnCreateTeamBallotSheetsClick,
-  OnEmailBallotSheetsLinksClick,
+  OnEmailBallotSheetLinksClick,
   OnPublishBallotsClick,
 } from "./ControlPanel";
 import { PublishBallots } from "./actions/PublishBallots";
@@ -65,7 +65,7 @@ export {
   deleteSheet,
   setActiveSheet,
   OnCreateTeamBallotSheetsClick,
-  OnEmailBallotSheetsLinksClick,
+  OnEmailBallotSheetLinksClick,
   OnPublishBallotsClick,
   DetectNameTypos,
   TabulateIndividualBallots,
@@ -96,7 +96,7 @@ global.onOpen = onOpen;
 global.openBallotEntry = openBallotEntry;
 global.openAboutSidebar = openAboutSidebar;
 global.OnCreateTeamBallotSheetsClick = OnCreateTeamBallotSheetsClick;
-global.OnEmailBallotSheetsLinksClick = OnEmailBallotSheetsLinksClick;
+global.OnEmailBallotSheetLinksClick = OnEmailBallotSheetLinksClick;
 global.OnPublishBallotsClick = OnPublishBallotsClick;
 /**
  * Tabulate individual results for the given rounds. Arguments provided after the below-listed argument are
