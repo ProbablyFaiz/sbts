@@ -35,7 +35,7 @@ publisher-deploy:
         --ingress all \
         --allow-unauthenticated \
         --service-account=sbts-publisher@$GCP_PROJECT_ID.iam.gserviceaccount.com \
-        --set-env-vars "PUBLISHER_API_KEY=$PUBLISHER_API_KEY,GCP_BUCKET_NAME=$GCP_BUCKET_NAME,GCP_PUBLIC_URL=$GCP_PUBLIC_URL"
+        --set-env-vars "PUBLISHER_API_KEY=$PUBLISHER_API_KEY,BUCKET_NAME=$BUCKET_NAME,BUCKET_PUBLIC_URL=$BUCKET_PUBLIC_URL,BUCKET_ACCESS_KEY_ID=$BUCKET_ACCESS_KEY_ID,BUCKET_SECRET_ACCESS_KEY=$BUCKET_SECRET_ACCESS_KEY,BUCKET_ENDPOINT=$BUCKET_ENDPOINT"
 publisher-logs:
     gcloud run services logs read publisher --gen2 --region=us-central1 --stream
 

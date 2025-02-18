@@ -7,15 +7,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
-from publisher.bucket import upload_to_gcs
+from publisher.bucket import upload_bytes
 from publisher.latex import create_pdf_from_template
 from publisher.utils import sha1_bytes
 
 load_dotenv()
 
-GCP_BUCKET_NAME = os.getenv("GCP_BUCKET_NAME")
-GCP_PUBLIC_URL = os.getenv("GCP_PUBLIC_URL")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
+BUCKET_PUBLIC_URL = os.getenv("BUCKET_PUBLIC_URL")
+BUCKET_ACCESS_KEY_ID = os.getenv("BUCKET_ACCESS_KEY_ID")
+BUCKET_SECRET_ACCESS_KEY = os.getenv("BUCKET_SECRET_ACCESS_KEY")
+BUCKET_ENDPOINT = os.getenv("BUCKET_ENDPOINT")
 _API_KEY = os.getenv("PUBLISHER_API_KEY")
+
 
 security = HTTPBearer()
 app = FastAPI(title="SBTS Publisher")
@@ -59,7 +63,5 @@ def publish(
     pdf = create_pdf_from_template(request.template_name, request.ballot_fields)
     pdf_hash = sha1_bytes(pdf)
     bucket_key = f"sbts/{pdf_hash[:2]}/{pdf_hash}.pdf"
-    upload_to_gcs(GCP_BUCKET_NAME, bucket_key, pdf, "application/pdf")
-    return PublishResponse(
-        request_id=request.request_id, bucket_url=f"{GCP_PUBLIC_URL}/{bucket_key}"
-    )
+    bucket_url = upload_bytes(pdf, bucket_key)
+    return PublishResponse(request_id=request.request_id, bucket_url=bucket_url)
