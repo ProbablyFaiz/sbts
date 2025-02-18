@@ -15,7 +15,7 @@ master-deploy remote="main":
     cd master && just master-build && just master-push {{remote}}
 
 publisher-build:
-    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg GCP_BUCKET_NAME=$GCP_BUCKET_NAME --build-arg GCP_PUBLIC_URL=$GCP_PUBLIC_URL --build-arg PUBLISHER_API_KEY=$PUBLISHER_API_KEY
+    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg PUBLISHER_API_KEY=$PUBLISHER_API_KEY
 
 publisher-push:
     cd publisher && docker push $GCP_CONTAINER_TAG

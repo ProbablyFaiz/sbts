@@ -197,13 +197,19 @@ enum CompetitorRole {
   R_ISSUE_2 = "R_ISSUE_2",
 }
 
+enum ScoringCategory {
+  CONTENT_OF_ARGUMENT = "contentOfArgument",
+  EXTEMPORANEOUS_ABILITY = "extempAbility",
+  FORENSIC_SKILL = "forensicSkill",
+}
+
 interface ScoreGroup {
   role: CompetitorRole;
   competitorName: string;
   writtenFeedback: string;
-  contentOfArgument: number;
-  extempAbility: number;
-  forensicSkill: number;
+  [ScoringCategory.CONTENT_OF_ARGUMENT]: number;
+  [ScoringCategory.EXTEMPORANEOUS_ABILITY]: number;
+  [ScoringCategory.FORENSIC_SKILL]: number;
 }
 
 interface BallotScoreGrouping {
@@ -255,16 +261,23 @@ const SCORE_GROUP_KEYS: Map<
   ],
 ]);
 
-const SCORE_IDX_MAP: Map<keyof ScoreGroup, number> = new Map([
-  ["contentOfArgument", 0],
-  ["extempAbility", 1],
-  ["forensicSkill", 2],
+const SCORE_IDX_MAP: Map<ScoringCategory, number> = new Map([
+  [ScoringCategory.CONTENT_OF_ARGUMENT, 0],
+  [ScoringCategory.EXTEMPORANEOUS_ABILITY, 1],
+  [ScoringCategory.FORENSIC_SKILL, 2],
 ]);
 
-const SCORE_CATEGORY_NAMES: Map<keyof ScoreGroup, string> = new Map([
-  ["contentOfArgument", "Content of Argument"],
-  ["extempAbility", "Extemporaneous Ability"],
-  ["forensicSkill", "Forensic Skill & Courtroom Demeanor"],
+const SCORE_CATEGORY_NAMES: Map<ScoringCategory, string> = new Map([
+  [ScoringCategory.CONTENT_OF_ARGUMENT, "Content of Argument"],
+  [ScoringCategory.EXTEMPORANEOUS_ABILITY, "Extemporaneous Ability"],
+  [ScoringCategory.FORENSIC_SKILL, "Forensic Skill & Courtroom Demeanor"],
+]);
+
+const ROLE_NAMES: Map<CompetitorRole, string> = new Map([
+  [CompetitorRole.P_ISSUE_1, "Petitioner, Issue 1"],
+  [CompetitorRole.P_ISSUE_2, "Petitioner, Issue 2"],
+  [CompetitorRole.R_ISSUE_1, "Respondent, Issue 1"],
+  [CompetitorRole.R_ISSUE_2, "Respondent, Issue 2"],
 ]);
 
 interface SwissConfig {
@@ -313,8 +326,10 @@ export {
   ByeStrategy,
   RoundRobinConfig,
   CompetitorRole,
+  ScoringCategory,
   ScoreGroup,
   SCORE_GROUP_KEYS,
   SCORE_IDX_MAP,
   SCORE_CATEGORY_NAMES,
+  ROLE_NAMES,
 };

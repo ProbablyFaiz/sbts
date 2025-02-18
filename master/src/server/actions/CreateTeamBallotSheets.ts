@@ -42,7 +42,7 @@ function CreateTeamBallotSheets() {
       if (teamInfo.competitorNames.length === 2) {
         teamBallotSheet
           .getRangeByName(BallotListRange.Competitors)
-          .setValue([
+          .setValues([
             [teamInfo.competitorNames[0]],
             [teamInfo.competitorNames[1]],
           ]);

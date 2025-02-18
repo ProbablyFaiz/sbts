@@ -11,6 +11,7 @@ import { SSContext } from "./context/Context";
 import { CurrentRoundNames } from "./monitoring/CurrentRoundNames";
 import { DetectMatchupTypos } from "./monitoring/DetectMatchupTypos";
 import DetectNameTypos from "./monitoring/DetectNameTypos";
+import DetectScoreTypos from "./monitoring/DetectScoreTypos";
 import {
   RoundRobinPairTeams,
   RoundRobinPairTeamsWithCourtrooms,
@@ -26,6 +27,7 @@ import DisplayMatchResults from "./tab/DisplayMatchResults";
 import { PrintMatchupSummary, PrintTeamSummary } from "./tab/PrintTabSummary";
 import { TabulateIndividualBallots } from "./tab/TabulateIndividualBallots";
 import { TabulateTeamBallots } from "./tab/TabulateTeamBallots";
+
 const getCourtrooms = () => {
   const context = new SSContext();
   return context.courtroomRecords;
@@ -82,6 +84,7 @@ export {
   CurrentRoundNames,
   NoOp,
   PublishBallots,
+  DetectScoreTypos,
   getCourtrooms,
   getTeams,
   getTeamBallotResults,
@@ -161,3 +164,4 @@ global.getJudgeNames = getJudgeNames;
 global.submitBallot = submitBallot;
 global.NoOp = NoOp;
 global.PublishBallots = PublishBallots;
+global.DetectScoreTypos = DetectScoreTypos;

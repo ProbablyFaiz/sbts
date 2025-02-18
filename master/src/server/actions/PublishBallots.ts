@@ -4,9 +4,11 @@ import {
   BallotScoreGrouping,
   Cell,
   CompetitorRole,
+  ScoringCategory,
 } from "../../Types";
 import { SSContext } from "../context/Context";
 import { Spreadsheet, setAndBackfillRange } from "../context/Helpers";
+import SheetLogger from "../context/SheetLogger";
 
 const PUBLISHER_FANOUT_ENDPOINT = process.env.PUBLISHER_FANOUT_ENDPOINT;
 const PUBLISHER_API_KEY = process.env.PUBLISHER_API_KEY;
@@ -50,18 +52,18 @@ const createBallotPdfs = (
           p2_name: p2.competitorName,
           r1_name: r1.competitorName,
           r2_name: r2.competitorName,
-          p1_content: p1.contentOfArgument,
-          p1_extemp: p1.extempAbility,
-          p1_forensic: p1.forensicSkill,
-          p2_content: p2.contentOfArgument,
-          p2_extemp: p2.extempAbility,
-          p2_forensic: p2.forensicSkill,
-          r1_content: r1.contentOfArgument,
-          r1_extemp: r1.extempAbility,
-          r1_forensic: r1.forensicSkill,
-          r2_content: r2.contentOfArgument,
-          r2_extemp: r2.extempAbility,
-          r2_forensic: r2.forensicSkill,
+          p1_content: p1[ScoringCategory.CONTENT_OF_ARGUMENT],
+          p1_extemp: p1[ScoringCategory.EXTEMPORANEOUS_ABILITY],
+          p1_forensic: p1[ScoringCategory.FORENSIC_SKILL],
+          p2_content: p2[ScoringCategory.CONTENT_OF_ARGUMENT],
+          p2_extemp: p2[ScoringCategory.EXTEMPORANEOUS_ABILITY],
+          p2_forensic: p2[ScoringCategory.FORENSIC_SKILL],
+          r1_content: r1[ScoringCategory.CONTENT_OF_ARGUMENT],
+          r1_extemp: r1[ScoringCategory.EXTEMPORANEOUS_ABILITY],
+          r1_forensic: r1[ScoringCategory.FORENSIC_SKILL],
+          r2_content: r2[ScoringCategory.CONTENT_OF_ARGUMENT],
+          r2_extemp: r2[ScoringCategory.EXTEMPORANEOUS_ABILITY],
+          r2_forensic: r2[ScoringCategory.FORENSIC_SKILL],
           p1_comments: p1.writtenFeedback,
           p2_comments: p2.writtenFeedback,
           r1_comments: r1.writtenFeedback,
@@ -157,7 +159,13 @@ function PublishBallots() {
         grouping.readout.rTeam === teamNumber,
     );
     const teamBallotSheet = context.teamBallotSheet(teamNumber);
-    updateTeamBallotSheet(teamScoreGroupings, teamNumber, teamBallotSheet);
+    if (teamBallotSheet) {
+      updateTeamBallotSheet(teamScoreGroupings, teamNumber, teamBallotSheet);
+    } else {
+      SheetLogger.log(
+        `Team ${teamNumber} does not have a ballot sheet, skipping...`,
+      );
+    }
   });
 }
 

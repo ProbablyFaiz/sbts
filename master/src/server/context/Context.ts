@@ -14,6 +14,7 @@ import {
   SCORE_GROUP_KEYS,
   SCORE_IDX_MAP,
   ScoreGroup,
+  ScoringCategory,
   SwissConfig,
   TeamBallotResult,
   TeamInfo,
@@ -518,9 +519,12 @@ class SSContext implements IContext {
           role,
           competitorName: name,
           writtenFeedback: readout[writtenFeedbackKey],
-          contentOfArgument: scores[SCORE_IDX_MAP.get("contentOfArgument")],
-          extempAbility: scores[SCORE_IDX_MAP.get("extempAbility")],
-          forensicSkill: scores[SCORE_IDX_MAP.get("forensicSkill")],
+          [ScoringCategory.CONTENT_OF_ARGUMENT]:
+            scores[SCORE_IDX_MAP.get(ScoringCategory.CONTENT_OF_ARGUMENT)],
+          [ScoringCategory.EXTEMPORANEOUS_ABILITY]:
+            scores[SCORE_IDX_MAP.get(ScoringCategory.EXTEMPORANEOUS_ABILITY)],
+          [ScoringCategory.FORENSIC_SKILL]:
+            scores[SCORE_IDX_MAP.get(ScoringCategory.FORENSIC_SKILL)],
         } as ScoreGroup;
         groupMap.set(role, group);
       },
