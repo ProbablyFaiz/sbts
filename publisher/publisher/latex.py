@@ -26,6 +26,9 @@ def escape_tex(text: str) -> str:
     :param text: a plain text message
     :return: the message escaped to appear correctly in LaTeX
     """
+    # First replace newlines with LaTeX line breaks
+    text = text.replace("\n", r" \\ ")
+
     conv = {
         "&": r"\&",
         "%": r"\%",

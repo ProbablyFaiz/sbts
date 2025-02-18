@@ -14,8 +14,8 @@ master-push remote="main":
 master-deploy remote="main":
     cd master && just master-build && just master-push {{remote}}
 
-publisher-build:
-    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg PUBLISHER_API_KEY=$PUBLISHER_API_KEY
+publisher-build *ARGS:
+    cd publisher && docker build -t $GCP_CONTAINER_TAG . --build-arg PUBLISHER_API_KEY=$PUBLISHER_API_KEY {{ARGS}}
 
 publisher-push:
     cd publisher && docker push $GCP_CONTAINER_TAG
