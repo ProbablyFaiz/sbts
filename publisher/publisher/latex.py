@@ -27,8 +27,6 @@ def escape_tex(text: str) -> str:
     :return: the message escaped to appear correctly in LaTeX
     """
     # First replace newlines with LaTeX line breaks
-    text = text.replace("\n", r" \\ ")
-
     conv = {
         "&": r"\&",
         "%": r"\%",
@@ -49,7 +47,9 @@ def escape_tex(text: str) -> str:
             for key in sorted(conv.keys(), key=lambda item: -len(item))
         )
     )
-    return escape_pattern.sub(lambda match: conv[match.group()], text)
+    output = escape_pattern.sub(lambda match: conv[match.group()], text)
+    output = output.replace("\n", r" \\ ")
+    return output
 
 
 def render_template(template: LatexTemplate, fields: dict[str, Any]) -> str:
