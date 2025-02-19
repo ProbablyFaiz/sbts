@@ -18,3 +18,27 @@ function sheetForFile(file: GoogleFile): Spreadsheet {
 function getIdFromUrl(url: string): string {
   return url.match(/[-\w]{25,}/)?.toString() ?? "";
 }
+
+const setAndBackfillRange = (
+  range: GoogleAppsScript.Spreadsheet.Range,
+  values: any[][],
+) => {
+  // Set the given values into the top left corner of the given range, and backfill the rest of the range with empty strings
+
+  // First, deep copy the values array
+  const valuesCopy = values.map((row) => row.slice());
+  // Then, backfill the rest of the range with empty strings
+  const numRows = range.getNumRows();
+  const numCols = range.getNumColumns();
+  for (let i = 0; i < numRows; i++) {
+    if (i >= values.length) {
+      valuesCopy.push(Array(numCols).fill(""));
+    } else {
+      const row = valuesCopy[i];
+      for (let j = row.length; j < numCols; j++) {
+        row.push("");
+      }
+    }
+  }
+  range.setValues(valuesCopy);
+};
