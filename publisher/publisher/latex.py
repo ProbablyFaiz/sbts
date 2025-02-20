@@ -40,15 +40,14 @@ def escape_tex(text: str) -> str:
         "\\": r"\textbackslash{}",
         "<": r"\textless{}",
         ">": r"\textgreater{}",
+        "\n": r" \newline ",
     }
     escape_pattern = re.compile(
         "|".join(
-            re.escape(str(key))
-            for key in sorted(conv.keys(), key=lambda item: -len(item))
+            re.escape(str(key)) for key in sorted(conv.keys(), key=len, reverse=True)
         )
     )
     output = escape_pattern.sub(lambda match: conv[match.group()], text)
-    output = output.replace("\n", r" \\ ")
     return output
 
 
