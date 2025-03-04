@@ -47,6 +47,21 @@ function PrintMatchupSummary(roundRange: any) {
   return output;
 }
 
+const formatRoundPlacement = (round: string, placement: number) => {
+  // If the last round is a final, then the top team is champion, and the second place team is runner-up
+  if (["final", "finals"].includes(round.toLowerCase()) && placement < 2) {
+    if (placement === 0) {
+      return "Champion";
+    } else if (placement === 1) {
+      return "Runner-Up";
+    }
+  }
+  if (round.match(/(?:final|finals)$/)) {
+    return round.replace(/(?:final|finals)$/, "finalist");
+  }
+  return round;
+};
+
 function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
   const context = new SSContext();
 
@@ -157,7 +172,7 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
       team.competitorNames.length >= 2 ? team.competitorNames[1] : "",
       team.emails,
       competedInKnockout.has(teamResult.teamNumber)
-        ? getLatestRound(teamResult)
+        ? formatRoundPlacement(getLatestRound(teamResult), i)
         : "Prelim",
       teamResult.ballotsWon,
       teamResult.combinedStrength,
@@ -172,9 +187,11 @@ function PrintTeamSummary(prelimRoundRange: any, knockoutRoundRange: any) {
     context.roundNames.sort().join(", ")
   ) {
     output.push(
-      ["WARNING: Not all rounds with results are being displayed."],
       [
-        "Make sure all rounds are specified on either the Prelim Results or Knockout Results sheets.",
+        "WARNING: Not all rounds with results are being displayed, or a round is being displayed twice.",
+      ],
+      [
+        "Make sure all rounds are specified on exactly one of the Prelim Results or Knockout Results sheets.",
       ],
       ["Included rounds: " + allRounds.join(", ")],
       ["All rounds found: " + context.roundNames.join(", ")],
