@@ -180,7 +180,14 @@ const calculateEloData = (
     .filter(({ schoolName }) => {
       return !EXCLUDED_PROGRAM_NAMES.includes(schoolName);
     });
-  return { eloProgression, eloResults };
+
+  const { boostedEloResults, newEloProgression } = adjustForTeamSize(
+    eloResults,
+    eloProgression,
+    tournaments,
+    config,
+  );
+  return { eloProgression: newEloProgression, eloResults: boostedEloResults };
 };
 
 function processTournament(
@@ -384,4 +391,89 @@ const addEloHistoryRow = (
     JSON.stringify(eloResults),
     JSON.stringify(eloProgression),
   ]);
+};
+
+const MIN_BOOST_FACTOR = 0.7;
+
+const adjustForTeamSize = (
+  eloResults: SchoolElo[],
+  eloProgression: EloProgressionEntry[],
+  tournaments: TabSummary[],
+  config: RankingConfig,
+) => {
+  const numBallotsWonBySchool = new Map<string, number>();
+  tournaments.forEach((t, idx) => {
+    if (idx > 0) {
+      const dayGap =
+        (new Date(t.tournamentStartTimestamp).getTime() -
+          new Date(tournaments[idx - 1].tournamentStartTimestamp).getTime()) /
+        (1000 * 60 * 60 * 24);
+      if (dayGap > config.halveElosAfter) {
+        // reset the numBallotsWonBySchool map so we only count the most recent season
+        numBallotsWonBySchool.clear();
+      }
+    }
+    const schoolByTeamNumber = new Map<string, string>();
+    t.teams.forEach((team) => {
+      schoolByTeamNumber.set(team.teamNumber, team.teamSchool);
+    });
+    t.matchupResults.forEach((m) => {
+      const pSchool = schoolByTeamNumber.get(m.pTeamNumber);
+      const dSchool = schoolByTeamNumber.get(m.dTeamNumber);
+      if (!numBallotsWonBySchool.has(pSchool)) {
+        numBallotsWonBySchool.set(pSchool, 0);
+      }
+      if (!numBallotsWonBySchool.has(dSchool)) {
+        numBallotsWonBySchool.set(dSchool, 0);
+      }
+      const totalBallots = m.pBallotsWon + m.dBallotsWon;
+      const normalizedPBallotsWon = (m.pBallotsWon / totalBallots) * 2;
+      const normalizedDBallotsWon = (m.dBallotsWon / totalBallots) * 2;
+      numBallotsWonBySchool.set(
+        pSchool,
+        numBallotsWonBySchool.get(pSchool) + normalizedPBallotsWon,
+      );
+      numBallotsWonBySchool.set(
+        dSchool,
+        numBallotsWonBySchool.get(dSchool) + normalizedDBallotsWon,
+      );
+    });
+  });
+  const lastTournamentDate =
+    tournaments[tournaments.length - 1].tournamentStartTimestamp;
+
+  const teamSizeBoostLogBase = config.teamSizeBoostFactor;
+  const newEloProgression = [...eloProgression];
+  const boostedEloResults = eloResults.map((result) => {
+    const numBallotsWon = numBallotsWonBySchool.get(result.schoolName) || 0;
+    const eloDifference = result.elo - config.startingElo;
+    if (eloDifference < 0) {
+      return result;
+    }
+    const boostFactor =
+      numBallotsWon > 0
+        ? Math.max(
+            MIN_BOOST_FACTOR,
+            Math.log(numBallotsWon) / Math.log(teamSizeBoostLogBase),
+          )
+        : MIN_BOOST_FACTOR;
+    const newElo = config.startingElo + boostFactor * eloDifference;
+    newEloProgression.push({
+      date: new Date(lastTournamentDate),
+      tournamentName: "Team Size Adjustment",
+      roundName: `${numBallotsWon.toFixed(2)} ballots won this season`,
+      school1Name: result.schoolName,
+      school2Name: "-",
+      initialElo1: result.elo,
+      initialElo2: 0,
+      adjustment1: newElo - result.elo,
+      adjustment2: 0,
+    });
+    return { ...result, elo: newElo };
+  });
+
+  return {
+    boostedEloResults: boostedEloResults.sort((a, b) => b.elo - a.elo),
+    newEloProgression,
+  };
 };

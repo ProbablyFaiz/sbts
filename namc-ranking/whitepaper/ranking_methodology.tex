@@ -1,0 +1,268 @@
+% NAMC School Ranking Methodology
+% National Association of Moot Court
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{stix2}
+\usepackage[margin=1.25in]{geometry}  % 1-inch margins all around
+
+\title{Program Ranking Methodology}
+\author{National Association of Moot Court}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document describes the methodology used by the National Association of Moot Court (NAMC) to rank high school moot court programs. The NAMC ranking system uses an adapted Elo rating system, which provides an objective measure of relative program strength based on head-to-head competition results. This paper details the mathematical foundations of the system, implementation specifics, and adjustments for program size and activity level.
+\end{abstract}
+
+\section{Introduction}
+
+The National Association of Moot Court serves as the national governing body for high school moot court competitions in the United States. An essential component of competitive forensics is a fair and transparent ranking system that accurately reflects the relative strength of participating programs.
+
+NAMC has adopted an Elo-based rating system for ranking moot court programs. This system has several advantages:
+
+\begin{itemize}
+    \item It accounts for the strength of opposition faced by each program
+    \item It dynamically updates based on competition results
+    \item It provides an objective measure of program performance
+    \item It adapts to changing program strengths over time
+\end{itemize}
+
+This document details the mathematical foundations and implementation specifics of the NAMC ranking methodology.
+
+\section{Background on Elo Rating Systems}
+
+\subsection{Historical Context}
+
+The Elo rating system was originally developed by Arpad Elo, a physics professor and chess master, for rating chess players \citep{elo1978rating}. Since its adoption by the World Chess Federation (FIDE) in 1970, Elo ratings have become the standard for ranking players in many competitive games and sports, from chess and Go to online gaming platforms, professional tennis, and various e-sports.
+
+The Elo system's key innovation is that it considers not just whether a competitor wins or loses, but the expected outcome based on the relative strength of the opponents. Defeating a stronger opponent results in a larger rating increase than defeating a weaker one, and similarly, losing to a stronger opponent results in a smaller rating decrease than losing to a weaker one.
+
+\subsection{Mathematical Foundations}
+
+The Elo system is based on several key formulas:
+
+\subsubsection{Expected Outcome}
+
+The expected outcome of a match between Competitor A with rating $R_A$ and Competitor B with rating $R_B$ is calculated as:
+
+\begin{equation}
+E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
+\end{equation}
+
+The denominator of 400 is a scaling factor that determines how rating differences translate to win probabilities. With this scaling, a 400-point rating advantage corresponds to a 90\% expected win rate.
+
+\subsubsection{Rating Adjustment}
+
+After a match, ratings are adjusted based on the difference between the actual outcome and the expected outcome:
+
+\begin{equation}
+R_{\text{new}} = R_{\text{old}} + K \times (S - E)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $R_{\text{new}}$ is the updated rating
+    \item $R_{\text{old}}$ is the rating before the match
+    \item $K$ is a factor that determines the maximum possible adjustment
+    \item $S$ is the actual outcome (1 for a win, 0 for a loss, 0.5 for a draw)
+    \item $E$ is the expected outcome calculated from the formula above
+\end{itemize}
+
+The K-factor determines how quickly ratings respond to results. A higher K-factor means that ratings will change more dramatically based on match outcomes.
+
+\section{NAMC's Elo Implementation}
+
+\subsection{Initial Rating Assignment}
+
+All schools begin with an identical starting Elo rating, 1200. This value serves as the average rating in the system, with stronger programs eventually rising above this level and weaker programs falling below it.
+
+\subsection{Match Outcome Processing}
+
+For each matchup between two schools, NAMC processes the results as follows:
+
+\begin{enumerate}
+    \item Calculate the expected outcome for each school based on their current Elo ratings
+    \item Determine the actual outcome based on ballots won
+    \item Calculate the Elo adjustment for each school
+    \item Update each school's Elo rating
+\end{enumerate}
+
+The actual outcome in moot court is determined by the proportion of ballots won in the matchup. If Team A wins 2 ballots out of 3 against Team B, then the actual outcome is $S_A = 2/3$ for Team A and $S_B = 1/3$ for Team B.
+
+\subsection{K-Factor Selection}
+
+The NAMC system uses a carefully calibrated K-factor to ensure that:
+\begin{itemize}
+    \item Ratings are responsive enough to meaningful results
+    \item Ratings are stable enough to not overreact to a single unusual outcome
+    \item The system can differentiate between programs of different strengths
+\end{itemize}
+
+The K-factor value is set based on empirical observation of how quickly school strengths tend to change over time. A typical value for the K-factor in the NAMC system is between 16 and 32.
+
+\section{Team Size and Activity Adjustments}
+
+\subsection{Challenge of Small Sample Size}
+
+A particular challenge in ranking moot court programs is the varying sizes and activity levels of different schools. A small program that attends only a few tournaments may have an Elo rating that does not accurately reflect its true strength due to small sample size.
+
+To account for this, NAMC implements a team size and activity adjustment that gives a modest boost to programs that have demonstrated success across multiple matchups.
+
+\subsection{Logarithmic Boost Factor}
+
+The adjustment is calculated as follows:
+
+\begin{equation}
+R_{\text{adjusted}} = R_{\text{start}} + (b \times (R_{\text{current}} - R_{\text{start}}))
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $R_{\text{adjusted}}$ is the adjusted rating
+    \item $R_{\text{start}}$ is the starting Elo (1200)
+    \item $R_{\text{current}}$ is the current unadjusted Elo
+    \item $b$ is the boost factor
+\end{itemize}
+
+The boost factor $b$ is calculated as:
+
+\begin{equation}
+b = \max\left(0.7, \frac{\ln(N)}{\ln(B)}\right)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $N$ is the number of ballots won by the program in the current season
+    \item $B$ is the logarithmic base (a configurable parameter)
+    \item $\ln$ is the natural logarithm
+\end{itemize}
+
+This formula ensures that programs with more ballots won have their deviation from the starting Elo emphasized, but in a gradually diminishing manner. The minimum boost factor of 0.7 ensures that even programs with very few ballots don't have their ratings excessively deflated.
+
+\subsection{Adjustment Application}
+
+The adjustment is only applied when the program's unadjusted Elo is higher than the starting Elo. This means the adjustment only boosts programs that have already demonstrated some success, rather than artificially inflating the ratings of unsuccessful programs.
+
+\section{Seasonal Considerations}
+
+\subsection{Rating Decay}
+
+To prevent historical results from excessively influencing current ratings, the NAMC system implements a rating decay mechanism between competitive seasons.
+
+After a specified period (typically at the start of a new academic year), all program ratings are adjusted toward the mean:
+
+\begin{equation}
+R_{\text{new season}} = R_{\text{start}} + \frac{R_{\text{end season}} - R_{\text{start}}}{2}
+\end{equation}
+
+This "halving" of rating deviations from the mean ensures that:
+\begin{itemize}
+    \item Programs retain some credit for past performance
+    \item Current results will have substantial impact on rankings
+    \item Programs cannot rest indefinitely on past achievements
+    \item New programs are not permanently disadvantaged
+\end{itemize}
+
+The timing of this adjustment coincides with natural transitions in program composition as students graduate and new competitors join teams.
+
+\section{Sample Calculations}
+
+\subsection{Basic Elo Adjustment Example}
+
+Consider two schools:
+\begin{itemize}
+    \item School A with Elo rating 1300
+    \item School B with Elo rating 1100
+\end{itemize}
+
+They compete in a round with 3 ballots, and School A wins 2 ballots while School B wins 1.
+
+The expected outcome for School A is:
+\begin{equation}
+E_A = \frac{1}{1 + 10^{(1100 - 1300)/400}} = \frac{1}{1 + 10^{-0.5}} = \frac{1}{1 + 0.316} \approx 0.76
+\end{equation}
+
+The expected outcome for School B is:
+\begin{equation}
+E_B = 1 - E_A = 0.24
+\end{equation}
+
+The actual outcomes are:
+\begin{equation}
+S_A = \frac{2}{3} \approx 0.67
+\end{equation}
+\begin{equation}
+S_B = \frac{1}{3} \approx 0.33
+\end{equation}
+
+With a K-factor of 32, the adjustments are:
+\begin{equation}
+\Delta R_A = 32 \times (0.67 - 0.76) = 32 \times (-0.09) \approx -2.98
+\end{equation}
+\begin{equation}
+\Delta R_B = 32 \times (0.33 - 0.24) = 32 \times 0.09 \approx 2.98
+\end{equation}
+
+The new ratings are:
+\begin{equation}
+R_A^{\text{new}} = 1300 - 2.98 = 1297.02
+\end{equation}
+\begin{equation}
+R_B^{\text{new}} = 1100 + 2.98 = 1102.98
+\end{equation}
+
+School A still has a higher rating, but the gap has narrowed slightly because School B performed better than expected.
+
+\subsection{Team Size Boost Example}
+
+Consider a school that has:
+\begin{itemize}
+    \item Starting Elo: 1200
+    \item Current Elo: 1350
+    \item Ballots won this season: 12
+\end{itemize}
+
+With a logarithmic base of 20, the boost factor is:
+\begin{equation}
+b = \max\left(0.7, \frac{\ln(12)}{\ln(20)}\right) = \max\left(0.7, \frac{2.485}{2.996}\right) = \max(0.7, 0.829) = 0.8295
+\end{equation}
+
+The adjusted Elo is:
+\begin{equation}
+R_{\text{adjusted}} = 1200 + (0.8295 \times (1350 - 1200)) = 1200 + (0.8295 \times 150) = 1200 + 124.42 = 1324.42
+\end{equation}
+
+This results in an Elo that is higher than the starting Elo but slightly moderated compared to the unadjusted value, reflecting some uncertainty due to the limited sample size.
+
+For contrast, consider a more active school that has:
+\begin{itemize}
+    \item Starting Elo: 1200
+    \item Current Elo: 1350
+    \item Ballots won this season: 50
+\end{itemize}
+
+With the same logarithmic base of 20, the boost factor is:
+\begin{equation}
+b = \max\left(0.7, \frac{\ln(50)}{\ln(20)}\right) = \max\left(0.7, \frac{3.912}{2.996}\right) = \max(0.7, 1.306) = 1.306
+\end{equation}
+
+The adjusted Elo is:
+\begin{equation}
+R_{\text{adjusted}} = 1200 + (1.306 \times (1350 - 1200)) = 1200 + (1.306 \times 150) = 1200 + 195.9 = 1395.9
+\end{equation}
+
+This team sees their rating actually increase above their unadjusted Elo, as their larger sample size of ballots provides more confidence in their demonstrated performance level.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
