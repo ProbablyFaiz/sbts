@@ -269,6 +269,24 @@ function TabulateTeamBallots(roundRange: any, ballotsPerMatch: number) {
   if (output.length === 0) {
     return [["No results to display"]];
   }
+  const possibleKnockoutRounds = rounds.filter((r) =>
+    r.toLowerCase().includes("final"),
+  );
+  if (possibleKnockoutRounds.length >= 1) {
+    output.push(
+      [""],
+      [
+        "WARNING: The following rounds are likely knockout rounds: " +
+          possibleKnockoutRounds.join(", "),
+      ],
+      [
+        "It is almost never a good idea to include those here, as the tab system will attempt to give byes to eliminated teams.",
+      ],
+      [
+        "This will make your results WRONG, so consider removing them unless you are sure of what you are doing.",
+      ],
+    );
+  }
   return output;
 }
 
