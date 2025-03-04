@@ -263,6 +263,14 @@ if (fs.existsSync(pfxPath)) {
   };
 }
 
+if (!process.env.PUBLISHER_FANOUT_ENDPOINT) {
+  throw new Error("PUBLISHER_FANOUT_ENDPOINT is not set");
+}
+
+if (!process.env.PUBLISHER_API_KEY) {
+  throw new Error("PUBLISHER_API_KEY is not set");
+}
+
 // webpack settings for the development client wrapper
 const devClientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   envVars.FILENAME = clientEntrypoint.filename;
