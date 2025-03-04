@@ -8,7 +8,12 @@ const NUM_BALLOTS = 2;
 
 function compactRange(rangeArr: string[][]): string[][] {
   return rangeArr.filter((row) =>
-    row.some((cell) => !["", null, undefined].includes(cell)),
+    row.some((cell) => {
+      if (typeof cell === "string") {
+        return cell.trim() !== "";
+      }
+      return cell !== null && cell !== undefined;
+    }),
   );
 }
 
@@ -98,6 +103,30 @@ const getByeStrategy = (byeStrategyInput: string): ByeStrategy => {
   throw new Error(
     `Invalid bye strategy: ${byeStrategyInput}. Permitted values are "AUTO_WIN", "PROPORTIONAL", and "NO_ADJUSTMENT"`,
   );
+};
+
+const setAndBackfillRange = (
+  range: GoogleAppsScript.Spreadsheet.Range,
+  values: any[][],
+) => {
+  // Set the given values into the top left corner of the given range, and backfill the rest of the range with empty strings
+
+  // First, deep copy the values array
+  const valuesCopy = values.map((row) => row.slice());
+  // Then, backfill the rest of the range with empty strings
+  const numRows = range.getNumRows();
+  const numCols = range.getNumColumns();
+  for (let i = 0; i < numRows; i++) {
+    if (i >= values.length) {
+      valuesCopy.push(Array(numCols).fill(""));
+    } else {
+      const row = valuesCopy[i];
+      for (let j = row.length; j < numCols; j++) {
+        row.push("");
+      }
+    }
+  }
+  range.setValues(valuesCopy);
 };
 
 class SeededRandom {

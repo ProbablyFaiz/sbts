@@ -122,16 +122,18 @@ class SSContext implements IContext {
     const results: TeamBallotResult[] = [];
     for (const readout of this.allReadouts) {
       const petitionerPd =
-        readout.pIssue1Scores.reduce((a, b) => a + b, 0) -
-        readout.rIssue1Scores.reduce((a, b) => a + b, 0);
+        readout.pIssue1Scores.reduce((a, b) => a + b, 0) +
+        readout.pIssue2Scores.reduce((a, b) => a + b, 0) -
+        (readout.rIssue1Scores.reduce((a, b) => a + b, 0) +
+          readout.rIssue2Scores.reduce((a, b) => a + b, 0));
       const petitionerWon = petitionerPd === 0 ? 0.5 : petitionerPd > 0 ? 1 : 0;
       const respondentPd = -petitionerPd;
       const respondentWon = 1 - petitionerWon;
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.pTeam,
-        opponentTeamNumber: readout.rTeam,
+        teamNumber: readout.pTeam.trim(),
+        opponentTeamNumber: readout.rTeam.trim(),
         side: this.firstPartyName,
         pd: petitionerPd,
         won: petitionerWon,
@@ -141,8 +143,8 @@ class SSContext implements IContext {
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.rTeam,
-        opponentTeamNumber: readout.pTeam,
+        teamNumber: readout.rTeam.trim(),
+        opponentTeamNumber: readout.pTeam.trim(),
         side: this.secondPartyName,
         pd: respondentPd,
         won: respondentWon,
@@ -160,8 +162,8 @@ class SSContext implements IContext {
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.pTeam,
-        competitorName: readout.pIssue1Name,
+        teamNumber: readout.pTeam.trim(),
+        competitorName: readout.pIssue1Name.trim(),
         side: this.firstPartyName,
         score: readout.pIssue1Scores.reduce((a, b) => a + b, 0),
         courtroom: readout.courtroom,
@@ -169,8 +171,8 @@ class SSContext implements IContext {
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.pTeam,
-        competitorName: readout.pIssue2Name,
+        teamNumber: readout.pTeam.trim(),
+        competitorName: readout.pIssue2Name.trim(),
         side: this.firstPartyName,
         score: readout.pIssue2Scores.reduce((a, b) => a + b, 0),
         courtroom: readout.courtroom,
@@ -178,8 +180,8 @@ class SSContext implements IContext {
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.rTeam,
-        competitorName: readout.rIssue1Name,
+        teamNumber: readout.rTeam.trim(),
+        competitorName: readout.rIssue1Name.trim(),
         side: this.secondPartyName,
         score: readout.rIssue1Scores.reduce((a, b) => a + b, 0),
         courtroom: readout.courtroom,
@@ -187,8 +189,8 @@ class SSContext implements IContext {
       results.push({
         round: readout.round,
         judgeName: readout.judgeName,
-        teamNumber: readout.rTeam,
-        competitorName: readout.rIssue2Name,
+        teamNumber: readout.rTeam.trim(),
+        competitorName: readout.rIssue2Name.trim(),
         side: this.secondPartyName,
         score: readout.rIssue2Scores.reduce((a, b) => a + b, 0),
         courtroom: readout.courtroom,
